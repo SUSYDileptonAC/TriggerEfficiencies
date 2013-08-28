@@ -30,10 +30,11 @@ def main():
 	dataPkls = loadPickles("shelves/triggerEff_Inclusive_%s_Run92.pkl"%argv[1])
 	dataBarrelPkls = loadPickles("shelves/triggerEff_Barrel_%s_Run92.pkl"%argv[1])
 	dataEndcapPkls = loadPickles("shelves/triggerEff_Endcap_%s_Run92.pkl"%argv[1])
-	mcPkls = loadPickles("/user/schomakers/TriggerEfficiencies/MC/shelves/triggerEff_Inclusive_%s_Simulation.pkl"%argv[1])
-	mcBarrelPkls = loadPickles("/user/schomakers/TriggerEfficiencies/MC/shelves/triggerEff_Barrel_%s_Simulation.pkl"%argv[1])
-	mcEndcapPkls = loadPickles("/user/schomakers/TriggerEfficiencies/MC/shelves/triggerEff_Endcap_%s_Simulation.pkl"%argv[1])
+	mcPkls = loadPickles("../MC/shelves/triggerEff_Inclusive_%s_Simulation.pkl"%argv[1])
+	mcBarrelPkls = loadPickles("../MC/shelves/triggerEff_Barrel_%s_Simulation.pkl"%argv[1])
+	mcEndcapPkls = loadPickles("../MC/shelves/triggerEff_Endcap_%s_Simulation.pkl"%argv[1])
 
+	print dataPkls
 	
 # Table for Inclusive
 
@@ -96,13 +97,13 @@ def main():
 \hline\hline
 & \multicolumn{6}{|c|}{MC} \\
 \hline
-&  \multicolumn{3}{|c|}{$|\eta|<1.4$ } & \multicolumn{3}{|c|}{ at least 1 $|\eta| > 1.4$ } \\
+&  \multicolumn{3}{|c|}{$|\eta|<1.4$ } & \multicolumn{3}{|c|}{ at least 1 $|\eta| > 1.6$ } \\
 \hline 
 %s    
     \hline 
 &\multicolumn{6}{|c|}{Data} \\
 \hline
-&  \multicolumn{3}{|c|}{$|\eta|<1.4$ } & \multicolumn{3}{|c|}{ at least 1 $|\eta| > 1.4$ }\\
+&  \multicolumn{3}{|c|}{$|\eta|<1.4$ } & \multicolumn{3}{|c|}{ at least 1 $|\eta| > 1.6$ }\\
 \hline
 %s 
  \hline     

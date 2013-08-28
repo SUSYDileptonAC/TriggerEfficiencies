@@ -98,6 +98,13 @@ class Backgrounds:
 		linecolor = ROOT.kBlack
 		uncertainty = 0.15
 		scaleFac     = 1.0
+	class TTJetsSC:
+		subprocesses = ["TTJets_MGDecays_madgraph_Summer12"]
+		label = "Madgraph t#bar{t} w/SC"
+		fillcolor = 855
+		linecolor = ROOT.kBlack 
+		uncertainty = 0.15
+		scaleFac     = 1.0
 	class TT:
 		subprocesses = ["TT_Powheg_Summer12_v2"] 
 		label = "Powheg t#bar{t}"
@@ -467,14 +474,26 @@ class selections:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && met > 100 && %s %s %s )"
 		label1 = " |#eta| < 2.4 met > 100"
 		name = "HighMET"
+	class SignalCentral:
+		cut = "weight*(chargeProduct < 0 && ((nJets >= 2 && met > 150) || (nJets >= 3 && met > 100)) && abs(eta1) < 1.4 && abs(eta2) < 1.4 && deltaR > 0.3 && %s %s %s )"
+		label1 = " Signal region central"
+		name = "SignalCentral"
+	class SignalForward:
+		cut = "weight*(chargeProduct < 0  && ((nJets >= 2 && met > 150) || (nJets>=3 && met > 100)) &&  1.4 <= TMath::Max(abs(eta1),abs(eta2)) && deltaR > 0.3  && %s %s %s )"
+		label1 = " Signal region forward"
+		name = "SignalForward"
 	class HighHT:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && ht > 200 && %s %s %s )"
 		label1 = " |#eta| < 2.4  ht > 200"
 		name = "HighHT"
-	class HighHTBarrel:
+	class HighHTCentral:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<1.4  && abs(eta2) < 1.4 && deltaR > 0.3  && ht > 200 && %s %s %s )"
 		label1 = " |#eta| < 1.4  ht > 200"
-		name = "HighHTBarrel"
+		name = "HighHTCentral"
+	class HighHTForward:
+		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4 && ((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6)) && abs(eta2) < 2.4 && 1.6 <= TMath::Max(abs(eta1),abs(eta2)) && deltaR > 0.3  && ht > 200 && %s %s %s )"
+		label1 = "at least one |#eta| > 1.6  ht > 200"
+		name = "HighHTForward"
 	class HighHTHighMET:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && ht > 150 && met > 50 && %s %s %s )"
 		label1 = " |#eta| < 2.4  ht > 150 met > 50"
@@ -488,13 +507,13 @@ class selections:
 		label1 = " |#eta| < 2.4  nJets >= 2"
 		name = "HighnJets"
 class mainConfig:
-	path = "/user/jschulte/TriggerEffTreesMC"
+	path = "/home/jan/Trees/TriggerEfficiency"
 	source = "HT"
 	#~ cuts = [selections.HighHT,selections.HighHTHighMET,selections.HighMET]
 	#~ cuts = [selections.HighHTHighMET,selections.HighHTHighMETBarrel]
-	cuts = [selections.HighHT,selections.HighHTBarrel]
+	cuts = [selections.HighHTCentral,selections.HighHTForward]
 	#~ cuts = [selections.HighNJets]
-	variables = [dependendies.leadingPt_trailing10,dependendies.leadingPt_trailing20,dependendies.trailingPt_leading20,dependendies.trailingPt_leading30, dependendies.nJets_pt2010,dependendies.nJets_pt2020,dependendies.mll_pt2010,dependendies.mll_pt2020,dependendies.ptll_pt2010,dependendies.ptll_pt2020,dependendies.met,dependendies.eta1_pt2010,dependendies.eta1_pt2020,dependendies.met_HighMll,dependendies.met_lowMll,dependendies.met_pt2020,dependendies.met_pt2020_HighMll,dependendies.met_pt2020_lowMll,dependendies.nVtx_pt2010,dependendies.nVtx_pt2020,dependendies.ht_pt2010,dependendies.ht_pt2020]
+	variables = [dependendies.leadingPt_trailing20,dependendies.trailingPt_leading20,dependendies.trailingPt_leading30,dependendies.nJets_pt2020,dependendies.mll_pt2020,dependendies.ptll_pt2020,dependendies.eta1_pt2020,dependendies.met_pt2020,dependendies.met_pt2020_HighMll,dependendies.met_pt2020_lowMll,dependendies.nVtx_pt2020,dependendies.ht_pt2020]
 	#~ variables = [dependendies.mll_pt2020,dependendies.ptll_pt2010,dependendies.ptll_pt2020,dependendies.met,dependendies.eta1_pt2010,dependendies.eta1_pt2020,dependendies.met_HighMll,dependendies.met_lowMll,dependendies.met_pt2020,dependendies.met_pt2020_HighMll,dependendies.met_pt2020_lowMll,dependendies.nVtx_pt2010,dependendies.nVtx_pt2020,dependendies.ht_pt2010,dependendies.ht_pt2020]
 	#~ variables = [dependendies.met_pt2020_lowMll,dependendies.nVtx_pt2010,dependendies.nVtx_pt2020,dependendies.ht_pt2010,dependendies.ht_pt2020]
 	#variables = [dependendies.trailingPt_leading30]

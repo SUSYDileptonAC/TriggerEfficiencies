@@ -98,13 +98,15 @@ if (__name__ == "__main__"):
 
 	TTJets = Process(Backgrounds.TTJets.subprocesses,eventCounts,Backgrounds.TTJets.label,Backgrounds.TTJets.fillcolor,Backgrounds.TTJets.linecolor,Backgrounds.TTJets.uncertainty,1)	
 	TT = Process(Backgrounds.TT.subprocesses,eventCounts,Backgrounds.TT.label,Backgrounds.TT.fillcolor,Backgrounds.TT.linecolor,Backgrounds.TT.uncertainty,1)	
+	TT_Dileptonic = Process(Backgrounds.TT_Dileptonic.subprocesses,eventCounts,Backgrounds.TT_Dileptonic.label,Backgrounds.TT_Dileptonic.fillcolor,Backgrounds.TT_Dileptonic.linecolor,Backgrounds.TT_Dileptonic.uncertainty,1)	
 	#~ TT_MCatNLO = Process(Backgrounds.TT_MCatNLO.subprocesses,eventCounts,Backgrounds.TT_MCatNLO.label,Backgrounds.TT_MCatNLO.fillcolor,Backgrounds.TT_MCatNLO.linecolor,Backgrounds.TT_MCatNLO.uncertainty,1)	
 	Diboson = Process(Backgrounds.Diboson.subprocesses,eventCounts,Backgrounds.Diboson.label,Backgrounds.Diboson.fillcolor,Backgrounds.Diboson.linecolor,Backgrounds.Diboson.uncertainty,1)	
 	Rare = Process(Backgrounds.Rare.subprocesses,eventCounts,Backgrounds.Rare.label,Backgrounds.Rare.fillcolor,Backgrounds.Rare.linecolor,Backgrounds.Rare.uncertainty,1)	
 	DY = Process(Backgrounds.DrellYan.subprocesses,eventCounts,Backgrounds.DrellYan.label,Backgrounds.DrellYan.fillcolor,Backgrounds.DrellYan.linecolor,Backgrounds.DrellYan.uncertainty,1)	
 	SingleTop = Process(Backgrounds.SingleTop.subprocesses,eventCounts,Backgrounds.SingleTop.label,Backgrounds.SingleTop.fillcolor,Backgrounds.SingleTop.linecolor,Backgrounds.SingleTop.uncertainty,1)	
 
-	processes = [TT,Diboson,Rare,DY,SingleTop]
+	#~ processes = [TT,Diboson,Rare,DY,SingleTop]
+	processes = [TT_Dileptonic]
 	#~ processes = [Rare]
 
 	lumi = 9200
@@ -422,9 +424,9 @@ if (__name__ == "__main__"):
 				intlumi.DrawLatex(0.6,0.65,"#splitline{"+cut.label1+"}{"+variable.additionalCutsLabel+"}")
 				legend.Draw("same")
 				if source == "HT" or source == "AlphaT":
-					hCanvas.Print("Triggereff_%s_%s_%s_%s_%s.pdf"%(source,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
+					hCanvas.Print("fig/Triggereff_%s_%s_%s_%s_%s.pdf"%(source,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
 				else:
-					hCanvas.Print("Triggereff_%s_%s_%s_%s.pdf"%(cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
+					hCanvas.Print("fig/Triggereff_%s_%s_%s_%s.pdf"%(cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
 				#~ hCanvas.Clear()
 				
 				denominatorHistoSF = denominatorHistoEE.Clone()
@@ -492,9 +494,9 @@ if (__name__ == "__main__"):
 				legend.Draw("same")
 
 				if source == "HT" or source == "AlphaT":
-					hCanvas.Print("Triggereff_SFvsOF_%s_%s_%s_%s_%s.pdf"%(source,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
+					hCanvas.Print("fig/Triggereff_SFvsOF_%s_%s_%s_%s_%s.pdf"%(source,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
 				else:
-					hCanvas.Print("Triggereff_SFvsOF_%s_%s_%s_%s.pdf"%(cut.name,run.plotName,variable.plotName,variable.additionalPlotName))	
+					hCanvas.Print("fig/Triggereff_SFvsOF_%s_%s_%s_%s.pdf"%(cut.name,run.plotName,variable.plotName,variable.additionalPlotName))	
 				
 				
 				hCanvas.DrawFrame(firstBin,.4,lastBin,1.6,"; %s ; Efficiency SF / Efficiency OF" %(variable.labelX))
@@ -504,9 +506,9 @@ if (__name__ == "__main__"):
 
 				x= array("f",[firstBin, lastBin]) 
 				#~ y= array("f", [1.175, 1.175]) # 1.237
-				y= array("f", [1.016, 1.016]) # 1.237
+				y= array("f", [1.015, 1.015]) # 1.237
 				ex= array("f", [0.,0.])
-				ey= array("f", [0.03, 0.03])
+				ey= array("f", [0.064, 0.064])
 				ge= ROOT.TGraphErrors(2, x, y, ex, ey)
 				ge.SetFillColor(ROOT.kOrange-9)
 				ge.SetFillStyle(1001)
@@ -515,25 +517,25 @@ if (__name__ == "__main__"):
 				
 				effSFvsOF.Draw("samep")
 				
-				sfLine= ROOT.TF1("sfLine","1.016",firstBin, lastBin)
+				sfLine= ROOT.TF1("sfLine","1.015",firstBin, lastBin)
 				sfLine.SetLineColor(ROOT.kBlack)
 				sfLine.SetLineWidth(3)
 				sfLine.SetLineStyle(2)
 				sfLine.Draw("SAME")				
 				
 
-				latex.DrawLatex(0.15, 0.96, "CMS Private Work  #sqrt{s} = 8 TeV, %s    #scale[0.6]{#int}Ldt = %s fb^{-1}"%(run.label,run.lumi))
+				latex.DrawLatex(0.15, 0.96, "CMS Private Work  #sqrt{s} = 8 TeV, %s"%(run.label))
 				intlumi.DrawLatex(0.6,0.65,"#splitline{"+cut.label1+"}{"+variable.additionalCutsLabel+"}")
 
 				
 				legend.Clear()
 				legend.AddEntry(effSFvsOF,"Triggerefficiency SF/OF","p") 
-				legend.AddEntry(sfLine,"Mean SF vs OF: 1.016","l") 
-				legend.AddEntry(ge,"Mean SF vs OF #pm 3%","f") 
+				legend.AddEntry(sfLine,"Mean SF vs OF: 1.015","l") 
+				legend.AddEntry(ge,"Mean SF vs OF #pm 6.4%","f") 
 				legend.Draw("same")
 				ROOT.gPad.RedrawAxis()
 				if source == "HT" or source == "AlphaT":
-					hCanvas.Print("Triggereff_SFvsOF_Syst_%s_%s_%s_%s_%s.pdf"%(source,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
+					hCanvas.Print("fig/Triggereff_SFvsOF_Syst_%s_%s_%s_%s_%s.pdf"%(source,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
 				else:
-					hCanvas.Print("Triggereff_SFvsOF_Syst_%s_%s_%s_%s.pdf"%(cut.name,run.plotName,variable.plotName,variable.additionalPlotName))	
+					hCanvas.Print("fig/Triggereff_SFvsOF_Syst_%s_%s_%s_%s.pdf"%(cut.name,run.plotName,variable.plotName,variable.additionalPlotName))	
 

@@ -4,10 +4,10 @@ from ROOT import TH1F, THStack
 from defs import mainConfig
 from ConfigParser import ConfigParser
 config = ConfigParser()
-config.read("/user/schomakers/SubmitScripts/Input/Master53X.ini")
+config.read("/home/jan/Doktorarbeit/Dilepton/projects/SubmitScripts/Input/Master53X.ini")
 
 config42 = ConfigParser()
-config42.read("/user/schomakers/SubmitScripts/Input/Master53X.ini")
+config42.read("/home/jan/Doktorarbeit/Dilepton/projects/SubmitScripts/Input/Input/Master53X.ini")
 
 
 

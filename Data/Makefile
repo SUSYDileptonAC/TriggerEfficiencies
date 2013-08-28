@@ -2,7 +2,7 @@ MAKEtriggerEff = python triggerEfficiencies.py
 MAKEtriggerEffCentralValues = python triggerEfficienciesCentralValues.py
 MAKEtriggerEffTables = python makeTriggerEffTables.py
 
-AN_PATH = /user/schomakers/DileptonAN
+AN_PATH = /home/jan/Doktorarbeit/Dilepton/projects/DileptonAN
 AN_TABLES=$(AN_PATH)/tables
 AN_PLOTS=$(AN_PATH)/plots
 

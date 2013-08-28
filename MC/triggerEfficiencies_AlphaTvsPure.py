@@ -90,6 +90,7 @@ if (__name__ == "__main__"):
 
 	TTJets = Process(Backgrounds.TTJets.subprocesses,eventCounts,Backgrounds.TTJets.label,Backgrounds.TTJets.fillcolor,Backgrounds.TTJets.linecolor,Backgrounds.TTJets.uncertainty,1)	
 	TT = Process(Backgrounds.TT.subprocesses,eventCounts,Backgrounds.TT.label,Backgrounds.TT.fillcolor,Backgrounds.TT.linecolor,Backgrounds.TT.uncertainty,1)	
+	TT_Dileptonic = Process(Backgrounds.TT_Dileptonic.subprocesses,eventCounts,Backgrounds.TT_Dileptonic.label,Backgrounds.TT_Dileptonic.fillcolor,Backgrounds.TT_Dileptonic.linecolor,Backgrounds.TT_Dileptonic.uncertainty,1)	
 	#~ TT_MCatNLO = Process(Backgrounds.TT_MCatNLO.subprocesses,eventCounts,Backgrounds.TT_MCatNLO.label,Backgrounds.TT_MCatNLO.fillcolor,Backgrounds.TT_MCatNLO.linecolor,Backgrounds.TT_MCatNLO.uncertainty,1)	
 	Diboson = Process(Backgrounds.Diboson.subprocesses,eventCounts,Backgrounds.Diboson.label,Backgrounds.Diboson.fillcolor,Backgrounds.Diboson.linecolor,Backgrounds.Diboson.uncertainty,1)	
 	Rare = Process(Backgrounds.Rare.subprocesses,eventCounts,Backgrounds.Rare.label,Backgrounds.Rare.fillcolor,Backgrounds.Rare.linecolor,Backgrounds.Rare.uncertainty,1)	
@@ -97,7 +98,7 @@ if (__name__ == "__main__"):
 	SingleTop = Process(Backgrounds.SingleTop.subprocesses,eventCounts,Backgrounds.SingleTop.label,Backgrounds.SingleTop.fillcolor,Backgrounds.SingleTop.linecolor,Backgrounds.SingleTop.uncertainty,1)	
 
 	#~ processes = [TT,Diboson,Rare,DY,SingleTop]
-	processes = [TT]
+	processes = [TT_Dileptonic]
 
 	lumi = 12000
 	
@@ -283,9 +284,9 @@ if (__name__ == "__main__"):
 				legend.Draw("same")
 
 				if source == "HT" or source == "AlphaT":
-					hCanvas.Print("Triggereff_AlphaTSyst_%s_%s_%s_%s_%s.pdf"%(source,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
+					hCanvas.Print("fig/Triggereff_AlphaTSyst_%s_%s_%s_%s_%s.pdf"%(source,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
 				else:
-					hCanvas.Print("Triggereff_AlphaTSyst_%s_%s_%s_%s.pdf"%(cut.name,run.plotName,variable.plotName,variable.additionalPlotName))	
+					hCanvas.Print("fig/Triggereff_AlphaTSyst_%s_%s_%s_%s.pdf"%(cut.name,run.plotName,variable.plotName,variable.additionalPlotName))	
 				
 				
 	

@@ -18,9 +18,9 @@ config.read("/user/schomakers/SubmitScripts/Input/Master53X.ini")
 
 baseCut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && pt1 > 20 && pt2 > 20 && p4.M()>20 && ht > 200 && %s)"
 cutStrings = {
-		"Inclusive":baseCut,
+		"Inclusive":baseCut%("((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) ) && %s"),
 		"Barrel":baseCut%("abs(eta1)<1.4  && abs(eta2) < 1.4 && %s"),
-		"Endcap":baseCut%("1.4<= TMath::Max(abs(eta1),abs(eta2)) && %s")
+		"Endcap":baseCut%("1.6<=TMath::Max(abs(eta1),abs(eta2)) && abs(eta1) < 2.4 && abs(eta2) < 2.4 && ((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) ) && %s")
 	}
 
 

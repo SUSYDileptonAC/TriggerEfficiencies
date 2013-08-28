@@ -12,13 +12,17 @@ from helpers import readTrees, createHistoFromTree
 from array import array
 
 
-etaCuts = {"Inclusive":"abs(eta1)<2.4  && abs(eta2) < 2.4 ",
+etaCuts = {"Inclusive":"((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6)) ",
 			  "Barrel":"abs(eta1)<1.4  && abs(eta2) < 1.4",
-			  "Endcap":"((abs(eta1)<2.4 && abs(eta2) > 1.4) ||( abs(eta2) < 2.4 && abs(eta1) > 1.4))"
+			  "Endcap":"1.6<=TMath::Max(abs(eta1),abs(eta2)) && abs(eta1) < 2.4 && abs(eta2) < 2.4 && ((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) )",
 			}
 logEtaCuts = {"Inclusive":"|eta|<2.4",
         		  "Barrel":"|eta|<1.4",
-        		  "Endcap":"min one 1.4<|eta|<2.4"
+        		  "Endcap":"min one 1.6<|eta|<2.4"
+        		}
+means = {"Inclusive":"1.014",
+        		  "Barrel":"1.010",
+        		  "Endcap":"1.028"
         		}
  
 
@@ -171,6 +175,9 @@ if (__name__ == "__main__"):
 			
 			
 			for variable in variables:
+				if region == "Endcap":
+					variable.nBins = int(variable.nBins/2)
+					variable.binWidths = variable.binWidths*2
 				log.logInfo("%s"%variable.labelX)
 				cutString = cut.cut%(run.runCut,variable.additionalCuts,"&& %s") %(etaCut)       			
 				cutStringEMu = cut.cut%(run.runCut,variable.additionalCuts," && pt1 > 20")
@@ -402,9 +409,9 @@ if (__name__ == "__main__"):
 
 				x= array("f",[firstBin, lastBin]) 
 				#~ y= array("f", [1.175, 1.175]) # 1.237
-				y= array("f", [1.025, 1.025]) # 1.237
+				y= array("f", [float(means[region]), float(means[region])]) # 1.237
 				ex= array("f", [0.,0.])
-				ey= array("f", [1.025*0.05, 1.025*0.05])
+				ey= array("f", [float(means[region])*0.067, float(means[region])*0.067])
 				ge= ROOT.TGraphErrors(2, x, y, ex, ey)
 				ge.SetFillColor(ROOT.kOrange-9)
 				ge.SetFillStyle(1001)
@@ -413,7 +420,7 @@ if (__name__ == "__main__"):
 				
 				effSFvsOF.Draw("samep")
 				
-				sfLine= ROOT.TF1("sfLine","1.025",firstBin, lastBin)
+				sfLine= ROOT.TF1("sfLine",means[region],firstBin, lastBin)
 				sfLine.SetLineColor(ROOT.kBlack)
 				sfLine.SetLineWidth(3)
 				sfLine.SetLineStyle(2)
@@ -426,8 +433,8 @@ if (__name__ == "__main__"):
 				
 				legend.Clear()
 				legend.AddEntry(effSFvsOF,"Triggerefficiency SF/OF","p") 
-				legend.AddEntry(sfLine,"Mean SF vs OF: 1.025","l") 
-				legend.AddEntry(ge,"Mean SF vs OF #pm 5%","f") 
+				legend.AddEntry(sfLine,"Mean SF vs OF: %s"%(means[region]),"l") 
+				legend.AddEntry(ge,"Mean SF vs OF #pm 6.7%","f") 
 				legend.Draw("same")
 				ROOT.gPad.RedrawAxis()
 				hCanvas.Print("fig/Triggereff_SFvsOF_Syst_%s_%s_%s_%s_%s_%s.pdf"%(source,region,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))

@@ -383,8 +383,8 @@ class selections:
 		name = "HighHTEndcap"
 
 class mainConfig:
-	path = "/user/schomakers/TriggerEffTrees"
-	source = "HT"
+	path = "/home/jan/Trees/HTTreesSyncd"
+	source = "AlphaT"
 	cuts = [selections.HighHT]
 	#~ cuts = [selections.HighHT,selections.HighHTBarrel]
 
