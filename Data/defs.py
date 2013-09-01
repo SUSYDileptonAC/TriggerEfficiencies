@@ -384,7 +384,7 @@ class selections:
 
 class mainConfig:
 	path = "/home/jan/Trees/HTTreesSyncd"
-	source = "AlphaT"
+	source = "HT"
 	cuts = [selections.HighHT]
 	#~ cuts = [selections.HighHT,selections.HighHTBarrel]
 
