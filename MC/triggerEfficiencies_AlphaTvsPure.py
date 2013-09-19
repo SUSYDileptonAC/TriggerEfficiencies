@@ -16,6 +16,33 @@ config = ConfigParser()
 config.read("/home/jan/Doktorarbeit/Dilepton/SubmitScripts/Input/Master53X.ini")
 
 
+etaCuts = {"Inclusive":"((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6)) ",
+			  "Barrel":"abs(eta1)<1.4  && abs(eta2) < 1.4",
+			  "Endcap":"1.6<=TMath::Max(abs(eta1),abs(eta2)) && abs(eta1) < 2.4 && abs(eta2) < 2.4 && ((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) )",
+			}
+logEtaCuts = {"Inclusive":"|eta|<2.4",
+        		  "Barrel":"|eta|<1.4",
+        		  "Endcap":"min one 1.6<|eta|<2.4"
+        		}
+means = {"Inclusive":"1.014",
+        		  "Barrel":"1.010",
+        		  "Endcap":"1.028"
+        		}
+meansExclusive = {"Inclusive":"1.014",
+        		  "Barrel":"1.015",
+        		  "Endcap":"1.096"
+        		}
+ 
+errs = {"Inclusive":"1.014",
+        		  "Barrel":"0.064",
+        		  "Endcap":"0.064"
+        		}
+errsExclusive = {"Inclusive":"1.014",
+        		  "Barrel":"0.064",
+        		  "Endcap":"0.064"
+        		}
+
+
 def efficiencyRatio(eff1,eff2):
 	newEff = TGraphAsymmErrors(eff1.GetN())
 	for i in range(0,eff1.GetN()):
@@ -56,8 +83,29 @@ def efficiencyRatio(eff1,eff2):
 	return newEff
 if (__name__ == "__main__"):
 	
+	from sys import argv
 	path = mainConfig.path
-	source = "AlphaT"
+
+	if len(argv) ==1:
+		log.logHighlighted("No lepton eta selection specified, using inclusive!")
+		region = "Inclusive"
+	else:
+		region = argv[1]
+
+	source = ""
+	treesDenominatorEENoTrig = readTrees(path,source,"%s"%(source,),"EE")
+	treesDenominatorMuMuNoTrig = readTrees(path,source,"%s"%(source,),"MuMu")
+	treesDenominatorEMuNoTrig = readTrees(path,source,"%s"%(source,),"EMu")
+	
+	
+	treesNominatorEENoTrig = readTrees(path,source,"HLTDiEle%s"%(source,),"EE")
+	treesNominatorMuMuNoTrig = readTrees(path,source,"HLTDiMu%s"%(source,),"MuMu")
+	treesNominatorMuMuNoTrackNoTrig = readTrees(path,source,"HLTDiMuNoTrackerMuon%s"%(source,),"MuMu")
+	treesNominatorMuEGNoTrig = readTrees(path,source,"HLTMuEG%s"%(source,),"EMu")
+	
+
+
+	source = "HT"
 	log.logHighlighted("Calculating trigger efficiencies on %s triggered dataset"%source)
 	log.logHighlighted("Using trees from %s "%path)
 	treesDenominatorEE = readTrees(path,source,"%s"%(source,),"EE")
@@ -70,18 +118,9 @@ if (__name__ == "__main__"):
 	treesNominatorMuMuNoTrack = readTrees(path,source,"HLTDiMuNoTrackerMuon%s"%(source,),"MuMu")
 	treesNominatorMuEG = readTrees(path,source,"HLTMuEG%s"%(source,),"EMu")
 	eventCounts = totalNumberOfGeneratedEvents(path,source,"%s"%(source,))
-	source = ""
-	treesDenominatorEENoTrig = readTrees(path,source,"%s"%(source,),"EE")
-	treesDenominatorMuMuNoTrig = readTrees(path,source,"%s"%(source,),"MuMu")
-	treesDenominatorEMuNoTrig = readTrees(path,source,"%s"%(source,),"EMu")
-	
-	
-	treesNominatorEENoTrig = readTrees(path,source,"HLTDiEle%s"%(source,),"EE")
-	treesNominatorMuMuNoTrig = readTrees(path,source,"HLTDiMu%s"%(source,),"MuMu")
-	treesNominatorMuMuNoTrackNoTrig = readTrees(path,source,"HLTDiMuNoTrackerMuon%s"%(source,),"MuMu")
-	treesNominatorMuEGNoTrig = readTrees(path,source,"HLTMuEG%s"%(source,),"EMu")
-	
-	
+
+	etaCut = etaCuts[region]
+	logEtaCut = logEtaCuts[region]	
 	cuts = mainConfig.cuts
 	variables = mainConfig.variables
 	runs = mainConfig.runs
@@ -148,10 +187,11 @@ if (__name__ == "__main__"):
 			#~ cutStringTemp = cut.cut%(run.runCut,"deltaR > 0.3","")	
 			for variable in variables:
 				log.logInfo("%s"%variable.labelX)
-				cutString = cut.cut%(run.runCut,variable.additionalCuts,"")				
-				cutStringEMu = cut.cut%(run.runCut,variable.additionalCuts," && pt1 > 20")
-				cutStringMuE = cut.cut%(run.runCut,variable.additionalCuts," && pt2 > 20")
+				cutString = cut.cut%(run.runCut,variable.additionalCuts,"&& %s") %(etaCut)       			
+				cutStringEMu = cut.cut%(run.runCut,variable.additionalCuts," && pt1 > 20 && %s") %(etaCut)
+				cutStringMuE = cut.cut%(run.runCut,variable.additionalCuts," && pt2 > 20 && %s") %(etaCut)
 				log.logInfo("Full cut string: %s"%(cutString,))
+
 				
 				firstBin = variable.firstBin
 				#~ if "eta" in variable.variable:
@@ -282,11 +322,11 @@ if (__name__ == "__main__"):
 				latex.DrawLatex(0.15, 0.96, "CMS Private Work  #sqrt{s} = 8 TeV, %s    #scale[0.6]{#int}Ldt = %s fb^{-1}"%(run.label,run.lumi))
 				intlumi.DrawLatex(0.6,0.65,"#splitline{"+cut.label1+"}{"+variable.additionalCutsLabel+"}")
 				legend.Draw("same")
-
+				print source
 				if source == "HT" or source == "AlphaT":
-					hCanvas.Print("fig/Triggereff_AlphaTSyst_%s_%s_%s_%s_%s.pdf"%(source,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
+					hCanvas.Print("fig/Triggereff_AlphaTSyst_%s_%s_%s_%s_%s_%s.pdf"%(source,region,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
 				else:
-					hCanvas.Print("fig/Triggereff_AlphaTSyst_%s_%s_%s_%s.pdf"%(cut.name,run.plotName,variable.plotName,variable.additionalPlotName))	
+					hCanvas.Print("fig/Triggereff_AlphaTSyst_%s_%s_%s_%s_%s.pdf"%(cut.name,region,run.plotName,variable.plotName,variable.additionalPlotName))	
 				
 				
 	

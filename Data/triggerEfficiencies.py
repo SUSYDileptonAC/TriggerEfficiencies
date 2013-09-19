@@ -24,6 +24,19 @@ means = {"Inclusive":"1.014",
         		  "Barrel":"1.010",
         		  "Endcap":"1.028"
         		}
+meansExclusive = {"Inclusive":"1.014",
+        		  "Barrel":"1.015",
+        		  "Endcap":"1.096"
+        		}
+ 
+errs = {"Inclusive":"1.014",
+        		  "Barrel":"0.064",
+        		  "Endcap":"0.064"
+        		}
+errsExclusive = {"Inclusive":"1.014",
+        		  "Barrel":"0.064",
+        		  "Endcap":"0.064"
+        		}
  
 
 
@@ -180,8 +193,8 @@ if (__name__ == "__main__"):
 					variable.binWidths = variable.binWidths*2
 				log.logInfo("%s"%variable.labelX)
 				cutString = cut.cut%(run.runCut,variable.additionalCuts,"&& %s") %(etaCut)       			
-				cutStringEMu = cut.cut%(run.runCut,variable.additionalCuts," && pt1 > 20")
-				cutStringMuE = cut.cut%(run.runCut,variable.additionalCuts," && pt2 > 20")
+				cutStringEMu = cut.cut%(run.runCut,variable.additionalCuts," && pt1 > 20 && %s") %(etaCut)
+				cutStringMuE = cut.cut%(run.runCut,variable.additionalCuts," && pt2 > 20 && %s") %(etaCut)
 				log.logInfo("Full cut string: %s"%(cutString,))
 				
 				firstBin = variable.firstBin
@@ -409,9 +422,16 @@ if (__name__ == "__main__"):
 
 				x= array("f",[firstBin, lastBin]) 
 				#~ y= array("f", [1.175, 1.175]) # 1.237
-				y= array("f", [float(means[region]), float(means[region])]) # 1.237
+				if "Exclusive" in cut.name:
+					y= array("f", [float(meansExclusive[region]), float(meansExclusive[region])]) # 1.237
+					ey= array("f", [float(meansExclusive[region])*float(errsExclusive[region]), float(meansExclusive[region])*float(errsExclusive[region])])
+					sfLine= ROOT.TF1("sfLine",meansExclusive[region],firstBin, lastBin)
+				else:	
+					y= array("f", [float(means[region]), float(means[region])]) # 1.237
+					ey= array("f", [float(means[region])*float(errs[region]), float(means[region])*float(errs[region])])					
+					sfLine= ROOT.TF1("sfLine",means[region],firstBin, lastBin)
 				ex= array("f", [0.,0.])
-				ey= array("f", [float(means[region])*0.067, float(means[region])*0.067])
+				
 				ge= ROOT.TGraphErrors(2, x, y, ex, ey)
 				ge.SetFillColor(ROOT.kOrange-9)
 				ge.SetFillStyle(1001)
@@ -420,7 +440,7 @@ if (__name__ == "__main__"):
 				
 				effSFvsOF.Draw("samep")
 				
-				sfLine= ROOT.TF1("sfLine",means[region],firstBin, lastBin)
+				
 				sfLine.SetLineColor(ROOT.kBlack)
 				sfLine.SetLineWidth(3)
 				sfLine.SetLineStyle(2)
@@ -432,9 +452,13 @@ if (__name__ == "__main__"):
 
 				
 				legend.Clear()
-				legend.AddEntry(effSFvsOF,"Triggerefficiency SF/OF","p") 
-				legend.AddEntry(sfLine,"Mean SF vs OF: %s"%(means[region]),"l") 
-				legend.AddEntry(ge,"Mean SF vs OF #pm 6.7%","f") 
+				legend.AddEntry(effSFvsOF,"Triggerefficiency SF/OF","p")
+				if "Exclusive" in cut.name: 
+					legend.AddEntry(sfLine,"Mean SF vs OF: %s"%(meansExclusive[region]),"l") 
+					legend.AddEntry(ge,"Mean SF vs OF #pm 6.4%","f") 
+				else:	
+					legend.AddEntry(sfLine,"Mean SF vs OF: %s"%(means[region]),"l") 
+					legend.AddEntry(ge,"Mean SF vs OF #pm 6.4% %","f") 
 				legend.Draw("same")
 				ROOT.gPad.RedrawAxis()
 				hCanvas.Print("fig/Triggereff_SFvsOF_Syst_%s_%s_%s_%s_%s_%s.pdf"%(source,region,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))

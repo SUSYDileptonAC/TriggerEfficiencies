@@ -24,17 +24,25 @@ def loadPickles(path):
 def main():
 	from sys import argv
 	#~ allPkls = loadPickles("shelves/*.pkl")
+	if argv[1] == "Exclusive":
 #	dataPkls = loadPickles("shelves/triggerEff_Inclusive_%s_Run2012A+B+C.pkl"%argv[1])
 #	dataBarrelPkls = loadPickles("shelves/triggerEff_Barrel_%s_Run2012A+B+C.pkl"%argv[1])
 #	dataEndcapPkls = loadPickles("shelves/triggerEff_Endcap_%s_Run2012A+B+C.pkl"%argv[1])
-	dataPkls = loadPickles("shelves/triggerEff_Inclusive_%s_Run92.pkl"%argv[1])
-	dataBarrelPkls = loadPickles("shelves/triggerEff_Barrel_%s_Run92.pkl"%argv[1])
-	dataEndcapPkls = loadPickles("shelves/triggerEff_Endcap_%s_Run92.pkl"%argv[1])
-	mcPkls = loadPickles("../MC/shelves/triggerEff_Inclusive_%s_Simulation.pkl"%argv[1])
-	mcBarrelPkls = loadPickles("../MC/shelves/triggerEff_Barrel_%s_Simulation.pkl"%argv[1])
-	mcEndcapPkls = loadPickles("../MC/shelves/triggerEff_Endcap_%s_Simulation.pkl"%argv[1])
+		dataPkls = loadPickles("shelves/triggerEffExclusive_Inclusive_%s_Run92.pkl"%argv[2])
+		dataBarrelPkls = loadPickles("shelves/triggerEffExclusive_Barrel_%s_Run92.pkl"%argv[2])
+		dataEndcapPkls = loadPickles("shelves/triggerEffExclusive_Endcap_%s_Run92.pkl"%argv[2])
+		mcPkls = loadPickles("../MC/shelves/triggerEffExclusive_Inclusive_%s_Simulation.pkl"%argv[2])
+		mcBarrelPkls = loadPickles("../MC/shelves/triggerEffExclusive_Barrel_%s_Simulation.pkl"%argv[2])
+		mcEndcapPkls = loadPickles("../MC/shelves/triggerEffExclusive_Endcap_%s_Simulation.pkl"%argv[2])
+	else:
+		dataPkls = loadPickles("shelves/triggerEff_Inclusive_%s_Run92.pkl"%argv[1])
+		dataBarrelPkls = loadPickles("shelves/triggerEff_Barrel_%s_Run92.pkl"%argv[1])
+		dataEndcapPkls = loadPickles("shelves/triggerEff_Endcap_%s_Run92.pkl"%argv[1])
+		mcPkls = loadPickles("../MC/shelves/triggerEff_Inclusive_%s_Simulation.pkl"%argv[1])
+		mcBarrelPkls = loadPickles("../MC/shelves/triggerEff_Barrel_%s_Simulation.pkl"%argv[1])
+		mcEndcapPkls = loadPickles("../MC/shelves/triggerEff_Endcap_%s_Simulation.pkl"%argv[1])
 
-	print dataPkls
+	#~ print dataPkls
 	
 # Table for Inclusive
 
@@ -82,7 +90,11 @@ def main():
 	tableMC += lineTemplate%("$\mu\mu$",mcPkls[run][name]["MuMu"]["Nominator"],mcPkls[run][name]["MuMu"]["Denominator"],mcPkls[run][name]["MuMu"]["Efficiency"],max(mcPkls[run][name]["MuMu"]["UncertaintyUp"],mcPkls[run][name]["MuMu"]["UncertaintyDown"]))	
 	tableMC += lineTemplate%("e$\mu$",mcPkls[run][name]["EMu"]["Nominator"],mcPkls[run][name]["EMu"]["Denominator"],mcPkls[run][name]["EMu"]["Efficiency"],max(mcPkls[run][name]["EMu"]["UncertaintyUp"],mcPkls[run][name]["EMu"]["UncertaintyDown"]))	
 
-	saveTable(tableTemplate%(tableMC,tableData), "TriggerEffs_Inclusive_%s"%argv[1])
+	if argv[1] == "Exclusive":
+		
+		saveTable(tableTemplate%(tableMC,tableData), "TriggerEffsExlusive_Inclusive_%s"%argv[1])
+	else:	
+		saveTable(tableTemplate%(tableMC,tableData), "TriggerEffs_Inclusive_%s"%argv[1])
 
 # Table with Barrel and Endcap seperated
 
@@ -130,7 +142,10 @@ def main():
 	tableMC += lineTemplate%("$\mu\mu$",mcBarrelPkls[run][name]["MuMu"]["Nominator"],mcBarrelPkls[run][name]["MuMu"]["Denominator"],mcBarrelPkls[run][name]["MuMu"]["Efficiency"],max(mcBarrelPkls[run][name]["MuMu"]["UncertaintyUp"],mcBarrelPkls[run][name]["MuMu"]["UncertaintyDown"]),mcEndcapPkls[run][name]["MuMu"]["Nominator"],mcEndcapPkls[run][name]["MuMu"]["Denominator"],mcEndcapPkls[run][name]["MuMu"]["Efficiency"],max(mcEndcapPkls[run][name]["MuMu"]["UncertaintyUp"],mcEndcapPkls[run][name]["MuMu"]["UncertaintyDown"]))	
 	tableMC += lineTemplate%("e$\mu$",mcBarrelPkls[run][name]["EMu"]["Nominator"],mcBarrelPkls[run][name]["EMu"]["Denominator"],mcBarrelPkls[run][name]["EMu"]["Efficiency"],max(mcBarrelPkls[run][name]["EMu"]["UncertaintyUp"],mcBarrelPkls[run][name]["EMu"]["UncertaintyDown"]),mcEndcapPkls[run][name]["EMu"]["Nominator"],mcEndcapPkls[run][name]["EMu"]["Denominator"],mcEndcapPkls[run][name]["EMu"]["Efficiency"],max(mcEndcapPkls[run][name]["EMu"]["UncertaintyUp"],mcEndcapPkls[run][name]["EMu"]["UncertaintyDown"]))	
 
-	saveTable(tableTemplate%(tableMC,tableData), "TriggerEffs_Seperated_%s"%argv[1])
+	if argv[1] == "Exclusive":	
+		saveTable(tableTemplate%(tableMC,tableData), "TriggerEffsExclusive_Seperated_%s"%argv[2])
+	else:	
+		saveTable(tableTemplate%(tableMC,tableData), "TriggerEffs_Seperated_%s"%argv[1])
 
 
 main()

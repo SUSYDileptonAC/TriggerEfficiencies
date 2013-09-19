@@ -16,12 +16,19 @@ config = ConfigParser()
 config.read("/user/schomakers/SubmitScripts/Input/Master53X.ini")
 
 
-baseCut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && pt1 > 20 && pt2 > 20 && p4.M()>20 && ht > 200 && %s)"
+baseCut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && pt1 > 20 && pt2 > 20 && p4.M()>20 && ht > 200  && %s)"
+baseCutExclusive = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && pt1 > 20 && pt2 > 20 && p4.M()>20 && ht > 200 && !(nJets >= 2 && met > 100) && %s)"
 cutStrings = {
 		"Inclusive":baseCut%("((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) ) && %s"),
 		"Barrel":baseCut%("abs(eta1)<1.4  && abs(eta2) < 1.4 && %s"),
 		"Endcap":baseCut%("1.6<=TMath::Max(abs(eta1),abs(eta2)) && abs(eta1) < 2.4 && abs(eta2) < 2.4 && ((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) ) && %s")
 	}
+cutStringsExclusive = {
+		"Inclusive":baseCutExclusive%("((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) ) && %s"),
+		"Barrel":baseCutExclusive%("abs(eta1)<1.4  && abs(eta2) < 1.4 && %s"),
+		"Endcap":baseCutExclusive%("1.6<=TMath::Max(abs(eta1),abs(eta2)) && abs(eta1) < 2.4 && abs(eta2) < 2.4 && ((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) ) && %s")
+	}
+
 
 
 def getCounts(nominatorHisto, denominatorHisto,cutString):
@@ -179,5 +186,55 @@ if (__name__ == "__main__"):
 		
 		
 		outFilePkl = open("shelves/triggerEff_%s_%s_%s.pkl"%(region,source,run.label),"w")
+		pickle.dump(counts, outFilePkl)
+		outFilePkl.close()		
+		
+				
+		cutString = cutStringsExclusive[region]%(run.runCut)
+		print cutString
+		
+		firstBin = 20
+		counts = {run.label:{}}
+		#~ if "eta" in variable.variable:
+			#~ firstBin = -2.4
+		lastBin = 1000
+		nBins = 1
+		plot = Plot("pt1",cutString,"bla","Efficiency",nBins,firstBin,lastBin)
+
+		denominatorStackEE = TheStack(processes,lumi,plot,treesDenominatorEE,"None",1.0,1.0,1.0)		
+		denominatorStackMuMu = TheStack(processes,lumi,plot,treesDenominatorMuMu,"None",1.0,1.0,1.0)		
+		#~ denominatorStackEMu = TheStack(processes,lumi,plotEMu,treesDenominatorEMu,"None",1.0,1.0,1.0)	
+		#~ denominatorStackMuE = TheStack(processes,lumi,plotMuE,treesDenominatorEMu,"None",1.0,1.0,1.0)	
+		denominatorStackMuEG = TheStack(processes,lumi,plot,treesDenominatorEMu,"None",1.0,1.0,1.0)	
+			
+		nominatorStackEE = TheStack(processes,lumi,plot,treesNominatorEE,"None",1.0,1.0,1.0)		
+		nominatorStackMuMu = TheStack(processes,lumi,plot,treesNominatorMuMu,"None",1.0,1.0,1.0)		
+		#~ nominatorStackMuMuNoTrack = TheStack(processes,lumi,plot,treesNominatorMuMuNoTrack,"None",1.0,1.0,1.0)		
+		#~ nominatorStackEMu = TheStack(processes,lumi,plotEMu,treesNominatorEMu,"None",1.0,1.0,1.0)		
+		#~ nominatorStackMuE = TheStack(processes,lumi,plotMuE,treesNominatorMuE,"None",1.0,1.0,1.0)		
+		nominatorStackMuEG = TheStack(processes,lumi,plot,treesNominatorMuEG,"None",1.0,1.0,1.0)		
+
+		denominatorHistoEE = denominatorStackEE.theHistogram
+		print denominatorHistoEE.GetEntries()
+		denominatorHistoMuMu = denominatorStackMuMu.theHistogram
+		#~ denominatorHistoEMu = denominatorStackEMu.theHistogram
+		#~ denominatorHistoMuE = denominatorStackMuE.theHistogram
+		denominatorHistoMuEG = denominatorStackMuEG.theHistogram
+		
+		nominatorHistoEE = nominatorStackEE.theHistogram
+		nominatorHistoMuMu = nominatorStackMuMu.theHistogram
+		#~ nominatorHistoMuMuNoTrack = nominatorStackMuMuNoTrack.theHistogram
+		#~ nominatorHistoEMu = nominatorStackEMu.theHistogram
+		#~ nominatorHistoMuE = nominatorStackMuE.theHistogram
+		nominatorHistoMuEG = nominatorStackMuEG.theHistogram						
+		
+		counts[run.label]["default"] = {}
+		
+		counts[run.label]["default"]["EE"] = getCounts(nominatorHistoEE, denominatorHistoEE,cutString)
+		counts[run.label]["default"]["MuMu"] = getCounts(nominatorHistoMuMu, denominatorHistoMuMu,cutString)
+		counts[run.label]["default"]["EMu"] = getCounts(nominatorHistoMuEG, denominatorHistoMuEG,cutString)
+		
+		
+		outFilePkl = open("shelves/triggerEffExclusive_%s_%s_%s.pkl"%(region,source,run.label),"w")
 		pickle.dump(counts, outFilePkl)
 		outFilePkl.close()				

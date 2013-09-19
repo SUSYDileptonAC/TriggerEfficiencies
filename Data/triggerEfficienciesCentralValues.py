@@ -11,11 +11,23 @@ from setTdrStyle import setTDRStyle
 from helpers import readTrees, createHistoFromTree
 from array import array
 
-baseCut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && pt1 > 20 && pt2 > 20 && p4.M()>20 && ht > 200 && !(nJets >= 2 && met > 100) && %s)"
+baseCut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && pt1 > 20 && pt2 > 20 && p4.M()>20 && ht > 200  && %s)"
+baseCutExclusive = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && pt1 > 20 && pt2 > 20 && p4.M()>20 && ht > 200 && !(nJets >= 2 && met > 100) && %s)"
+baseCutExclusiveNoHT = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && pt1 > 20 && pt2 > 20 && p4.M()>20 && !(nJets >= 2 && met > 100) && %s)"
 cutStrings = {
 		"Inclusive":baseCut%("((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) ) && %s"),
 		"Barrel":baseCut%("abs(eta1)<1.4  && abs(eta2) < 1.4 && %s"),
 		"Endcap":baseCut%("1.6<=TMath::Max(abs(eta1),abs(eta2)) && abs(eta1) < 2.4 && abs(eta2) < 2.4 && ((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) ) && %s")
+	}
+cutStringsExclusive = {
+		"Inclusive":baseCutExclusive%("((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) ) && %s"),
+		"Barrel":baseCutExclusive%("abs(eta1)<1.4  && abs(eta2) < 1.4 && %s"),
+		"Endcap":baseCutExclusive%("1.6<=TMath::Max(abs(eta1),abs(eta2)) && abs(eta1) < 2.4 && abs(eta2) < 2.4 && ((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) ) && %s")
+	}
+cutStringsExclusiveNoHT = {
+		"Inclusive":baseCutExclusiveNoHT%("((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) ) && %s"),
+		"Barrel":baseCutExclusiveNoHT%("abs(eta1)<1.4  && abs(eta2) < 1.4 && %s"),
+		"Endcap":baseCutExclusiveNoHT%("1.6<=TMath::Max(abs(eta1),abs(eta2)) && abs(eta1) < 2.4 && abs(eta2) < 2.4 && ((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) ) && %s")
 	}
 
 
@@ -180,6 +192,117 @@ if (__name__ == "__main__"):
 		outFilePkl = open("shelves/triggerEff_%s_%s_%s.pkl"%(region,source,run.label),"w")
 		pickle.dump(counts, outFilePkl)
 		outFilePkl.close()		
+				
+				
+		cutString = cutStringsExclusive[region]%(run.runCut)
+		print cutString
+		
+		firstBin = 20
+		counts = {run.label:{}}
+		lastBin = 10000
+		nBins = 1
+		denominatorHistoEE = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesDenominatorEE.iteritems():
+			denominatorHistoEE.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+		denominatorHistoMuMu = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesDenominatorMuMu.iteritems():
+			denominatorHistoMuMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+			print denominatorHistoMuMu.GetEntries()
+		denominatorHistoEMu = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesDenominatorEMu.iteritems():
+			denominatorHistoEMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+		denominatorHistoMuE = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesDenominatorEMu.iteritems():
+			denominatorHistoMuE.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+		denominatorHistoMuEG = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesDenominatorEMu.iteritems():
+			denominatorHistoMuEG.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+
+		nominatorHistoEE = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesNominatorEE.iteritems():
+			nominatorHistoEE.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+			print nominatorHistoEE.GetEntries()
+		nominatorHistoMuMu = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesNominatorMuMu.iteritems():
+			nominatorHistoMuMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+		nominatorHistoMuMuNoTrack = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesNominatorMuMuNoTrack.iteritems():
+			nominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+		nominatorHistoMuE = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesNominatorMuE.iteritems():
+			nominatorHistoMuE.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+		nominatorHistoEMu = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesNominatorEMu.iteritems():
+			nominatorHistoEMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+		nominatorHistoMuEG = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesNominatorMuEG.iteritems():
+			nominatorHistoMuEG.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())							
+		
+		counts[run.label]["default"] = {}
+		counts[run.label]["default"]["EE"] = getCounts(nominatorHistoEE, denominatorHistoEE,cutString)
+		counts[run.label]["default"]["MuMu"] = getCounts(nominatorHistoMuMu, denominatorHistoMuMu,cutString)
+		counts[run.label]["default"]["EMu"] = getCounts(nominatorHistoMuEG, denominatorHistoMuEG,cutString)
+		
+		
+		outFilePkl = open("shelves/triggerEffExclusive_%s_%s_%s.pkl"%(region,source,run.label),"w")
+		pickle.dump(counts, outFilePkl)
+		outFilePkl.close()		
+		
+		
+		cutString = cutStringsExclusiveNoHT[region]%(run.runCut)
+		print cutString
+		
+		firstBin = 20
+		counts = {run.label:{}}
+		lastBin = 10000
+		nBins = 1
+		denominatorHistoEE = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesDenominatorEE.iteritems():
+			denominatorHistoEE.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+		denominatorHistoMuMu = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesDenominatorMuMu.iteritems():
+			denominatorHistoMuMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+			print denominatorHistoMuMu.GetEntries()
+		denominatorHistoEMu = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesDenominatorEMu.iteritems():
+			denominatorHistoEMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+		denominatorHistoMuE = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesDenominatorEMu.iteritems():
+			denominatorHistoMuE.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+		denominatorHistoMuEG = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesDenominatorEMu.iteritems():
+			denominatorHistoMuEG.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+
+		nominatorHistoEE = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesNominatorEE.iteritems():
+			nominatorHistoEE.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+			print nominatorHistoEE.GetEntries()
+		nominatorHistoMuMu = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesNominatorMuMu.iteritems():
+			nominatorHistoMuMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+		nominatorHistoMuMuNoTrack = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesNominatorMuMuNoTrack.iteritems():
+			nominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+		nominatorHistoMuE = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesNominatorMuE.iteritems():
+			nominatorHistoMuE.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+		nominatorHistoEMu = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesNominatorEMu.iteritems():
+			nominatorHistoEMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+		nominatorHistoMuEG = TH1F("","",nBins,firstBin,lastBin)
+		for name, tree in treesNominatorMuEG.iteritems():
+			nominatorHistoMuEG.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())							
+		
+		counts[run.label]["default"] = {}
+		counts[run.label]["default"]["EE"] = getCounts(nominatorHistoEE, denominatorHistoEE,cutString)
+		counts[run.label]["default"]["MuMu"] = getCounts(nominatorHistoMuMu, denominatorHistoMuMu,cutString)
+		counts[run.label]["default"]["EMu"] = getCounts(nominatorHistoMuEG, denominatorHistoMuEG,cutString)
+		
+		
+		outFilePkl = open("shelves/triggerEffExclusiveNoHT_%s_%s_%s.pkl"%(region,source,run.label),"w")
+		pickle.dump(counts, outFilePkl)
+		outFilePkl.close()		
+				
 				
 	
 		

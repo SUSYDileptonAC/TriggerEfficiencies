@@ -486,6 +486,10 @@ class selections:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && ht > 200 && %s %s %s )"
 		label1 = " |#eta| < 2.4  ht > 200"
 		name = "HighHT"
+	class HighHTExclusive:
+		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && ht > 200 && !(nJets >= 2 && met > 100) && %s %s %s )"
+		label1 = " |#eta| < 2.4  ht > 200"
+		name = "HighHTExclusive"
 	class HighHTCentral:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<1.4  && abs(eta2) < 1.4 && deltaR > 0.3  && ht > 200 && %s %s %s )"
 		label1 = " |#eta| < 1.4  ht > 200"
@@ -511,7 +515,8 @@ class mainConfig:
 	source = "HT"
 	#~ cuts = [selections.HighHT,selections.HighHTHighMET,selections.HighMET]
 	#~ cuts = [selections.HighHTHighMET,selections.HighHTHighMETBarrel]
-	cuts = [selections.HighHTCentral,selections.HighHTForward]
+	#~ cuts = [selections.HighHTCentral,selections.HighHTForward]
+	cuts = [selections.HighHT,selections.HighHTExclusive]
 	#~ cuts = [selections.HighNJets]
 	variables = [dependendies.leadingPt_trailing20,dependendies.trailingPt_leading20,dependendies.trailingPt_leading30,dependendies.nJets_pt2020,dependendies.mll_pt2020,dependendies.ptll_pt2020,dependendies.eta1_pt2020,dependendies.met_pt2020,dependendies.met_pt2020_HighMll,dependendies.met_pt2020_lowMll,dependendies.nVtx_pt2020,dependendies.ht_pt2020]
 	#~ variables = [dependendies.mll_pt2020,dependendies.ptll_pt2010,dependendies.ptll_pt2020,dependendies.met,dependendies.eta1_pt2010,dependendies.eta1_pt2020,dependendies.met_HighMll,dependendies.met_lowMll,dependendies.met_pt2020,dependendies.met_pt2020_HighMll,dependendies.met_pt2020_lowMll,dependendies.nVtx_pt2010,dependendies.nVtx_pt2020,dependendies.ht_pt2010,dependendies.ht_pt2020]

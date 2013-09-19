@@ -373,18 +373,23 @@ class selections:
 		#label1 = " |#eta| < 2.4  ht > 200"
 		label1 = "ht > 200"
 		name = "HighHT"
+	class HighHTExclusive:
+		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3 && p4.M() > 20 && ht > 200 && %s && !(nJets >= 2 && met > 100) && %s %s )"
+		#label1 = " |#eta| < 2.4  ht > 200"
+		label1 = "ht > 200"
+		name = "HighHTExclusive"
 	class HighHTHighMET:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3 && p4.M() > 20  && ht > 150 && met > 50 && %s && %s %s )"
 		label1 = " |#eta| < 2.4  ht > 150 met > 50"
 		name = "HighHTHighMET"	
-		name = "InclusiveBarrel"
-		name = "HighMETBarrel"
-		name = "HighHTBarrel"
-		name = "HighHTEndcap"
+		#~ name = "InclusiveBarrel"
+		#~ name = "HighMETBarrel"
+		#~ name = "HighHTBarrel"
+		#~ name = "HighHTEndcap"
 
 class mainConfig:
 	path = "/home/jan/Trees/HTTreesSyncd"
-	source = "HT"
+	source = "AlphaT"
 	cuts = [selections.HighHT]
 	#~ cuts = [selections.HighHT,selections.HighHTBarrel]
 
