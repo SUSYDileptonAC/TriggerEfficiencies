@@ -21,21 +21,21 @@ logEtaCuts = {"Inclusive":"|eta|<2.4",
         		  "Endcap":"min one 1.6<|eta|<2.4"
         		}
 means = {"Inclusive":"1.014",
-        		  "Barrel":"1.010",
-        		  "Endcap":"1.028"
+        		  "Barrel":"1.01",
+        		  "Endcap":"1.10"
         		}
 meansExclusive = {"Inclusive":"1.014",
-        		  "Barrel":"1.015",
-        		  "Endcap":"1.096"
+        		  "Barrel":"1.01",
+        		  "Endcap":"1.10"
         		}
  
 errs = {"Inclusive":"1.014",
-        		  "Barrel":"0.064",
-        		  "Endcap":"0.064"
+        		  "Barrel":"0.06",
+        		  "Endcap":"0.07"
         		}
 errsExclusive = {"Inclusive":"1.014",
-        		  "Barrel":"0.064",
-        		  "Endcap":"0.064"
+        		  "Barrel":"0.06",
+        		  "Endcap":"0.07"
         		}
  
 
@@ -458,7 +458,7 @@ if (__name__ == "__main__"):
 					legend.AddEntry(ge,"Mean SF vs OF #pm 6.4%","f") 
 				else:	
 					legend.AddEntry(sfLine,"Mean SF vs OF: %s"%(means[region]),"l") 
-					legend.AddEntry(ge,"Mean SF vs OF #pm 6.4% %","f") 
+					legend.AddEntry(ge,"Mean SF vs OF #pm 6.4%","f") 
 				legend.Draw("same")
 				ROOT.gPad.RedrawAxis()
 				hCanvas.Print("fig/Triggereff_SFvsOF_Syst_%s_%s_%s_%s_%s_%s.pdf"%(source,region,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))

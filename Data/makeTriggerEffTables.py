@@ -50,22 +50,19 @@ def main():
 \begin{table}[hbp] \caption{Triggerefficiency-values for data and MC with OS, $p_T>20(20)\,\GeV$ and $H_T>200\,\GeV$ for the inclusive region.} 
 \centering 
 \renewcommand{\arraystretch}{1.2} 
-\begin{tabular}{|l|c|c|c|}     
-\hline    
+\begin{tabular}{l|c|c|c}     
+
  & nominator & denominator & $\epsilon_{trigger} \pm \sigma_{stat}$ \\    
-\hline\hline
-& \multicolumn{3}{|c|}{MC} \\
 \hline
-& \multicolumn{3}{|c|}{$|\eta|<2.4$ } \\
-\hline 
+& \multicolumn{3}{c}{MC, $|\eta|<2.4$ } \\
+\hline
+
 %s    
     \hline 
-&\multicolumn{3}{|c|}{Data} \\
-\hline
-& \multicolumn{3}{|c|}{$|\eta|<2.4$ } \\
+&\multicolumn{3}{c}{Data,$|\eta|<2.4$} \\
 \hline
 %s 
- \hline     
+ 
 \end{tabular}  
 \label{tab:EffValues_Inclusive}
 \end{table}
@@ -92,7 +89,7 @@ def main():
 
 	if argv[1] == "Exclusive":
 		
-		saveTable(tableTemplate%(tableMC,tableData), "TriggerEffsExlusive_Inclusive_%s"%argv[1])
+		saveTable(tableTemplate%(tableMC,tableData), "TriggerEffsExclusive_Inclusive_%s"%argv[2])
 	else:	
 		saveTable(tableTemplate%(tableMC,tableData), "TriggerEffs_Inclusive_%s"%argv[1])
 
@@ -103,22 +100,22 @@ def main():
 \begin{table}[hbp] \caption{Triggerefficiency-values for data and MC with OS, $p_T>20(20)\,\GeV$ and $H_T>200\,\GeV$ for central and forward region seperated.} 
 \centering 
 \renewcommand{\arraystretch}{1.2} 
-\begin{tabular}{|l|c|c|c|c|c|c|c|c|}     
-\hline    
+\begin{tabular}{l|c|c|c|c|c|c}     
+
  & nominator & denominator & $\epsilon_{trigger} \pm \sigma_{stat}$ &  nominator & denominator & $\epsilon_{trigger} \pm \sigma_{stat}$  \\    
-\hline\hline
-& \multicolumn{6}{|c|}{MC} \\
 \hline
-&  \multicolumn{3}{|c|}{$|\eta|<1.4$ } & \multicolumn{3}{|c|}{ at least 1 $|\eta| > 1.6$ } \\
+& \multicolumn{6}{c}{MC} \\
+\hline
+&  \multicolumn{3}{c|}{$|\eta|<1.4$ } & \multicolumn{3}{|c}{ at least 1 $|\eta| > 1.6$ } \\
 \hline 
 %s    
     \hline 
-&\multicolumn{6}{|c|}{Data} \\
+&\multicolumn{6}{c}{Data} \\
 \hline
-&  \multicolumn{3}{|c|}{$|\eta|<1.4$ } & \multicolumn{3}{|c|}{ at least 1 $|\eta| > 1.6$ }\\
+&  \multicolumn{3}{c|}{$|\eta|<1.4$ } & \multicolumn{3}{|c}{ at least 1 $|\eta| > 1.6$ }\\
 \hline
 %s 
- \hline     
+ 
 \end{tabular}  
 \label{tab:EffValues_Seperated}
 \end{table}

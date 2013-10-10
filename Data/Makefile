@@ -20,14 +20,13 @@ TriggerEfficienciesCentralValues: triggerEfficienciesCentralValues.py shelves
 	$(MAKEtriggerEffCentralValues) Inclusive
 
 TriggerEfficienciesTables: makeTriggerEffTables.py
-	$(MAKEtriggerEffTables) Barrel
-	$(MAKEtriggerEffTables) Endcap
-	$(MAKEtriggerEffTables) Inclusive
+	$(MAKEtriggerEffTables) Exclusive HT
+
 	
 		
 		
 copyAN:
 	cp fig/Triggereff_SFvsOF_Syst_AlphaT_Barrel_HighHT_Run92_nJets_pt2020.pdf fig/Triggereff_SFvsOF_Syst_AlphaT_Barrel_HighHT_Run92_nVtx_pt2020.pdf fig/Triggereff_SFvsOF_Syst_AlphaT_Barrel_HighHT_Run92_pt1_leadingPt30.pdf fig/Triggereff_SFvsOF_Syst_AlphaT_Barrel_HighHT_Run92_Mll_pt2020.pdf fig/Triggereff_SFvsOF_Syst_AlphaT_Barrel_HighHT_Run92_MET_pt2020.pdf fig/Triggereff_SFvsOF_Syst_AlphaT_Barrel_HighHT_Run92_Eta1_pt2020.pdf fig/Triggereff_SFvsOF_Syst_AlphaT_Endcap_HighHT_Run92_nJets_pt2020.pdf fig/Triggereff_SFvsOF_Syst_AlphaT_Endcap_HighHT_Run92_nVtx_pt2020.pdf fig/Triggereff_SFvsOF_Syst_AlphaT_Endcap_HighHT_Run92_pt1_leadingPt30.pdf fig/Triggereff_SFvsOF_Syst_AlphaT_Endcap_HighHT_Run92_Mll_pt2020.pdf fig/Triggereff_SFvsOF_Syst_AlphaT_Endcap_HighHT_Run92_MET_pt2020.pdf fig/Triggereff_SFvsOF_Syst_AlphaT_Endcap_HighHT_Run92_Eta1_pt2020.pdf $(AN_PLOTS)
-	cp tab/table_TriggerEffs_Inclusive_HT.tex tab/table_TriggerEffs_Seperated_HT.tex $(AN_TABLES)
+	cp tab/table_TriggerEffsExclusive_Inclusive_HT.tex tab/table_TriggerEffsExclusive_Seperated_HT.tex $(AN_TABLES)
 	
 
