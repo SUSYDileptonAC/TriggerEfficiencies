@@ -118,17 +118,31 @@ if (__name__ == "__main__"):
 	source = mainConfig.source
 	log.logHighlighted("Calculating trigger efficiencies on %s triggered dataset"%source)
 	log.logHighlighted("Using trees from %s "%path)
-	treesDenominatorEE = readTrees(path,source,"%s"%(source,),"EE")
-	treesDenominatorMuMu = readTrees(path,source,"%s"%(source,),"MuMu")
-	treesDenominatorEMu = readTrees(path,source,"%s"%(source,),"EMu")
+	if source == "PFHT":
 	
-	
-	treesNominatorEE = readTrees(path,source,"%sHLTDiEle"%(source,),"EE")
-	treesNominatorMuMu = readTrees(path,source,"%sHLTDiMu"%(source,),"MuMu")
-	treesNominatorMuMuNoTrack = readTrees(path,source,"%sHLTDiMuNoTrackerMuon"%(source,),"MuMu")
-	treesNominatorEMu = readTrees(path,source,"%sHLTEleMu"%(source,),"EMu")
-	treesNominatorMuE = readTrees(path,source,"%sHLTMuEle"%(source,),"EMu")
-	treesNominatorMuEG = readTrees(path,source,"%sHLTMuEG"%(source,),"EMu")
+		treesDenominatorEE = readTrees(path,source,"%s"%(source,),"EE")
+		treesDenominatorMuMu = readTrees(path,source,"%s"%(source,),"MuMu")
+		treesDenominatorEMu = readTrees(path,source,"%s"%(source,),"EMu")
+		
+		
+		treesNominatorEE = readTrees(path,source,"%sHLTPFDiEle"%(source,),"EE")
+		treesNominatorMuMu = readTrees(path,source,"%sHLTPFDiMu"%(source,),"MuMu")
+		treesNominatorMuMuNoTrack = readTrees(path,source,"%sHLTPFDiMuNoTrackerMuon"%(source,),"MuMu")
+		treesNominatorEMu = readTrees(path,source,"%sHLTPFEleMu"%(source,),"EMu")
+		treesNominatorMuE = readTrees(path,source,"%sHLTPFMuEle"%(source,),"EMu")
+		treesNominatorMuEG = readTrees(path,source,"%sHLTPFMuEG"%(source,),"EMu")
+	else:
+		treesDenominatorEE = readTrees(path,source,"%s"%(source,),"EE")
+		treesDenominatorMuMu = readTrees(path,source,"%s"%(source,),"MuMu")
+		treesDenominatorEMu = readTrees(path,source,"%s"%(source,),"EMu")
+		
+		
+		treesNominatorEE = readTrees(path,source,"%sHLTDiEle"%(source,),"EE")
+		treesNominatorMuMu = readTrees(path,source,"%sHLTDiMu"%(source,),"MuMu")
+		treesNominatorMuMuNoTrack = readTrees(path,source,"%sHLTDiMuNoTrackerMuon"%(source,),"MuMu")
+		treesNominatorEMu = readTrees(path,source,"%sHLTEleMu"%(source,),"EMu")
+		treesNominatorMuE = readTrees(path,source,"%sHLTMuEle"%(source,),"EMu")
+		treesNominatorMuEG = readTrees(path,source,"%sHLTMuEG"%(source,),"EMu")	
 	
 	etaCut = etaCuts[argv[1]]
 	logEtaCut = logEtaCuts[argv[1]]
@@ -144,7 +158,7 @@ if (__name__ == "__main__"):
 	plotPad.Draw()	
 	plotPad.cd()
 	
-	legend = TLegend(0.3, 0.13, 0.95, 0.5)
+	legend = TLegend(0.6, 0.13, 0.95, 0.35)
 	legend.SetFillStyle(0)
 	legend.SetBorderSize(1)
 	
@@ -278,35 +292,35 @@ if (__name__ == "__main__"):
 				effMuMuNoTrack.SetMarkerStyle(22)
 				effMuE.SetMarkerStyle(23)
 				effEMu.SetMarkerStyle(33)				
-				hCanvas.DrawFrame(firstBin,0,lastBin,1.2,"; %s ; Efficiency" %(variable.labelX))
+				hCanvas.DrawFrame(firstBin,0.6,lastBin,1.2,"; %s ; Efficiency" %(variable.labelX))
 				
 				fitStart = variable.fitStart
 				fitEnd = variable.fitEnd
 				print fitStart, fitEnd				
 				
 				
-				fitEE = TF1("fitEE","[0]",fitStart,fitEnd)
-				fitMuMu = TF1("fitMuMu","[0]",fitStart,fitEnd)
-				fitMuMuNoTrack = TF1("fitMuMuNoTrack","[0]",fitStart,fitEnd)
-				fitEMu = TF1("fitEMu","[0]",fitStart,fitEnd)
-				fitMuE = TF1("fitMuE","[0]",fitStart,fitEnd)
-				fitEE.SetLineColor(ROOT.kBlack)
-				fitMuMu.SetLineColor(ROOT.kRed)
-				fitMuMuNoTrack.SetLineColor(ROOT.kRed+2)
-				fitEMu.SetLineColor(ROOT.kBlue+2)
-				fitMuE.SetLineColor(ROOT.kBlue)
-				effEE.Fit("fitEE","BRQE","",fitStart,fitEnd)
-				effMuMu.Fit("fitMuMu","BRQE","",fitStart,fitEnd)
-				effMuMuNoTrack.Fit("fitMuMuNoTrack","BRQE","",fitStart,fitEnd)
-				effEMu.Fit("fitEMu","BRQE","",fitStart,fitEnd)
-				effMuE.Fit("fitMuE","BRQE","",fitStart,fitEnd)
+				#fitEE = TF1("fitEE","[0]",fitStart,fitEnd)
+				#fitMuMu = TF1("fitMuMu","[0]",fitStart,fitEnd)
+				#fitMuMuNoTrack = TF1("fitMuMuNoTrack","[0]",fitStart,fitEnd)
+				#fitEMu = TF1("fitEMu","[0]",fitStart,fitEnd)
+				#fitMuE = TF1("fitMuE","[0]",fitStart,fitEnd)
+				#fitEE.SetLineColor(ROOT.kBlack)
+				#fitMuMu.SetLineColor(ROOT.kRed)
+				#fitMuMuNoTrack.SetLineColor(ROOT.kRed+2)
+				#fitEMu.SetLineColor(ROOT.kBlue+2)
+				#fitMuE.SetLineColor(ROOT.kBlue)
+				#effEE.Fit("fitEE","BRQE","",fitStart,fitEnd)
+				#effMuMu.Fit("fitMuMu","BRQE","",fitStart,fitEnd)
+				#effMuMuNoTrack.Fit("fitMuMuNoTrack","BRQE","",fitStart,fitEnd)
+				#effEMu.Fit("fitEMu","BRQE","",fitStart,fitEnd)
+				#effMuE.Fit("fitMuE","BRQE","",fitStart,fitEnd)
 				
 				legend.Clear()
-				legend.AddEntry(effEE,"Ele_17_X_Ele8_X %.3f #pm %.3f"%(fitEE.GetParameter(0),fitEE.GetParError(0)),"p")
-				legend.AddEntry(effMuMu,"Mu17_Mu8 || Mu17_TkMu8 %.3f #pm %.3f"%(fitMuMu.GetParameter(0),fitMuMu.GetParError(0)),"p")
-				legend.AddEntry(effMuMuNoTrack,"Mu17_Mu8 %.3f #pm %.3f"%(fitMuMuNoTrack.GetParameter(0),fitMuMuNoTrack.GetParError(0)),"p")
-				legend.AddEntry(effMuE,"Mu17_Ele8_X %.3f #pm %.3f"%(fitMuE.GetParameter(0),fitMuE.GetParError(0)),"p")
-				legend.AddEntry(effEMu,"Ele17_X_Mu8 %.3f #pm %.3f"%(fitEMu.GetParameter(0),fitEMu.GetParError(0)),"p")
+				legend.AddEntry(effEE,"Ele_17_X_Ele8_X ","p")
+				legend.AddEntry(effMuMu,"Mu17_Mu8 || Mu17_TkMu8","p")
+				#legend.AddEntry(effMuMuNoTrack,"Mu17_Mu8 %.3f #pm %.3f"%(fitMuMuNoTrack.GetParameter(0),fitMuMuNoTrack.GetParError(0)),"p")
+				legend.AddEntry(effMuE,"Mu17_Ele8_X","p")
+				legend.AddEntry(effEMu,"Ele17_X_Mu8","p")
 
 				
 				effEE.Draw("samep")

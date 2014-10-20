@@ -23,7 +23,7 @@ def readTreeFromFile(path,tree, dileptonCombination):
 	"""
 	from ROOT import TChain
 	result = TChain()
-	result.Add("%s/cutsV22DileptonTrigger%sFinalTrees/%sDileptonTree"%(path,tree, dileptonCombination))
+	result.Add("%s/cutsV23DileptonTrigger%sFinalTrees/%sDileptonTree"%(path,tree, dileptonCombination))
 	#~ print "%s/cutsV22DileptonTrigger%sFinalTrees/%sDileptonTree"%(path,tree, dileptonCombination)
 	
 
@@ -71,17 +71,21 @@ def getFilePathsAndSampleNames(path,source,tree):
 	"""
 	if source == "AlphaT":
 		source = "HTMHT"
+	if source == "PFHT":
+		source = "HT"
 	result = []
 	from glob import glob
 	from re import match
 	result = {}
 	#~ print path	
 	#~ print tree
-	#~ print "%s/sw532*cutV22DileptonTrigger%s*.root"%(path,tree)
-	for filePath in glob("%s/sw532*cutsV22DileptonTrigger*.root"%(path,)):		
+	#print "%s/sw538*cutV23DileptonTrigger%s*.root"%(path,tree)
+	for filePath in glob("%s/sw538*cutsV23DileptonTrigger*.root"%(path,)):
+		#print filePath		
 		if source in filePath:
-			sampleName = match(".*sw532v.*\.cutsV22DileptonTrigger.*\.(.*).root", filePath).groups()[0]			
+			sampleName = match(".*sw538v.*\.cutsV23DileptonTrigger.*\.(.*).root", filePath).groups()[0]			
 			#for the python enthusiats: yield sampleName, filePath is more efficient here :)
+			#print sampleName
 			if sampleName.split("_")[0] == source:
 				result[sampleName] = filePath
 	return result

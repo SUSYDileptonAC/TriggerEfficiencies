@@ -112,18 +112,32 @@ if (__name__ == "__main__"):
 	source = mainConfig.source
 	log.logHighlighted("Calculating trigger efficiencies on %s triggered dataset"%source)
 	log.logHighlighted("Using trees from %s "%path)
-	treesDenominatorEE = readTrees(path,source,"%s"%(source,),"EE")
-	treesDenominatorMuMu = readTrees(path,source,"%s"%(source,),"MuMu")
-	treesDenominatorEMu = readTrees(path,source,"%s"%(source,),"EMu")
 	
+	if source == "PFHT":
 	
-	treesNominatorEE = readTrees(path,source,"%sHLTDiEle"%(source,),"EE")
-	treesNominatorMuMu = readTrees(path,source,"%sHLTDiMu"%(source,),"MuMu")
-	treesNominatorMuMuNoTrack = readTrees(path,source,"%sHLTDiMuNoTrackerMuon"%(source,),"MuMu")
-	treesNominatorEMu = readTrees(path,source,"%sHLTEleMu"%(source,),"EMu")
-	treesNominatorMuE = readTrees(path,source,"%sHLTMuEle"%(source,),"EMu")
-	treesNominatorMuEG = readTrees(path,source,"%sHLTMuEG"%(source,),"EMu")
-	
+		treesDenominatorEE = readTrees(path,source,"%s"%(source,),"EE")
+		treesDenominatorMuMu = readTrees(path,source,"%s"%(source,),"MuMu")
+		treesDenominatorEMu = readTrees(path,source,"%s"%(source,),"EMu")
+		
+		
+		treesNominatorEE = readTrees(path,source,"%sHLTPFDiEle"%(source,),"EE")
+		treesNominatorMuMu = readTrees(path,source,"%sHLTPFDiMu"%(source,),"MuMu")
+		treesNominatorMuMuNoTrack = readTrees(path,source,"%sHLTPFDiMuNoTrackerMuon"%(source,),"MuMu")
+		treesNominatorEMu = readTrees(path,source,"%sHLTPFEleMu"%(source,),"EMu")
+		treesNominatorMuE = readTrees(path,source,"%sHLTPFMuEle"%(source,),"EMu")
+		treesNominatorMuEG = readTrees(path,source,"%sHLTPFMuEG"%(source,),"EMu")
+	else:
+		treesDenominatorEE = readTrees(path,source,"%s"%(source,),"EE")
+		treesDenominatorMuMu = readTrees(path,source,"%s"%(source,),"MuMu")
+		treesDenominatorEMu = readTrees(path,source,"%s"%(source,),"EMu")
+		
+		
+		treesNominatorEE = readTrees(path,source,"%sHLTDiEle"%(source,),"EE")
+		treesNominatorMuMu = readTrees(path,source,"%sHLTDiMu"%(source,),"MuMu")
+		treesNominatorMuMuNoTrack = readTrees(path,source,"%sHLTDiMuNoTrackerMuon"%(source,),"MuMu")
+		treesNominatorEMu = readTrees(path,source,"%sHLTEleMu"%(source,),"EMu")
+		treesNominatorMuE = readTrees(path,source,"%sHLTMuEle"%(source,),"EMu")
+		treesNominatorMuEG = readTrees(path,source,"%sHLTMuEG"%(source,),"EMu")			
 	cuts = mainConfig.cuts
 	variables = mainConfig.variables
 	runs = mainConfig.runs

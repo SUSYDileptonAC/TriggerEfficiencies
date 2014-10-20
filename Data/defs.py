@@ -90,7 +90,7 @@ class runRanges:
 	class Full2012:
 		plotName = "Full2012"
 		runCut = "runNr >= 190456 && runNr <=209465"
-		label = "Full 2012"
+		label = "Full2012"
 		lumi = "19.4"
 class dependendies:
 	class nJets_pt2010:
@@ -378,6 +378,11 @@ class selections:
 		#label1 = " |#eta| < 2.4  ht > 200"
 		label1 = "ht > 200"
 		name = "HighHTExclusive"
+	class Exclusive:
+		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3 && p4.M() > 20 && %s && !((nJets >= 2 && met > 150) || (nJets >=3 && met > 100)) && %s %s )"
+		#label1 = " |#eta| < 2.4  ht > 200"
+		label1 = "Excluding signal region"
+		name = "Exclusive"		
 	class HighHTHighMET:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3 && p4.M() > 20  && ht > 150 && met > 50 && %s && %s %s )"
 		label1 = " |#eta| < 2.4  ht > 150 met > 50"
@@ -388,16 +393,16 @@ class selections:
 		#~ name = "HighHTEndcap"
 
 class mainConfig:
-	path = "/home/jan/Trees/HTTreesSyncd"
-	source = "AlphaT"
-	cuts = [selections.HighHT]
+	path = "/user/jschulte/Trees/HTTrees"
+	source = "PFHT"
+	cuts = [selections.Exclusive]
 	#~ cuts = [selections.HighHT,selections.HighHTBarrel]
 
 	variables = [dependendies.leadingPt_trailing10,dependendies.leadingPt_trailing20,dependendies.trailingPt_leading20,dependendies.trailingPt_leading30,dependendies.mll_pt2020,dependendies.met_pt2020,dependendies.ht_pt2020,dependendies.nJets_pt2020,dependendies.nVtx_pt2020,dependendies.eta1_pt2020]
 	#~ variables = [dependendies.eta1_pt2020]
 	#~ runs = [runRanges.RunABC,runRanges.RunC,runRanges.RunA,runRanges.RunB,runRanges.RunD,runRanges.Full2012]
 	#runs = [runRanges.RunABC]
-	runs = [runRanges.Run92]
+	runs = [runRanges.Full2012]
 	
 # Color definition
 #==================
