@@ -8,7 +8,7 @@ from defs import selections
 import ROOT
 from ROOT import TCanvas, TEfficiency, TPad, TH1F, TH1I, THStack, TLegend, TMath, TGraphAsymmErrors, TF1
 from setTdrStyle import setTDRStyle
-from helpers import readTrees, createHistoFromTree
+from helpers import readTreesV23, createHistoFromTree
 from array import array
 
 
@@ -118,17 +118,17 @@ if (__name__ == "__main__"):
 	source = mainConfig.source
 	log.logHighlighted("Calculating trigger efficiencies on %s triggered dataset"%source)
 	log.logHighlighted("Using trees from %s "%path)
-	treesDenominatorEE = readTrees(path,source,"%s"%(source,),"EE")
-	treesDenominatorMuMu = readTrees(path,source,"%s"%(source,),"MuMu")
-	treesDenominatorEMu = readTrees(path,source,"%s"%(source,),"EMu")
+	treesDenominatorEE = readTreesV23(path,source,"%s"%(source,),"EE")
+	treesDenominatorMuMu = readTreesV23(path,source,"%s"%(source,),"MuMu")
+	treesDenominatorEMu = readTreesV23(path,source,"%s"%(source,),"EMu")
 	
 	
-	treesNominatorEE = readTrees(path,source,"%sHLTDiEle"%(source,),"EE")
-	treesNominatorMuMu = readTrees(path,source,"%sHLTDiMu"%(source,),"MuMu")
-	treesNominatorMuMuNoTrack = readTrees(path,source,"%sHLTDiMuNoTrackerMuon"%(source,),"MuMu")
-	treesNominatorEMu = readTrees(path,source,"%sHLTEleMu"%(source,),"EMu")
-	treesNominatorMuE = readTrees(path,source,"%sHLTMuEle"%(source,),"EMu")
-	treesNominatorMuEG = readTrees(path,source,"%sHLTMuEG"%(source,),"EMu")
+	treesNominatorEE = readTreesV23(path,source,"%sHLTDiEle"%(source,),"EE")
+	treesNominatorMuMu = readTreesV23(path,source,"%sHLTDiMu"%(source,),"MuMu")
+	treesNominatorMuMuNoTrack = readTreesV23(path,source,"%sHLTDiMuNoTrackerMuon"%(source,),"MuMu")
+	treesNominatorEMu = readTreesV23(path,source,"%sHLTEleMu"%(source,),"EMu")
+	treesNominatorMuE = readTreesV23(path,source,"%sHLTMuEle"%(source,),"EMu")
+	treesNominatorMuEG = readTreesV23(path,source,"%sHLTMuEG"%(source,),"EMu")
 	
 	etaCut = etaCuts[argv[1]]
 	logEtaCut = logEtaCuts[argv[1]]
@@ -144,7 +144,7 @@ if (__name__ == "__main__"):
 	plotPad.Draw()	
 	plotPad.cd()
 	
-	legend = TLegend(0.3, 0.13, 0.95, 0.5)
+	legend = TLegend(0.3, 0.13, 0.95, 0.35)
 	legend.SetFillStyle(0)
 	legend.SetBorderSize(1)
 	
@@ -161,7 +161,7 @@ if (__name__ == "__main__"):
 	legendHist5.SetMarkerColor(ROOT.kBlue+2)
 	
 	legend.AddEntry(legendHist1,"Ele_17_X_Ele8_X","p")
-	legend.AddEntry(legendHist2,"Mu17_Mu8 || Mu17_TkMu8","p")
+	legend.AddEntry(legendHist2,"Mu17_Mu8 or Mu17_TkMu8","p")
 	legend.AddEntry(legendHist3,"Mu17_Mu8","p")
 	legend.AddEntry(legendHist4,"Mu17_Ele8_X","p")
 	legend.AddEntry(legendHist5,"Ele17_X_Mu8","p")
@@ -177,7 +177,8 @@ if (__name__ == "__main__"):
 	
 	result = ""
 	
-	for run in runs:
+	#~ for run in runs:
+	for index, run in enumerate(runs):
 		log.logInfo("%s"%run.label)
 		
 		
@@ -188,7 +189,7 @@ if (__name__ == "__main__"):
 			
 			
 			for variable in variables:
-				if region == "Endcap":
+				if region == "Endcap" and index == 0:
 					variable.nBins = int(variable.nBins/2)
 					variable.binWidths = variable.binWidths*2
 				log.logInfo("%s"%variable.labelX)
@@ -201,10 +202,13 @@ if (__name__ == "__main__"):
 				
 				#~ if "eta" in variable.variable:
 					#~ firstBin = -2.4
+
+
 				lastBin = variable.nBins*variable.binWidths
 				denominatorHistoEE = TH1F("","",variable.nBins,firstBin,lastBin)
 				for name, tree in treesDenominatorEE.iteritems():
 					#~ print name
+					treeDenomiatorEE = tree
 					denominatorHistoEE.Add(createHistoFromTree(tree,variable.variable,cutString,variable.nBins,firstBin,lastBin).Clone())
 				denominatorHistoMuMu = TH1F("","",variable.nBins,firstBin,lastBin)
 				for name, tree in treesDenominatorMuMu.iteritems():
@@ -454,8 +458,8 @@ if (__name__ == "__main__"):
 				legend.Clear()
 				legend.AddEntry(effSFvsOF,"Triggerefficiency SF/OF","p")
 				if "Exclusive" in cut.name: 
-					legend.AddEntry(sfLine,"Mean SF vs OF: %s"%(meansExclusive[region]),"l") 
-					legend.AddEntry(ge,"Mean SF vs OF #pm 6.4%","f") 
+					legend.AddEntry(sfLine,"mean","l") 
+					legend.AddEntry(ge,"mean #pm 6.4%","f") 
 				else:	
 					legend.AddEntry(sfLine,"Mean SF vs OF: %s"%(means[region]),"l") 
 					legend.AddEntry(ge,"Mean SF vs OF #pm 6.4%","f") 

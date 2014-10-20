@@ -29,6 +29,22 @@ def readTreeFromFile(path,tree, dileptonCombination):
 
 	return result
 	
+def readTreeFromFileV23(path,tree, dileptonCombination):
+	"""
+	helper functionfrom argparse import ArgumentParser
+	path: path to .root file containing simulated events
+	dileptonCombination: EMu, EMu, or EMu for electron-electron, electron-muon, or muon-muon events
+
+	returns: tree containing events for on sample and dileptonCombination
+	"""
+	from ROOT import TChain
+	result = TChain()
+	result.Add("%s/cutsV23DileptonTrigger%sFinalTrees/%sDileptonTree"%(path,tree, dileptonCombination))
+	#~ print "%s/cutsV22DileptonTrigger%sFinalTrees/%sDileptonTree"%(path,tree, dileptonCombination)
+	
+
+	return result
+	
 	
 def totalNumberOfGeneratedEvents(path):
 	"""
@@ -59,6 +75,20 @@ def readTrees(path,source,tree, dileptonCombination):
 		result[sampleName] = readTreeFromFile(filePath, tree,dileptonCombination)
 		
 	return result
+def readTreesV23(path,source,tree, dileptonCombination):
+	"""
+	path: path to directory containing all sample files
+    dileptonCombination: "EMu", "EMu", or pyroot"EMu" for electron-electron, electron-muon, or muon-muon events
+
+	returns: dict of sample names ->  trees containing events (for all samples for one dileptonCombination)
+	"""
+	result = {}
+	#~ print tree
+	for sampleName, filePath in getFilePathsAndSampleNamesV23(path,source,tree).iteritems():
+		#~ print tree
+		result[sampleName] = readTreeFromFileV23(filePath, tree,dileptonCombination)
+		
+	return result
 
 
 	
@@ -84,6 +114,33 @@ def getFilePathsAndSampleNames(path,source,tree):
 			#for the python enthusiats: yield sampleName, filePath is more efficient here :)
 			if sampleName.split("_")[0] == source:
 				result[sampleName] = filePath
+	return result
+def getFilePathsAndSampleNamesV23(path,source,tree):
+	"""
+	helper function
+	path: path to directory containing all sample files
+
+	returns: dict of smaple names -> path of .root file (for all samples in path)
+	"""
+	if source == "AlphaT":
+		source = "HTMHT"
+	if source == "PFHT":
+		source = "HT"
+	result = []
+	from glob import glob
+	from re import match
+	result = {}
+	#~ print path	
+	#~ print tree
+	#~ print "%s/sw532*cutV22DileptonTrigger%s*.root"%(path,tree)
+	for filePath in glob("%s/sw538*cutsV23DileptonTrigger*.root"%(path,)):
+		if source in filePath:
+			sampleName = match(".*sw538v.*\.cutsV23DileptonTrigger.*\.(.*).root", filePath).groups()[0]			
+			#for the python enthusiats: yield sampleName, filePath is more efficient here :)
+			if sampleName.split("_")[0] == source:
+				
+				result[sampleName] = filePath
+				
 	return result
 
 

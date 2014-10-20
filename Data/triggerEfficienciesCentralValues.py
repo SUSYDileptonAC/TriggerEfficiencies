@@ -8,7 +8,7 @@ from defs import selections
 import ROOT
 from ROOT import TCanvas, TEfficiency, TPad, TH1F, TH1I, THStack, TLegend, TMath, TGraphAsymmErrors, TF1
 from setTdrStyle import setTDRStyle
-from helpers import readTrees, createHistoFromTree
+from helpers import readTreesV23, createHistoFromTree
 from array import array
 
 baseCut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && pt1 > 20 && pt2 > 20 && p4.M()>20 && ht > 200  && %s)"
@@ -112,23 +112,23 @@ if (__name__ == "__main__"):
 	source = mainConfig.source
 	log.logHighlighted("Calculating trigger efficiencies on %s triggered dataset"%source)
 	log.logHighlighted("Using trees from %s "%path)
-	treesDenominatorEE = readTrees(path,source,"%s"%(source,),"EE")
-	treesDenominatorMuMu = readTrees(path,source,"%s"%(source,),"MuMu")
-	treesDenominatorEMu = readTrees(path,source,"%s"%(source,),"EMu")
+	treesDenominatorEE = readTreesV23(path,source,"%s"%(source,),"EE")
+	treesDenominatorMuMu = readTreesV23(path,source,"%s"%(source,),"MuMu")
+	treesDenominatorEMu = readTreesV23(path,source,"%s"%(source,),"EMu")
 	
 	
-	treesNominatorEE = readTrees(path,source,"%sHLTDiEle"%(source,),"EE")
-	treesNominatorMuMu = readTrees(path,source,"%sHLTDiMu"%(source,),"MuMu")
-	treesNominatorMuMuNoTrack = readTrees(path,source,"%sHLTDiMuNoTrackerMuon"%(source,),"MuMu")
-	treesNominatorEMu = readTrees(path,source,"%sHLTEleMu"%(source,),"EMu")
-	treesNominatorMuE = readTrees(path,source,"%sHLTMuEle"%(source,),"EMu")
-	treesNominatorMuEG = readTrees(path,source,"%sHLTMuEG"%(source,),"EMu")
+	treesNominatorEE = readTreesV23(path,source,"%sHLTPFDiEle"%(source,),"EE")
+	treesNominatorMuMu = readTreesV23(path,source,"%sHLTPFDiMu"%(source,),"MuMu")
+	treesNominatorMuMuNoTrack = readTreesV23(path,source,"%sHLTPFDiMuNoTrackerMuon"%(source,),"MuMu")
+	treesNominatorEMu = readTreesV23(path,source,"%sHLTPFEleMu"%(source,),"EMu")
+	treesNominatorMuE = readTreesV23(path,source,"%sHLTPFMuEle"%(source,),"EMu")
+	treesNominatorMuEG = readTreesV23(path,source,"%sHLTPFMuEG"%(source,),"EMu")
 	
 	cuts = mainConfig.cuts
 	variables = mainConfig.variables
 	runs = mainConfig.runs
 
-					
+	print treesDenominatorEE				
 	
 	result = ""
 	
@@ -146,13 +146,17 @@ if (__name__ == "__main__"):
 		counts = {run.label:{}}
 		lastBin = 10000
 		nBins = 1
+		
+		
+		
 		denominatorHistoEE = TH1F("","",nBins,firstBin,lastBin)
 		for name, tree in treesDenominatorEE.iteritems():
+
 			denominatorHistoEE.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
 		denominatorHistoMuMu = TH1F("","",nBins,firstBin,lastBin)
 		for name, tree in treesDenominatorMuMu.iteritems():
+
 			denominatorHistoMuMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
-			print denominatorHistoMuMu.GetEntries()
 		denominatorHistoEMu = TH1F("","",nBins,firstBin,lastBin)
 		for name, tree in treesDenominatorEMu.iteritems():
 			denominatorHistoEMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
@@ -163,10 +167,12 @@ if (__name__ == "__main__"):
 		for name, tree in treesDenominatorEMu.iteritems():
 			denominatorHistoMuEG.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
 
+
+
+
 		nominatorHistoEE = TH1F("","",nBins,firstBin,lastBin)
 		for name, tree in treesNominatorEE.iteritems():
 			nominatorHistoEE.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
-			print nominatorHistoEE.GetEntries()
 		nominatorHistoMuMu = TH1F("","",nBins,firstBin,lastBin)
 		for name, tree in treesNominatorMuMu.iteritems():
 			nominatorHistoMuMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
@@ -186,6 +192,7 @@ if (__name__ == "__main__"):
 		counts[run.label]["default"] = {}
 		counts[run.label]["default"]["EE"] = getCounts(nominatorHistoEE, denominatorHistoEE,cutString)
 		counts[run.label]["default"]["MuMu"] = getCounts(nominatorHistoMuMu, denominatorHistoMuMu,cutString)
+		counts[run.label]["default"]["MuMuNoTrack"] = getCounts(nominatorHistoMuMuNoTrack, denominatorHistoMuMu,cutString)
 		counts[run.label]["default"]["EMu"] = getCounts(nominatorHistoMuEG, denominatorHistoMuEG,cutString)
 		
 		
@@ -201,13 +208,18 @@ if (__name__ == "__main__"):
 		counts = {run.label:{}}
 		lastBin = 10000
 		nBins = 1
+		
+		treesDenominatorEESelected = []	
+		treesDenominatorMMSelected = []	
+		treesDenominatorEMuSelected = []			
 		denominatorHistoEE = TH1F("","",nBins,firstBin,lastBin)
 		for name, tree in treesDenominatorEE.iteritems():
+			treesDenominatorEESelected.append(tree.CopyTree(cutString))			
 			denominatorHistoEE.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
 		denominatorHistoMuMu = TH1F("","",nBins,firstBin,lastBin)
 		for name, tree in treesDenominatorMuMu.iteritems():
+			treesDenominatorMMSelected.append(tree.CopyTree(cutString))			
 			denominatorHistoMuMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
-			print denominatorHistoMuMu.GetEntries()
 		denominatorHistoEMu = TH1F("","",nBins,firstBin,lastBin)
 		for name, tree in treesDenominatorEMu.iteritems():
 			denominatorHistoEMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
@@ -216,14 +228,21 @@ if (__name__ == "__main__"):
 			denominatorHistoMuE.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
 		denominatorHistoMuEG = TH1F("","",nBins,firstBin,lastBin)
 		for name, tree in treesDenominatorEMu.iteritems():
+			treesDenominatorEMuSelected.append(tree.CopyTree(cutString))			
 			denominatorHistoMuEG.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
+
+
+		treesNominatorEESelected = []	
+		treesNominatorMMSelected = []	
+		treesNominatorEMuSelected = []	
 
 		nominatorHistoEE = TH1F("","",nBins,firstBin,lastBin)
 		for name, tree in treesNominatorEE.iteritems():
+			treesNominatorEESelected.append(tree.CopyTree(cutString))			
 			nominatorHistoEE.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
-			print nominatorHistoEE.GetEntries()
 		nominatorHistoMuMu = TH1F("","",nBins,firstBin,lastBin)
 		for name, tree in treesNominatorMuMu.iteritems():
+			treesNominatorMMSelected.append(tree.CopyTree(cutString))			
 			nominatorHistoMuMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
 		nominatorHistoMuMuNoTrack = TH1F("","",nBins,firstBin,lastBin)
 		for name, tree in treesNominatorMuMuNoTrack.iteritems():
@@ -236,11 +255,13 @@ if (__name__ == "__main__"):
 			nominatorHistoEMu.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())
 		nominatorHistoMuEG = TH1F("","",nBins,firstBin,lastBin)
 		for name, tree in treesNominatorMuEG.iteritems():
+			treesNominatorEMuSelected.append(tree.CopyTree(cutString))			
 			nominatorHistoMuEG.Add(createHistoFromTree(tree,"pt1",cutString,nBins,firstBin,lastBin).Clone())							
 		
 		counts[run.label]["default"] = {}
 		counts[run.label]["default"]["EE"] = getCounts(nominatorHistoEE, denominatorHistoEE,cutString)
 		counts[run.label]["default"]["MuMu"] = getCounts(nominatorHistoMuMu, denominatorHistoMuMu,cutString)
+		counts[run.label]["default"]["MuMuNoTrack"] = getCounts(nominatorHistoMuMuNoTrack, denominatorHistoMuMu,cutString)
 		counts[run.label]["default"]["EMu"] = getCounts(nominatorHistoMuEG, denominatorHistoMuEG,cutString)
 		
 		
@@ -301,9 +322,61 @@ if (__name__ == "__main__"):
 		
 		outFilePkl = open("shelves/triggerEffExclusiveNoHT_%s_%s_%s.pkl"%(region,source,run.label),"w")
 		pickle.dump(counts, outFilePkl)
-		outFilePkl.close()		
+		outFilePkl.close()	
+
+			
+
+		lineTemplate = r"%s:%s:%s"+"\n"
+		eventList = ""		
+		for tree in treesDenominatorEESelected:
+			for ev in tree:
+				eventList += lineTemplate%(ev.runNr,ev.lumiSec,ev.eventNr)
+		name = "eventList_Exclusive_%s_%s_%s_Denominator_EE.txt"%(region,source,run.label)
+		listFile = open("eventLists/%s"%name, "w")
+		listFile.write(eventList)
+		listFile.close()	
+		
+		eventList = ""	
+		for tree in treesDenominatorMMSelected:
+			for ev in tree:
+				eventList += lineTemplate%(ev.runNr,ev.lumiSec,ev.eventNr)
+		name = "eventList_Exclusive_%s_%s_%s_Denominator_MM.txt"%(region,source,run.label)
+		listFile = open("eventLists/%s"%name, "w")
+		listFile.write(eventList)
+		listFile.close()			
+		eventList = ""	
+		for tree in treesDenominatorEMuSelected:
+			for ev in tree:
+				eventList += lineTemplate%(ev.runNr,ev.lumiSec,ev.eventNr)
+		name = "eventList_Exclusive_%s_%s_%s_Denominator_EM.txt"%(region,source,run.label)
+		listFile = open("eventLists/%s"%name, "w")
+		listFile.write(eventList)
+		listFile.close()			
+		eventList = ""	
+		for tree in treesNominatorEESelected:
+			for ev in tree:
+				eventList += lineTemplate%(ev.runNr,ev.lumiSec,ev.eventNr)
+		name = "eventList_Exclusive_%s_%s_%s_Nominator_EE.txt"%(region,source,run.label)
+		listFile = open("eventLists/%s"%name, "w")
+		listFile.write(eventList)
+		listFile.close()			
+		eventList = ""	
+		for tree in treesNominatorMMSelected:
+			for ev in tree:
+				eventList += lineTemplate%(ev.runNr,ev.lumiSec,ev.eventNr)
+		name = "eventList_Exclusive_%s_%s_%s_Nominator_MM.txt"%(region,source,run.label)
+		listFile = open("eventLists/%s"%name, "w")
+		listFile.write(eventList)
+		listFile.close()			
+		eventList = ""	
+		for tree in treesNominatorEMuSelected:
+			for ev in tree:
+				eventList += lineTemplate%(ev.runNr,ev.lumiSec,ev.eventNr)
 				
-				
+		name = "eventList_Exclusive_%s_%s_%s_Nominator_EM.txt"%(region,source,run.label)
+		listFile = open("eventLists/%s"%name, "w")
+		listFile.write(eventList)
+		listFile.close()				
 	
 		
 		
