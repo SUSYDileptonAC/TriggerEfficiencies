@@ -8,7 +8,7 @@ from defs import selections
 import ROOT
 from ROOT import TCanvas, TEfficiency, TPad, TH1F, TH1I, THStack, TLegend, TMath, TGraphAsymmErrors, TF1
 from setTdrStyle import setTDRStyle
-from helpers import readTreesV23, createHistoFromTree
+from helpers import readTreesV23, readTrees, createHistoFromTree
 from array import array
 
 
@@ -16,26 +16,26 @@ etaCuts = {"Inclusive":"((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.
 			  "Barrel":"abs(eta1)<1.4  && abs(eta2) < 1.4",
 			  "Endcap":"1.6<=TMath::Max(abs(eta1),abs(eta2)) && abs(eta1) < 2.4 && abs(eta2) < 2.4 && ((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) )",
 			}
-logEtaCuts = {"Inclusive":"|eta|<2.4",
-        		  "Barrel":"|eta|<1.4",
-        		  "Endcap":"min one 1.6<|eta|<2.4"
+logEtaCuts = {"Inclusive":"|#eta|<2.4",
+        		  "Barrel":"Central",
+        		  "Endcap":"Forward"
         		}
 means = {"Inclusive":"1.014",
-        		  "Barrel":"1.01",
+        		  "Barrel":"1.0257352929253987",
         		  "Endcap":"1.10"
         		}
 meansExclusive = {"Inclusive":"1.014",
-        		  "Barrel":"1.01",
-        		  "Endcap":"1.10"
+        		  "Barrel":"1.0258951162843153",
+        		  "Endcap":"1.0832331645697035"
         		}
  
-errs = {"Inclusive":"1.014",
+errs = {"Inclusive":"0.06",
         		  "Barrel":"0.06",
         		  "Endcap":"0.07"
         		}
-errsExclusive = {"Inclusive":"1.014",
-        		  "Barrel":"0.06",
-        		  "Endcap":"0.07"
+errsExclusive = {"Inclusive":"0.064",
+        		  "Barrel":"0.064",
+        		  "Endcap":"0.064"
         		}
  
 
@@ -104,6 +104,52 @@ def efficiencyRatio(eff1,eff2):
 		newEff.SetPointError(i,xError,xError,yErrorDown,yErrorUp)
 		
 	return newEff
+	
+def efficiencyRatioGeometricMean(eff1,eff2,eff3):
+	newEff = TGraphAsymmErrors(eff1.GetN())
+	for i in range(0,eff1.GetN()):
+		pointX1 = ROOT.Double(0.)
+		pointX2 = ROOT.Double(0.)
+		pointX3 = ROOT.Double(0.)
+		pointY1 = ROOT.Double(0.)
+		pointY2 = ROOT.Double(0.)
+		pointY3 = ROOT.Double(0.)
+		
+		isSuccesful1 = eff1.GetPoint(i,pointX1,pointY1)
+		isSuccesful2 = eff2.GetPoint(i,pointX2,pointY2)
+		isSuccesful3 = eff3.GetPoint(i,pointX3,pointY3)
+		errY1Up = eff1.GetErrorYhigh(i)
+		errY1Down = eff1.GetErrorYlow(i)
+		errY2Up = eff2.GetErrorYhigh(i)
+		errY2Down = eff2.GetErrorYlow(i)
+		errY3Up = eff3.GetErrorYhigh(i)
+		errY3Down = eff3.GetErrorYlow(i)
+		
+		errX = eff1.GetErrorX(i)
+		#~ print pointY1
+		#~ print pointY2
+
+
+		if pointY3!=0 and pointY2!=0 and pointY3!=0:
+			yValue = (pointY1*pointY2)**0.5/pointY3
+			xValue = pointX1
+			xError = errX
+			#~ yErrorUp = yValue*math.sqrt(0.5*((errY1Up/pointY1)**2+(errY2Up/pointY2**2)**2) + (errY3Up/pointY3**2)**2)
+			#~ yErrorDown = yValue*math.sqrt(0.5*((errY1Low/pointY1)**2+(errY2Low/pointY2**2)**2) + (errY3Low/pointY3**2)**2)				
+			yErrorUp = math.sqrt( ( ( 0.5*(pointY1*pointY2)**(-0.5)*pointY2 / pointY3 ) * errY1Up )**2 + ( ( 0.5*(pointY1*pointY2)**(-0.5)*pointY1 / pointY3 ) * errY2Up )**2 + ( ( (pointY1*pointY2)**0.5/pointY3**2 ) * errY3Down )**2)				
+			yErrorDown = math.sqrt( ( ( 0.5*(pointY1*pointY2)**(-0.5)*pointY2 / pointY3 ) * errY1Down )**2 + ( ( 0.5*(pointY1*pointY2)**(-0.5)*pointY1 / pointY3 ) * errY2Down )**2 + ( ( (pointY1*pointY2)**0.5/pointY3**2 ) * errY3Up )**2)				
+		else:
+			yValue = 0
+			xValue = pointX1
+			xError = errX
+			yErrorUp =0
+			yErrorDown = 0
+			
+		#~ print i
+		newEff.SetPoint(i,xValue,yValue)
+		newEff.SetPointError(i,xError,xError,yErrorDown,yErrorUp)
+		
+	return newEff
 
 if (__name__ == "__main__"):
 	from sys import argv
@@ -118,17 +164,32 @@ if (__name__ == "__main__"):
 	source = mainConfig.source
 	log.logHighlighted("Calculating trigger efficiencies on %s triggered dataset"%source)
 	log.logHighlighted("Using trees from %s "%path)
-	treesDenominatorEE = readTreesV23(path,source,"%s"%(source,),"EE")
-	treesDenominatorMuMu = readTreesV23(path,source,"%s"%(source,),"MuMu")
-	treesDenominatorEMu = readTreesV23(path,source,"%s"%(source,),"EMu")
+
+	if source == "PFHT":
 	
-	
-	treesNominatorEE = readTreesV23(path,source,"%sHLTDiEle"%(source,),"EE")
-	treesNominatorMuMu = readTreesV23(path,source,"%sHLTDiMu"%(source,),"MuMu")
-	treesNominatorMuMuNoTrack = readTreesV23(path,source,"%sHLTDiMuNoTrackerMuon"%(source,),"MuMu")
-	treesNominatorEMu = readTreesV23(path,source,"%sHLTEleMu"%(source,),"EMu")
-	treesNominatorMuE = readTreesV23(path,source,"%sHLTMuEle"%(source,),"EMu")
-	treesNominatorMuEG = readTreesV23(path,source,"%sHLTMuEG"%(source,),"EMu")
+		treesDenominatorEE = readTrees(path,source,"%s"%(source,),"EE")
+		treesDenominatorMuMu = readTrees(path,source,"%s"%(source,),"MuMu")
+		treesDenominatorEMu = readTrees(path,source,"%s"%(source,),"EMu")
+		
+		
+		treesNominatorEE = readTrees(path,source,"%sHLTPFDiEle"%(source,),"EE")
+		treesNominatorMuMu = readTrees(path,source,"%sHLTPFDiMu"%(source,),"MuMu")
+		treesNominatorMuMuNoTrack = readTrees(path,source,"%sHLTPFDiMuNoTrackerMuon"%(source,),"MuMu")
+		treesNominatorEMu = readTrees(path,source,"%sHLTPFEleMu"%(source,),"EMu")
+		treesNominatorMuE = readTrees(path,source,"%sHLTPFMuEle"%(source,),"EMu")
+		treesNominatorMuEG = readTrees(path,source,"%sHLTPFMuEG"%(source,),"EMu")
+	else:
+		treesDenominatorEE = readTrees(path,source,"%s"%(source,),"EE")
+		treesDenominatorMuMu = readTrees(path,source,"%s"%(source,),"MuMu")
+		treesDenominatorEMu = readTrees(path,source,"%s"%(source,),"EMu")
+		
+		
+		treesNominatorEE = readTrees(path,source,"%sHLTDiEle"%(source,),"EE")
+		treesNominatorMuMu = readTrees(path,source,"%sHLTDiMu"%(source,),"MuMu")
+		treesNominatorMuMuNoTrack = readTrees(path,source,"%sHLTDiMuNoTrackerMuon"%(source,),"MuMu")
+		treesNominatorEMu = readTrees(path,source,"%sHLTEleMu"%(source,),"EMu")
+		treesNominatorMuE = readTrees(path,source,"%sHLTMuEle"%(source,),"EMu")
+		treesNominatorMuEG = readTrees(path,source,"%sHLTMuEG"%(source,),"EMu")	
 	
 	etaCut = etaCuts[argv[1]]
 	logEtaCut = logEtaCuts[argv[1]]
@@ -144,7 +205,8 @@ if (__name__ == "__main__"):
 	plotPad.Draw()	
 	plotPad.cd()
 	
-	legend = TLegend(0.3, 0.13, 0.95, 0.35)
+
+	legend = TLegend(0.6, 0.13, 0.95, 0.35)
 	legend.SetFillStyle(0)
 	legend.SetBorderSize(1)
 	
@@ -167,8 +229,22 @@ if (__name__ == "__main__"):
 	legend.AddEntry(legendHist5,"Ele17_X_Mu8","p")
 	
 	latex = ROOT.TLatex()
-	latex.SetTextSize(0.035)
+	latex.SetTextFont(42)
+	latex.SetTextAlign(31)
+	latex.SetTextSize(0.04)
 	latex.SetNDC(True)
+	latexCMS = ROOT.TLatex()
+	latexCMS.SetTextFont(61)
+	#latexCMS.SetTextAlign(31)
+	latexCMS.SetTextSize(0.06)
+	latexCMS.SetNDC(True)
+	latexCMSExtra = ROOT.TLatex()
+	latexCMSExtra.SetTextFont(52)
+	#latexCMSExtra.SetTextAlign(31)
+	latexCMSExtra.SetTextSize(0.045)
+	latexCMSExtra.SetNDC(True)		
+	
+
 
 	intlumi = ROOT.TLatex()
 	intlumi.SetTextAlign(12)
@@ -282,35 +358,35 @@ if (__name__ == "__main__"):
 				effMuMuNoTrack.SetMarkerStyle(22)
 				effMuE.SetMarkerStyle(23)
 				effEMu.SetMarkerStyle(33)				
-				hCanvas.DrawFrame(firstBin,0,lastBin,1.2,"; %s ; Efficiency" %(variable.labelX))
+				hCanvas.DrawFrame(firstBin,0.6,lastBin,1.2,"; %s ; Efficiency" %(variable.labelX))
 				
 				fitStart = variable.fitStart
 				fitEnd = variable.fitEnd
 				print fitStart, fitEnd				
 				
 				
-				fitEE = TF1("fitEE","[0]",fitStart,fitEnd)
-				fitMuMu = TF1("fitMuMu","[0]",fitStart,fitEnd)
-				fitMuMuNoTrack = TF1("fitMuMuNoTrack","[0]",fitStart,fitEnd)
-				fitEMu = TF1("fitEMu","[0]",fitStart,fitEnd)
-				fitMuE = TF1("fitMuE","[0]",fitStart,fitEnd)
-				fitEE.SetLineColor(ROOT.kBlack)
-				fitMuMu.SetLineColor(ROOT.kRed)
-				fitMuMuNoTrack.SetLineColor(ROOT.kRed+2)
-				fitEMu.SetLineColor(ROOT.kBlue+2)
-				fitMuE.SetLineColor(ROOT.kBlue)
-				effEE.Fit("fitEE","BRQE","",fitStart,fitEnd)
-				effMuMu.Fit("fitMuMu","BRQE","",fitStart,fitEnd)
-				effMuMuNoTrack.Fit("fitMuMuNoTrack","BRQE","",fitStart,fitEnd)
-				effEMu.Fit("fitEMu","BRQE","",fitStart,fitEnd)
-				effMuE.Fit("fitMuE","BRQE","",fitStart,fitEnd)
+				#fitEE = TF1("fitEE","[0]",fitStart,fitEnd)
+				#fitMuMu = TF1("fitMuMu","[0]",fitStart,fitEnd)
+				#fitMuMuNoTrack = TF1("fitMuMuNoTrack","[0]",fitStart,fitEnd)
+				#fitEMu = TF1("fitEMu","[0]",fitStart,fitEnd)
+				#fitMuE = TF1("fitMuE","[0]",fitStart,fitEnd)
+				#fitEE.SetLineColor(ROOT.kBlack)
+				#fitMuMu.SetLineColor(ROOT.kRed)
+				#fitMuMuNoTrack.SetLineColor(ROOT.kRed+2)
+				#fitEMu.SetLineColor(ROOT.kBlue+2)
+				#fitMuE.SetLineColor(ROOT.kBlue)
+				#effEE.Fit("fitEE","BRQE","",fitStart,fitEnd)
+				#effMuMu.Fit("fitMuMu","BRQE","",fitStart,fitEnd)
+				#effMuMuNoTrack.Fit("fitMuMuNoTrack","BRQE","",fitStart,fitEnd)
+				#effEMu.Fit("fitEMu","BRQE","",fitStart,fitEnd)
+				#effMuE.Fit("fitMuE","BRQE","",fitStart,fitEnd)
 				
 				legend.Clear()
-				legend.AddEntry(effEE,"Ele_17_X_Ele8_X %.3f #pm %.3f"%(fitEE.GetParameter(0),fitEE.GetParError(0)),"p")
-				legend.AddEntry(effMuMu,"Mu17_Mu8 || Mu17_TkMu8 %.3f #pm %.3f"%(fitMuMu.GetParameter(0),fitMuMu.GetParError(0)),"p")
-				legend.AddEntry(effMuMuNoTrack,"Mu17_Mu8 %.3f #pm %.3f"%(fitMuMuNoTrack.GetParameter(0),fitMuMuNoTrack.GetParError(0)),"p")
-				legend.AddEntry(effMuE,"Mu17_Ele8_X %.3f #pm %.3f"%(fitMuE.GetParameter(0),fitMuE.GetParError(0)),"p")
-				legend.AddEntry(effEMu,"Ele17_X_Mu8 %.3f #pm %.3f"%(fitEMu.GetParameter(0),fitEMu.GetParError(0)),"p")
+				legend.AddEntry(effEE,"Ele_17_X_Ele8_X ","p")
+				legend.AddEntry(effMuMu,"Mu17_Mu8 || Mu17_TkMu8","p")
+				#legend.AddEntry(effMuMuNoTrack,"Mu17_Mu8 %.3f #pm %.3f"%(fitMuMuNoTrack.GetParameter(0),fitMuMuNoTrack.GetParError(0)),"p")
+				legend.AddEntry(effMuE,"Mu17_Ele8_X","p")
+				legend.AddEntry(effEMu,"Ele17_X_Mu8","p")
 
 				
 				effEE.Draw("samep")
@@ -319,8 +395,11 @@ if (__name__ == "__main__"):
 				effMuE.Draw("samep")
 				effEMu.Draw("samep")
 		
-		
-				latex.DrawLatex(0.15, 0.96, "CMS Preliminary  #sqrt{s} = 8 TeV, %s    #scale[0.6]{#int}Ldt = %s fb^{-1}"%(run.label,run.lumi))
+				latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (8 TeV)"%run.lumi)
+				cmsExtra = "Private Work"
+
+				latexCMS.DrawLatex(0.15,0.955,"CMS")
+				latexCMSExtra.DrawLatex(0.28,0.955,"%s"%(cmsExtra))
 				intlumi.DrawLatex(0.55,0.65,"#splitline{"+logEtaCut+", "+cut.label1+"}{"+variable.additionalCutsLabel+"}")
 				legend.Draw("same")
 				hCanvas.Print("fig/Triggereff_%s_%s_%s_%s_%s_%s.pdf"%(source,region,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
@@ -388,14 +467,17 @@ if (__name__ == "__main__"):
 				effOF.Draw("samep")
 
 		
-		
-				latex.DrawLatex(0.15, 0.96, "CMS Preliminary  #sqrt{s} = 8 TeV, %s    #scale[0.6]{#int}Ldt = %s fb^{-1}"%(run.label,run.lumi))
+				latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (8 TeV)"%run.lumi)
+				cmsExtra = "Private Work"
+
+				latexCMS.DrawLatex(0.15,0.955,"CMS")
+				latexCMSExtra.DrawLatex(0.28,0.955,"%s"%(cmsExtra))
 				intlumi.DrawLatex(0.55,0.65,"#splitline{"+logEtaCut+", "+cut.label1+"}{"+variable.additionalCutsLabel+"}")
 				legend.Draw("same")
 	
 				hCanvas.Print("fig/Triggereff_SFvsOF_%s_%s_%s_%s_%s_%s.pdf"%(source,region,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
 
-				hCanvas.DrawFrame(firstBin,.4,lastBin,1.6,"; %s ; Efficiency SF / Efficiency OF" %(variable.labelX))
+				hCanvas.DrawFrame(firstBin,.6,lastBin,1.4,"; %s ; R_{T}" %(variable.labelX))
 
 				#~ effSFNoFit = effSF.Clone()
 				#~ effSFNoTrackNoFit = effSFNoTrack.Clone()
@@ -422,7 +504,8 @@ if (__name__ == "__main__"):
 				#~ legend.AddEntry(effOFNoFit,"Opposite Flavour","p")				
 				#~ legend.AddEntry(ofLine,"OF Efficiency: 0.921","p")	
 				
-				effSFvsOF = efficiencyRatio(effSF,effOF)
+				#~ effSFvsOF = efficiencyRatio(effSF,effOF)
+				effSFvsOF = efficiencyRatioGeometricMean(effEE,effMuMu,effOF)
 
 				x= array("f",[firstBin, lastBin]) 
 				#~ y= array("f", [1.175, 1.175]) # 1.237
@@ -450,18 +533,22 @@ if (__name__ == "__main__"):
 				sfLine.SetLineStyle(2)
 				sfLine.Draw("SAME")				
 				
+				latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (8 TeV)"%run.lumi)
+				cmsExtra = "Private Work"
 
-				latex.DrawLatex(0.15, 0.96, "CMS Preliminary  #sqrt{s} = 8 TeV, %s    #scale[0.6]{#int}Ldt = %s fb^{-1}"%(run.label,run.lumi))
-				intlumi.DrawLatex(0.55,0.65,"#splitline{"+logEtaCut+", "+cut.label1+"}{"+variable.additionalCutsLabel+"}")
+				latexCMS.DrawLatex(0.15,0.955,"CMS")
+				latexCMSExtra.DrawLatex(0.28,0.955,"%s"%(cmsExtra))			
+				#~ latex.DrawLatex(0.15, 0.96, "CMS Preliminary  #sqrt{s} = 8 TeV, %s    #scale[0.6]{#int}Ldt = %s fb^{-1}"%(run.label,run.lumi))
+				intlumi.DrawLatex(0.65,0.9,"#splitline{"+logEtaCut+", "+cut.label1+"}{"+variable.additionalCutsLabel+"}")
 
 				
 				legend.Clear()
-				legend.AddEntry(effSFvsOF,"Triggerefficiency SF/OF","p")
+				legend.AddEntry(effSFvsOF,"R_{T}","p")
 				if "Exclusive" in cut.name: 
 					legend.AddEntry(sfLine,"mean","l") 
 					legend.AddEntry(ge,"mean #pm 6.4%","f") 
 				else:	
-					legend.AddEntry(sfLine,"Mean SF vs OF: %s"%(means[region]),"l") 
+					legend.AddEntry(sfLine,"Mean R_{T}: %s"%(means[region]),"l") 
 					legend.AddEntry(ge,"Mean SF vs OF #pm 6.4%","f") 
 				legend.Draw("same")
 				ROOT.gPad.RedrawAxis()

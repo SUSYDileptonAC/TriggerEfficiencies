@@ -36,8 +36,8 @@ class Constants:
 			val =1.2
 			err =1.2*0.1
 	class Lumi:
-		val = 12000
-		printval = "12.0"
+		val = 19800
+		printval = "19.8"
 		err = 0.045*12000
 		#~ val = 9200
 		#~ printval = "9.2"
@@ -198,7 +198,7 @@ class runRanges:
 		plotName = "MC"
 		runCut = "runNr == 1"
 		label = "Simulation"
-		lumi = "12.0"
+		lumi = "19.8"
 class dependendies:
 	class nJets_pt2010:
 		plotName = "nJets"
@@ -488,7 +488,7 @@ class selections:
 		name = "HighHT"
 	class HighHTExclusive:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && ht > 200 && !(nJets >= 2 && met > 100) && %s %s %s )"
-		label1 = " |#eta| < 2.4  ht > 200"
+		label1 = "H_{T} > 200 GeV"
 		name = "HighHTExclusive"
 	class HighHTCentral:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<1.4  && abs(eta2) < 1.4 && deltaR > 0.3  && ht > 200 && %s %s %s )"
@@ -511,8 +511,8 @@ class selections:
 		label1 = " |#eta| < 2.4  nJets >= 2"
 		name = "HighnJets"
 class mainConfig:
-	path = "/home/jan/Trees/TriggerEfficiency"
-	source = "HT"
+	path = "/home/jan/Trees/sw538v0478Trigger/"
+	source = "AlphaT"
 	#~ cuts = [selections.HighHT,selections.HighHTHighMET,selections.HighMET]
 	#~ cuts = [selections.HighHTHighMET,selections.HighHTHighMETBarrel]
 	#~ cuts = [selections.HighHTCentral,selections.HighHTForward]

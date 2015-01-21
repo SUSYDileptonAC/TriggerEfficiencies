@@ -11,6 +11,17 @@ from setTdrStyle import setTDRStyle
 from helpers import readTrees, createHistoFromTree
 from array import array
 
+
+etaCuts = {"Inclusive":"((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6)) ",
+			  "Barrel":"abs(eta1)<1.4  && abs(eta2) < 1.4",
+			  "Endcap":"1.6<=TMath::Max(abs(eta1),abs(eta2)) && abs(eta1) < 2.4 && abs(eta2) < 2.4 && ((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) )",
+			}
+logEtaCuts = {"Inclusive":"|#eta|<2.4",
+        		  "Barrel":"Central",
+        		  "Endcap":"Forward"
+        		}
+
+
 def efficiencyRatio(eff1,eff2):
 	newEff = TGraphAsymmErrors(eff1.GetN())
 	for i in range(0,eff1.GetN()):
@@ -51,6 +62,14 @@ def efficiencyRatio(eff1,eff2):
 	return newEff
 
 if (__name__ == "__main__"):
+
+	from sys import argv
+
+	if len(argv) ==1:
+		log.logHighlighted("No lepton eta selection specified, using inclusive!")
+		region = "Inclusive"
+	else:
+		region = argv[1]
 	
 	path = mainConfig.path
 	source = "Electron"
@@ -59,6 +78,7 @@ if (__name__ == "__main__"):
 	treesDenominatorElectronEE = readTrees(path,source,"","EE")
 	treesDenominatorElectronMuMu = readTrees(path,source,"","MuMu")
 	treesDenominatorElectronEMu = readTrees(path,source,"","EMu")
+	
 	
 	
 	treesNominatorElectronEE = readTrees(path,source,"HLTDiEle","EE")
@@ -81,6 +101,10 @@ if (__name__ == "__main__"):
 	treesNominatorMuonEMu = readTrees(path,source,"HLTEleMu","EMu")
 	treesNominatorMuonMuE = readTrees(path,source,"HLTMuEle","EMu")
 	treesNominatorMuonMuEG = readTrees(path,source,"HLTMuEG","EMu")	
+
+
+	etaCut = etaCuts[argv[1]]
+	logEtaCut = logEtaCuts[argv[1]]
 	
 	cuts = mainConfig.cuts
 	variables = mainConfig.variables
@@ -96,7 +120,7 @@ if (__name__ == "__main__"):
 	
 	legend = TLegend(0.3, 0.13, 0.95, 0.5)
 	legend.SetFillStyle(0)
-	legend.SetBorderSize(1)
+	legend.SetBorderSize(0)
 	
 	legendHist1 = TH1F()
 	legendHist2 = TH1F()
@@ -117,13 +141,27 @@ if (__name__ == "__main__"):
 	legend.AddEntry(legendHist5,"Ele17_X_Mu8","p")
 	
 	latex = ROOT.TLatex()
-	latex.SetTextSize(0.035)
+	latex.SetTextFont(42)
+	latex.SetTextAlign(31)
+	latex.SetTextSize(0.04)
 	latex.SetNDC(True)
+	latexCMS = ROOT.TLatex()
+	latexCMS.SetTextFont(61)
+	#latexCMS.SetTextAlign(31)
+	latexCMS.SetTextSize(0.06)
+	latexCMS.SetNDC(True)
+	latexCMSExtra = ROOT.TLatex()
+	latexCMSExtra.SetTextFont(52)
+	#latexCMSExtra.SetTextAlign(31)
+	latexCMSExtra.SetTextSize(0.045)
+	latexCMSExtra.SetNDC(True)		
+	
+
 
 	intlumi = ROOT.TLatex()
 	intlumi.SetTextAlign(12)
 	intlumi.SetTextSize(0.03)
-	intlumi.SetNDC(True)					
+	intlumi.SetNDC(True)				
 	
 	for run in runs:
 		log.logInfo("%s"%run.label)
@@ -132,12 +170,12 @@ if (__name__ == "__main__"):
 			
 			for variable in variables:
 				log.logInfo("%s"%variable.labelX)
-				cutString = cut.cut%(run.runCut,variable.additionalCuts,"")				
-				cutStringEE = cut.cut%(run.runCut,variable.additionalCuts,"&& matchesSingleElectron2 == 1")				
-				cutStringMuMu = cut.cut%(run.runCut,variable.additionalCuts,"&& matchesSingleMuon2 == 1")				
-				cutStringEMu = cut.cut%(run.runCut,variable.additionalCuts," && pt1 > 20 && matchesSingleElectron1 == 1 ")
-				cutStringMuE = cut.cut%(run.runCut,variable.additionalCuts," && pt2 > 20 && matchesSingleMuon2 == 1")
-				cutStringMuE2 = cut.cut%(run.runCut,variable.additionalCuts," && pt2 > 20 && matchesSingleMuon2 == 1 && matchesMuETrailing1==1")
+				cutString = cut.cut%(run.runCut,variable.additionalCuts,"&& %s"%(etaCut) )				
+				cutStringEE = cut.cut%(run.runCut,variable.additionalCuts,"&& matchesSingleElectron2 == 1 && %s"%(etaCut) )				
+				cutStringMuMu = cut.cut%(run.runCut,variable.additionalCuts,"&& matchesSingleMuon2 == 1 && %s"%(etaCut) )				
+				cutStringEMu = cut.cut%(run.runCut,variable.additionalCuts," && pt1 > 20 && matchesSingleElectron1 == 1 && %s"%(etaCut) )
+				cutStringMuE = cut.cut%(run.runCut,variable.additionalCuts," && pt2 > 20 && matchesSingleMuon2 == 1 && %s"%(etaCut) )
+				cutStringMuE2 = cut.cut%(run.runCut,variable.additionalCuts," && pt2 > 20 && matchesSingleMuon2 == 1 && matchesMuETrailing1==1 && %s"%(etaCut) )
 				#~ cutString = ""				
 				#~ cutStringEMu = ""
 				#~ cutStringMuE = ""
@@ -237,27 +275,38 @@ if (__name__ == "__main__"):
 				
 				
 				fitEE = TF1("fitEE","[0]",fitStart,fitEnd)
-				fitMuMu = TF1("fitMuMu","[0]",fitStart,fitEnd)
-				fitMuMuNoTrack = TF1("fitMuMuNoTrack","[0]",fitStart,fitEnd)
-				fitEMu = TF1("fitEMu","[0]",fitStart,fitEnd)
-				fitMuE = TF1("fitMuE","[0]",fitStart,fitEnd)
+				fitMuMu = TF1("fitMuMu","[0]",0,100)
+				fitMuMuNoTrack = TF1("fitMuMuNoTrack","[0]",0,100)
+				fitEMu = TF1("fitEMu","[0]",0,100)
+				fitMuE = TF1("fitMuE","[0]",0,100)
+				#~ fitEE = TF1("fitEE","0.5*[2]*(1. + TMath::Erf((x-[0])/(TMath::Sqrt(2)*[1])))",0,100)
+				#~ fitEE.SetParameter(2,0.95)
+				#~ fitEE.SetParameter(0,10)
+				#~ fitEE.SetParLimits(0,100)
+				#~ fitEE.SetParameter(1,1)
+
 				fitEE.SetLineColor(ROOT.kBlack)
 				fitMuMu.SetLineColor(ROOT.kRed)
 				fitMuMuNoTrack.SetLineColor(ROOT.kRed+2)
 				fitEMu.SetLineColor(ROOT.kBlue+2)
 				fitMuE.SetLineColor(ROOT.kBlue)
-				effEE.Fit("fitEE","BRQE","",fitStart,fitEnd)
-				effMuMu.Fit("fitMuMu","BRQE","",fitStart,fitEnd)
-				effMuMuNoTrack.Fit("fitMuMuNoTrack","BRQE","",fitStart,fitEnd)
-				effEMu.Fit("fitEMu","BRQE","",fitStart,fitEnd)
-				effMuE.Fit("fitMuE","BRQE","",fitStart,fitEnd)
+				effEE.Fit("fitEE","BRQE","",40,fitEnd)
+				effMuMu.Fit("fitMuMu","BRQE","",40,fitEnd)
+				effMuMuNoTrack.Fit("fitMuMuNoTrack","BRQE","",40,fitEnd)
+				effEMu.Fit("fitEMu","BRQE","",40,fitEnd)
+				effMuE.Fit("fitMuE","BRQE","",40,fitEnd)
 				
 				legend.Clear()
-				legend.AddEntry(effEE,"Ele_17_X_Ele8_X %.3f #pm %.3f"%(fitEE.GetParameter(0),fitEE.GetParError(0)),"p")
-				legend.AddEntry(effMuMu,"Mu17_Mu8 || Mu17_TkMu8 %.3f #pm %.3f"%(fitMuMu.GetParameter(0),fitMuMu.GetParError(0)),"p")
-				legend.AddEntry(effMuMuNoTrack,"Mu17_Mu8 %.3f #pm %.3f"%(fitMuMuNoTrack.GetParameter(0),fitMuMuNoTrack.GetParError(0)),"p")
-				legend.AddEntry(effMuE,"Mu17_Ele8_X %.3f #pm %.3f"%(fitMuE.GetParameter(0),fitMuE.GetParError(0)),"p")
-				legend.AddEntry(effEMu,"Ele17_X_Mu8 %.3f #pm %.3f"%(fitEMu.GetParameter(0),fitEMu.GetParError(0)),"p")
+				#~ legend.AddEntry(effEE,"Ele_17_X_Ele8_X %.3f #pm %.3f"%(fitEE.GetParameter(0),fitEE.GetParError(0)),"p")
+				#~ legend.AddEntry(effMuMu,"Mu17_Mu8 || Mu17_TkMu8 %.3f #pm %.3f"%(fitMuMu.GetParameter(0),fitMuMu.GetParError(0)),"p")
+				#~ legend.AddEntry(effMuMuNoTrack,"Mu17_Mu8 %.3f #pm %.3f"%(fitMuMuNoTrack.GetParameter(0),fitMuMuNoTrack.GetParError(0)),"p")
+				#~ legend.AddEntry(effMuE,"Mu17_Ele8_X %.3f #pm %.3f"%(fitMuE.GetParameter(0),fitMuE.GetParError(0)),"p")
+				#~ legend.AddEntry(effEMu,"Ele17_X_Mu8 %.3f #pm %.3f"%(fitEMu.GetParameter(0),fitEMu.GetParError(0)),"p")
+				legend.AddEntry(effEE,"Dielectron_X %.3f #pm %.3f"%(fitEE.GetParameter(0),fitEE.GetParError(0)),"p")
+				legend.AddEntry(effMuMu,"Dimuon incl. tracker muon %.3f #pm %.3f"%(fitMuMu.GetParameter(0),fitMuMu.GetParError(0)),"p")
+				legend.AddEntry(effMuMuNoTrack,"Dimuon %.3f #pm %.3f"%(fitMuMuNoTrack.GetParameter(0),fitMuMuNoTrack.GetParError(0)),"p")
+				legend.AddEntry(effMuE,"OF muon leading %.3f #pm %.3f"%(fitMuE.GetParameter(0),fitMuE.GetParError(0)),"p")
+				legend.AddEntry(effEMu,"OF ele leading %.3f #pm %.3f"%(fitEMu.GetParameter(0),fitEMu.GetParError(0)),"p")
 
 				
 				effEE.Draw("samep")
@@ -267,10 +316,25 @@ if (__name__ == "__main__"):
 				effEMu.Draw("samep")
 		
 		
-				latex.DrawLatex(0.15, 0.96, "CMS Preliminary  #sqrt{s} = 8 TeV, %s    #scale[0.6]{#int}Ldt = %s fb^{-1}"%(run.label,run.lumi))
-				intlumi.DrawLatex(0.6,0.65,"#splitline{"+cut.label1+"}{"+variable.additionalCutsLabel+"}")
+				latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (8 TeV)"%run.lumi)
+				cmsExtra = "Private Work"
+
+				latexCMS.DrawLatex(0.15,0.955,"CMS")
+				latexCMSExtra.DrawLatex(0.28,0.955,"%s"%(cmsExtra))			
+				#~ latex.DrawLatex(0.15, 0.96, "CMS Preliminary  #sqrt{s} = 8 TeV, %s    #scale[0.6]{#int}Ldt = %s fb^{-1}"%(run.label,run.lumi))
+				intlumi.DrawLatex(0.2,0.9,"#splitline{"+logEtaCut+", "+cut.label1+"}{"+variable.additionalCutsLabel+"}")	
 				legend.Draw("same")
-				hCanvas.Print("Triggereff_%s_%s_%s_%s_%s.pdf"%(source,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
+				
+				
+				line1 = ROOT.TLine(20,0,20,1.05)
+				line1.SetLineColor(ROOT.kBlue+3)
+
+				line1.SetLineWidth(2)
+				line1.SetLineStyle(2)
+
+				line1.Draw("same")				
+							
+				hCanvas.Print("Triggereff_%s_%s_%s_%s_%s_%s.pdf"%(source,region,cut.name,run.plotName,variable.plotName,variable.additionalPlotName))
 				#~ hCanvas.Clear()
 				
 				#~ denominatorHistoSF = denominatorHistoEE.Clone()

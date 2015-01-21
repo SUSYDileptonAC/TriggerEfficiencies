@@ -23,7 +23,7 @@ def readTreeFromFile(source,path,tree, dileptonCombination):
 	"""
 	from ROOT import TChain
 	result = TChain()
-	result.Add("%s/cutsV22DileptonSingle%sTrigger%sFinalTriggerTrees/%sDileptonTree"%(path,source,tree, dileptonCombination))
+	result.Add("%s/cutsV23DileptonSingle%sTrigger%sFinalTriggerTrees/%sDileptonTree"%(path,source,tree, dileptonCombination))
 	#~ print "%s/cutsV22DileptonSingle%sTrigger%sFinalTriggerTrees/%sDileptonTree"%(path,source,tree, dileptonCombination)
 	
 
@@ -53,7 +53,7 @@ def readTrees(path,source,tree, dileptonCombination):
 	returns: dict of sample names ->  trees containing events (for all samples for one dileptonCombination)
 	"""
 	result = {}
-	#~ print tree
+	
 	for sampleName, filePath in getFilePathsAndSampleNames(path,source,tree).iteritems():
 		#~ print tree
 		result[sampleName] = readTreeFromFile(source,filePath, tree,dileptonCombination)
@@ -76,10 +76,10 @@ def getFilePathsAndSampleNames(path,source,tree):
 	#~ print path	
 	#~ print tree
 	#~ print "%s/sw532*cutV22DileptonTrigger%s*.root"%(path,tree)
-	for filePath in glob("%s/sw532*cutsV22DileptonSingle%sTrigger*.root"%(path,source)):	
+	for filePath in glob("%s/sw538*cutsV23DileptonSingle%sTrigger*.root"%(path,source)):	
 		#~ print filePath
 		if source in filePath:
-			sampleName = match(".*sw532v.*\.cutsV22DileptonSingle%sTrigger.*\.(.*).root"%source, filePath).groups()[0]			
+			sampleName = match(".*sw538v.*\.cutsV23DileptonSingle%sTrigger.*\.(.*).root"%source, filePath).groups()[0]			
 			#for the python enthusiats: yield sampleName, filePath is more efficient here :)
 			result[sampleName] = filePath
 	return result

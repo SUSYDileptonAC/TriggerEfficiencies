@@ -20,9 +20,9 @@ etaCuts = {"Inclusive":"((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.
 			  "Barrel":"abs(eta1)<1.4  && abs(eta2) < 1.4",
 			  "Endcap":"1.6<=TMath::Max(abs(eta1),abs(eta2)) && abs(eta1) < 2.4 && abs(eta2) < 2.4 && ((abs(eta1) < 1.4 || abs(eta1) > 1.6) && (abs(eta2) < 1.4 || abs(eta2) > 1.6) )",
 			}
-logEtaCuts = {"Inclusive":"|eta|<2.4",
-        		  "Barrel":"|eta|<1.4",
-        		  "Endcap":"min one 1.6<|eta|<2.4"
+logEtaCuts = {"Inclusive":"|#eta|<2.4",
+        		  "Barrel":"|#eta|<1.4",
+        		  "Endcap":"min one 1.6<|#eta|<2.4"
         		}
 means = {"Inclusive":"1.014",
         		  "Barrel":"1.010",
@@ -105,7 +105,7 @@ if (__name__ == "__main__"):
 	
 
 
-	source = "HT"
+	source = "AlphaT"
 	log.logHighlighted("Calculating trigger efficiencies on %s triggered dataset"%source)
 	log.logHighlighted("Using trees from %s "%path)
 	treesDenominatorEE = readTrees(path,source,"%s"%(source,),"EE")
@@ -127,27 +127,28 @@ if (__name__ == "__main__"):
 
 	
 
-	TTJets = Process(Backgrounds.TTJets.subprocesses,eventCounts,Backgrounds.TTJets.label,Backgrounds.TTJets.fillcolor,Backgrounds.TTJets.linecolor,Backgrounds.TTJets.uncertainty,1)	
-	TT = Process(Backgrounds.TT.subprocesses,eventCounts,Backgrounds.TT.label,Backgrounds.TT.fillcolor,Backgrounds.TT.linecolor,Backgrounds.TT.uncertainty,1)	
-	TT_Dileptonic = Process(Backgrounds.TT_Dileptonic.subprocesses,eventCounts,Backgrounds.TT_Dileptonic.label,Backgrounds.TT_Dileptonic.fillcolor,Backgrounds.TT_Dileptonic.linecolor,Backgrounds.TT_Dileptonic.uncertainty,1)	
+	TTJets = Process(Backgrounds.TTJetsSC.subprocesses,eventCounts,Backgrounds.TTJetsSC.label,Backgrounds.TTJetsSC.fillcolor,Backgrounds.TTJetsSC.linecolor,Backgrounds.TTJetsSC.uncertainty,1)	
+	#~ TT = Process(Backgrounds.TT.subprocesses,eventCounts,Backgrounds.TT.label,Backgrounds.TT.fillcolor,Backgrounds.TT.linecolor,Backgrounds.TT.uncertainty,1)	
+	#~ TT_Dileptonic = Process(Backgrounds.TT_Dileptonic.subprocesses,eventCounts,Backgrounds.TT_Dileptonic.label,Backgrounds.TT_Dileptonic.fillcolor,Backgrounds.TT_Dileptonic.linecolor,Backgrounds.TT_Dileptonic.uncertainty,1)	
 	#~ TT_MCatNLO = Process(Backgrounds.TT_MCatNLO.subprocesses,eventCounts,Backgrounds.TT_MCatNLO.label,Backgrounds.TT_MCatNLO.fillcolor,Backgrounds.TT_MCatNLO.linecolor,Backgrounds.TT_MCatNLO.uncertainty,1)	
-	Diboson = Process(Backgrounds.Diboson.subprocesses,eventCounts,Backgrounds.Diboson.label,Backgrounds.Diboson.fillcolor,Backgrounds.Diboson.linecolor,Backgrounds.Diboson.uncertainty,1)	
-	Rare = Process(Backgrounds.Rare.subprocesses,eventCounts,Backgrounds.Rare.label,Backgrounds.Rare.fillcolor,Backgrounds.Rare.linecolor,Backgrounds.Rare.uncertainty,1)	
-	DY = Process(Backgrounds.DrellYan.subprocesses,eventCounts,Backgrounds.DrellYan.label,Backgrounds.DrellYan.fillcolor,Backgrounds.DrellYan.linecolor,Backgrounds.DrellYan.uncertainty,1)	
-	SingleTop = Process(Backgrounds.SingleTop.subprocesses,eventCounts,Backgrounds.SingleTop.label,Backgrounds.SingleTop.fillcolor,Backgrounds.SingleTop.linecolor,Backgrounds.SingleTop.uncertainty,1)	
+	#~ Diboson = Process(Backgrounds.Diboson.subprocesses,eventCounts,Backgrounds.Diboson.label,Backgrounds.Diboson.fillcolor,Backgrounds.Diboson.linecolor,Backgrounds.Diboson.uncertainty,1)	
+	#~ Rare = Process(Backgrounds.Rare.subprocesses,eventCounts,Backgrounds.Rare.label,Backgrounds.Rare.fillcolor,Backgrounds.Rare.linecolor,Backgrounds.Rare.uncertainty,1)	
+	#~ DY = Process(Backgrounds.DrellYan.subprocesses,eventCounts,Backgrounds.DrellYan.label,Backgrounds.DrellYan.fillcolor,Backgrounds.DrellYan.linecolor,Backgrounds.DrellYan.uncertainty,1)	
+	#~ SingleTop = Process(Backgrounds.SingleTop.subprocesses,eventCounts,Backgrounds.SingleTop.label,Backgrounds.SingleTop.fillcolor,Backgrounds.SingleTop.linecolor,Backgrounds.SingleTop.uncertainty,1)	
 
 	#~ processes = [TT,Diboson,Rare,DY,SingleTop]
-	processes = [TT_Dileptonic]
+	processes = [TTJets]
 
-	lumi = 12000
+	lumi = 19800
 	
 	hCanvas = TCanvas("hCanvas", "Distribution", 800,800)
 	
 	plotPad = ROOT.TPad("plotPad","plotPad",0,0,1,1)
 	setTDRStyle()
 	plotPad.UseCurrentStyle()
+
 	plotPad.Draw()	
-	plotPad.cd()
+	plotPad.cd()	
 	
 	legend = TLegend(0.5, 0.13, 0.95, 0.3)
 	legend.SetFillStyle(0)
@@ -172,8 +173,20 @@ if (__name__ == "__main__"):
 	legend.AddEntry(legendHist5,"Ele17_X_Mu8","p")
 	
 	latex = ROOT.TLatex()
-	latex.SetTextSize(0.035)
+	latex.SetTextFont(42)
+	latex.SetTextAlign(31)
+	latex.SetTextSize(0.04)
 	latex.SetNDC(True)
+	latexCMS = ROOT.TLatex()
+	latexCMS.SetTextFont(61)
+	#latexCMS.SetTextAlign(31)
+	latexCMS.SetTextSize(0.06)
+	latexCMS.SetNDC(True)
+	latexCMSExtra = ROOT.TLatex()
+	latexCMSExtra.SetTextFont(52)
+	#latexCMSExtra.SetTextAlign(31)
+	latexCMSExtra.SetTextSize(0.045)
+	latexCMSExtra.SetNDC(True)		
 
 	intlumi = ROOT.TLatex()
 	intlumi.SetTextAlign(12)
@@ -265,13 +278,13 @@ if (__name__ == "__main__"):
 				
 				nominatorHistoOFNoTrig = nominatorHistoMuEGNoTrig.Clone()
 				
-				effSF = TGraphAsymmErrors(nominatorHistoSF,denominatorHistoSF,"cp")
+				effSF = TGraphAsymmErrors(nominatorHistoSF,denominatorHistoSF,"cl=0.683 b(1,1) mode")
 				#~ effSFNoTrack = TGraphAsymmErrors(nominatorHistoSFNoTrack,denominatorHistoSF,"cp")
-				effOF = TGraphAsymmErrors(nominatorHistoOF,denominatorHistoOF,"cp")
+				effOF = TGraphAsymmErrors(nominatorHistoOF,denominatorHistoOF,"cl=0.683 b(1,1) mode")
 				
-				effSFNoTrig = TGraphAsymmErrors(nominatorHistoSFNoTrig,denominatorHistoSFNoTrig,"cp")
+				effSFNoTrig = TGraphAsymmErrors(nominatorHistoSFNoTrig,denominatorHistoSFNoTrig,"cl=0.683 b(1,1) mode")
 				#~ effSFNoTrackNoTrig = TGraphAsymmErrors(nominatorHistoSFNoTrackNoTrig,denominatorHistoSFNoTrig,"cp")
-				effOFNoTrig = TGraphAsymmErrors(nominatorHistoOFNoTrig,denominatorHistoOFNoTrig,"cp")
+				effOFNoTrig = TGraphAsymmErrors(nominatorHistoOFNoTrig,denominatorHistoOFNoTrig,"cl=0.683 b(1,1) mode")
 
 
 
@@ -285,7 +298,7 @@ if (__name__ == "__main__"):
 				effRatioOF.SetLineColor(ROOT.kBlue)
 				
 				#~ hCanvas.DrawFrame(firstBin,0.6,lastBin,1.4,"; %s ; Efficiency #alpha_{T} based / True Efficiency" %(variable.labelX))
-				hCanvas.DrawFrame(firstBin,0.8,lastBin,1.2,"; %s ; Measured Efficiency / True Efficiency" %(variable.labelX))
+				hCanvas.DrawFrame(firstBin,0.95,lastBin,1.05,"; %s ; Measured Efficiency / True Efficiency" %(variable.labelX))
 
 
 				x= array("f",[firstBin, lastBin]) 
@@ -319,8 +332,12 @@ if (__name__ == "__main__"):
 
 		
 		
-				latex.DrawLatex(0.15, 0.96, "CMS Private Work  #sqrt{s} = 8 TeV, %s    #scale[0.6]{#int}Ldt = %s fb^{-1}"%(run.label,run.lumi))
-				intlumi.DrawLatex(0.6,0.65,"#splitline{"+cut.label1+"}{"+variable.additionalCutsLabel+"}")
+				latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (8 TeV)"%run.lumi)
+				cmsExtra = "Simulation Private Work"
+
+				latexCMS.DrawLatex(0.15,0.955,"CMS")
+				latexCMSExtra.DrawLatex(0.28,0.955,"%s"%(cmsExtra))
+				intlumi.DrawLatex(0.55,0.65,"#splitline{"+logEtaCut+", "+cut.label1+"}{"+variable.additionalCutsLabel+"}")
 				legend.Draw("same")
 				print source
 				if source == "HT" or source == "AlphaT":

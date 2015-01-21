@@ -86,7 +86,7 @@ class runRanges:
 		plotName = "Full2012"
 		runCut = "runNr >= 190456 && runNr <=209465"
 		label = "Full 2012"
-		lumi = "19.4"
+		lumi = "19.8"
 class dependendies:
 	class nJets_pt2010:
 		plotName = "nJets"
@@ -139,8 +139,8 @@ class dependendies:
 	class trailingPt_leading20:
 		plotName = "pt1"
 		variable = "(pt2>pt1)*pt1+(pt1>pt2)*pt2"
-		nBins = 9
-		binWidths = 10
+		nBins = 45
+		binWidths = 2
 		firstBin = 10
 		labelX = "trailing p_{T} [GeV]"
 		additionalCuts = "((pt2>pt1)*pt2+(pt1>pt2)*pt1) > 20"
@@ -151,8 +151,8 @@ class dependendies:
 	class trailingPt_leading30:
 		plotName = "pt1"
 		variable = "(pt2>pt1)*pt1+(pt1>pt2)*pt2"
-		nBins = 9
-		binWidths = 10
+		nBins = 45
+		binWidths = 2
 		firstBin = 10
 		labelX = "trailing p_{T} [GeV]"
 		additionalCuts = "((pt2>pt1)*pt2+(pt1>pt2)*pt1) > 30"
@@ -357,29 +357,33 @@ class dependendies:
 class selections:
 	class inclusive:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && %s && %s %s  )"
-		label1 = " |#eta| < 2.4 "
+		label1 = ""
 		name = "Inclusive"
 	class HighMET:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && met > 100 && %s && %s %s )"
-		label1 = " |#eta| < 2.4 met > 100"
+		label1 = "met > 100"
 		name = "HighMET"
 	class HighHT:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && ht > 200 && %s && %s %s )"
 		label1 = " |#eta| < 2.4  ht > 200"
 		name = "HighHT"
+	class HighHTExclusive:
+		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && ht > 200 && !(met > 100 && nJets >= 2) && %s && %s %s )"
+		label1 = "H_{T} > 200 GeV Veto Signal & Control Region"
+		name = "HighHTExclusive"
 	class HighHTHighMET:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && ht > 200 && met > 100 && %s && %s %s )"
 		label1 = " |#eta| < 2.4  ht > 200 met > 100"
 		name = "HighHTHighMET"	
 class mainConfig:
-	path = "/media/data/DATA/SingleLeptonPD"
+	path = "/home/jan/Trees/SingleLepton"
 	source = ""
-	cuts = [selections.inclusive]
+	cuts = [selections.inclusive,selections.HighHT,selections.HighHTExclusive]
 	#~ cuts = [selections.HighHT]
 	variables = [dependendies.trailingPt_leading20,dependendies.trailingPt_leading30]
 	#~ variables = [dependendies.eta1_pt2020]
 	#~ runs = [runRanges.RunABC,runRanges.RunC,runRanges.RunA,runRanges.RunB,runRanges.RunD,runRanges.Full2012]
-	runs = [runRanges.RunABC,runRanges.RunAB,runRanges.RunC]
+	runs = [runRanges.Full2012]
 	
 # Color definition
 #==================

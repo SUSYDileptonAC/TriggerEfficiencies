@@ -94,19 +94,9 @@ class runRanges:
 		lumi = "10.3"
 	class Full2012:
 		plotName = "Full2012"
-		runCut = "runNr >= 190456 && runNr <=209465 && !(runNr == 190705 && ((lumiSec >= 66 && lumiSec <= 76) || (lumiSec >=78 && lumiSec < 80))) && !(runNr == 190705 && ((lumiSec >= 66 && lumiSec <= 76) || (lumiSec >=78 && lumiSec < 80))) && !(runNr == 191830 && (lumiSec >= 243 && lumiSec <= 244)) && !(runNr == 194115 && (lumiSec >= 732 && lumiSec <= 818)) && !(runNr == 194223 && (lumiSec >= 9 && lumiSec <= 51)) && !(runNr == 195016 && ((lumiSec >= 252 && lumiSec <= 253) || (lumiSec >=561 && lumiSec < 562))) && !(runNr == 195774 && lumiSec == 138) && !(runNr == 195918 && lumiSec == 45)"
-		label = "Full 2012"
-		lumi = "19.6"
-	class BlockA:
-		plotName = "BlockA"
-		runCut = "!(runNr > 201678 || (runNr >= 198022 && runNr <= 198523) || runNr == 201671 || runNr == 201669 || runNr == 201668 || runNr == 201658 || runNr == 201657 || runNr == 200976 || runNr == 200961 || (runNr == 200229 && (lumiSec == 532 || lumiSec == 533)) || (runNr == 199812 && (lumiSec >= 182 && lumiSec <= 186)) || runNr == 190782 || runNr == 190895 || runNr == 190906 || runNr == 190945 || runNr == 190949 || runNr == 190646 || runNr == 190659 || runNr == 190679 || runNr == 190688 || runNr == 190702 || runNr == 190703 || runNr == 190706 || runNr == 190707 || runNr == 190708 || runNr == 190733 || runNr == 190736 || (runNr == 191271 && lumiSec >= 159) || runNr == 193192 || runNr == 193193 || runNr == 194631 || (runNr == 195540 && lumiSec <=120) || runNr == 201191) && !(runNr == 190705 && ((lumiSec >= 66 && lumiSec <= 76) || (lumiSec >=78 && lumiSec < 80))) && !(runNr == 190705 && ((lumiSec >= 66 && lumiSec <= 76) || (lumiSec >=78 && lumiSec < 80))) && !(runNr == 191830 && (lumiSec >= 243 && lumiSec <= 244)) && !(runNr == 194115 && (lumiSec >= 732 && lumiSec <= 818)) && !(runNr == 194223 && (lumiSec >= 9 && lumiSec <= 51)) && !(runNr == 195016 && ((lumiSec >= 252 && lumiSec <= 253) || (lumiSec >=561 && lumiSec < 562))) && !(runNr == 195774 && lumiSec == 138) && !(runNr == 195918 && lumiSec == 45)"	
-		label = "BlockA"
-		lumi = "9.2"
-	class BlockB:
-		plotName = "BlockB"
-		runCut = "(runNr > 201678 || (runNr >= 198022 && runNr <= 198523) || runNr == 201671 || runNr == 201669 || runNr == 201668 || runNr == 201658 || runNr == 201657 || runNr == 200976 || runNr == 200961 || (runNr == 200229 && (lumiSec == 532 || lumiSec == 533)) || (runNr == 199812 && (lumiSec >= 182 && lumiSec <= 186)) || runNr == 190782 || runNr == 190895 || runNr == 190906 || runNr == 190945 || runNr == 190949 || runNr == 190646 || runNr == 190659 || runNr == 190679 || runNr == 190688 || runNr == 190702 || runNr == 190703 || runNr == 190706 || runNr == 190707 || runNr == 190708 || runNr == 190733 || runNr == 190736 || (runNr == 191271 && lumiSec >= 159) || runNr == 193192 || runNr == 193193 || runNr == 194631 || (runNr == 195540 && lumiSec <=120) || runNr == 201191) && !(runNr == 190705 && ((lumiSec >= 66 && lumiSec <= 76) || (lumiSec >=78 && lumiSec < 80))) && !(runNr == 190705 && ((lumiSec >= 66 && lumiSec <= 76) || (lumiSec >=78 && lumiSec < 80))) && !(runNr == 191830 && (lumiSec >= 243 && lumiSec <= 244)) && !(runNr == 194115 && (lumiSec >= 732 && lumiSec <= 818)) && !(runNr == 194223 && (lumiSec >= 9 && lumiSec <= 51)) && !(runNr == 195016 && ((lumiSec >= 252 && lumiSec <= 253) || (lumiSec >=561 && lumiSec < 562))) && !(runNr == 195774 && lumiSec == 138) && !(runNr == 195918 && lumiSec == 45)"	
-		label = "BlockB"
-		lumi = "10.4"
+		runCut = "runNr >= 190456 && runNr <=209465"
+		label = "Full2012"
+		lumi = "19.8"
 class dependendies:
 	class nJets_pt2010:
 		plotName = "nJets"
@@ -185,19 +175,19 @@ class dependendies:
 		plotName = "Mll"
 		variable = "p4.M()"
 		nBins = 9
-		binWidths = 20
+		binWidths = 30
 		firstBin = 20
 		labelX = "m(ll) [GeV]"
-		additionalCuts = "pt1 > 30 && pt2 > 20"
-		additionalCutsLabel = "p_{T} > 20 GeV"
+		additionalCuts = "pt1 > 20 && pt2 > 20"
+		additionalCutsLabel = ""
 		additionalPlotName = "pt2020"
 		fitStart = 20
 		fitEnd = 200			
 	class mll_pt2010:
 		plotName = "Mll"
 		variable = "p4.M()"
-		nBins = 9
-		binWidths = 20
+		nBins = 8
+		binWidths = 30
 		firstBin = 20
 		labelX = "m(ll) [GeV]"
 		additionalCuts = "((pt1 > 20 && pt2 > 10 ) || (pt2 > 20 && pt1 > 10 ))"
@@ -208,9 +198,9 @@ class dependendies:
 	class ptll_pt2020:
 		plotName = "ptll"
 		variable = "p4.Pt()"
-		nBins = 9
+		nBins = 10
 		binWidths = 20
-		firstBin = 15
+		firstBin = 20
 		labelX = "p_{T}(ll) [GeV]"
 		additionalCuts = "pt1 > 20 && pt2 > 20"
 		additionalCutsLabel = "p_{T} > 20 GeV"
@@ -386,13 +376,18 @@ class selections:
 	class HighHT:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3 && p4.M() > 20 && ht > 200 && %s && %s %s )"
 		#label1 = " |#eta| < 2.4  ht > 200"
-		label1 = "ht > 200"
+		label1 = "H_{T} > 200 GeV"
 		name = "HighHT"
 	class HighHTExclusive:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3 && p4.M() > 20 && ht > 200 && %s && !(nJets >= 2 && met > 100) && %s %s )"
 		#label1 = " |#eta| < 2.4  ht > 200"
-		label1 = "ht > 200"
+		label1 = "H_{T} > 200 GeV"
 		name = "HighHTExclusive"
+	class Exclusive:
+		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3 && p4.M() > 20 && %s && !((nJets >= 2 && met > 150) || (nJets >=3 && met > 100)) && %s %s )"
+		#label1 = " |#eta| < 2.4  ht > 200"
+		label1 = "Excluding signal region"
+		name = "Exclusive"		
 	class HighHTHighMET:
 		cut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3 && p4.M() > 20  && ht > 150 && met > 50 && %s && %s %s )"
 		label1 = " |#eta| < 2.4  ht > 150 met > 50"
@@ -403,13 +398,16 @@ class selections:
 		#~ name = "HighHTEndcap"
 
 class mainConfig:
+
 	path = "/home/jan/Trees/HTTreesReReco"
 	source = "PFHT"
 	cuts = [selections.HighHTExclusive]
+
+
 	#~ cuts = [selections.HighHT,selections.HighHTBarrel]
 
-	#~ variables = [dependendies.leadingPt_trailing10,dependendies.leadingPt_trailing20,dependendies.trailingPt_leading20,dependendies.trailingPt_leading30,dependendies.mll_pt2020,dependendies.met_pt2020,dependendies.ht_pt2020,dependendies.nJets_pt2020,dependendies.nVtx_pt2020,dependendies.eta1_pt2020]
-	variables = [dependendies.mll_pt2020,dependendies.met_pt2020]
+	variables = [dependendies.leadingPt_trailing10,dependendies.leadingPt_trailing20,dependendies.trailingPt_leading20,dependendies.trailingPt_leading30,dependendies.mll_pt2020,dependendies.met_pt2020,dependendies.ht_pt2020,dependendies.nJets_pt2020,dependendies.nVtx_pt2020,dependendies.eta1_pt2020]
+	#~ variables = [dependendies.mll_pt2020,dependendies.met_pt2020]
 	#~ runs = [runRanges.RunABC,runRanges.RunC,runRanges.RunA,runRanges.RunB,runRanges.RunD,runRanges.Full2012]
 	#runs = [runRanges.RunABC]
 	runs = [runRanges.Full2012]

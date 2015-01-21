@@ -23,7 +23,7 @@ def readTreeFromFile(path,tree, dileptonCombination):
 	"""
 	from ROOT import TChain
 	result = TChain()
-	result.Add("%s/cutsV22DileptonTriggerEfficiency%sFinalTrees/%sDileptonTree"%(path,tree, dileptonCombination))
+	result.Add("%s/cutsV23DileptonTriggerEfficiency%sFinalTrees/%sDileptonTree"%(path,tree, dileptonCombination))
 	#~ print "%s/cutsV22DileptonTrigger%sFinalTrees/%sDileptonTree"%(path,tree, dileptonCombination)
 	
 
@@ -77,9 +77,9 @@ def getFilePathsAndSampleNames(path,source,tree):
 	#~ print path	
 	#~ print tree
 	#~ print "%s/sw532*cutV22DileptonTrigger*.root"%(path,)
-	for filePath in glob("%s/sw532*cutsV22DileptonTrigger*.root"%(path,)):		
+	for filePath in glob("%s/sw538*cutsV23DileptonTrigger*.root"%(path,)):		
 		#~ print filePath
-		sampleName = match(".*sw532v.*\.cutsV22DileptonTrigger.*\.(.*).root", filePath).groups()[0]			
+		sampleName = match(".*sw538v.*\.cutsV23DileptonTrigger.*\.(.*).root", filePath).groups()[0]			
 		#for the python enthusiats: yield sampleName, filePath is more efficient here :)
 		result[sampleName] = filePath
 	return result

@@ -8,7 +8,7 @@ from defs import selections
 import ROOT
 from ROOT import TCanvas, TEfficiency, TPad, TH1F, TH1I, THStack, TLegend, TMath, TGraphAsymmErrors, TF1
 from setTdrStyle import setTDRStyle
-from helpers import readTreesV23, createHistoFromTree
+from helpers import readTreesV23, readTrees, createHistoFromTree
 from array import array
 
 baseCut = "weight*(chargeProduct < 0  && abs(eta1)<2.4  && abs(eta2) < 2.4 && deltaR > 0.3  && pt1 > 20 && pt2 > 20 && p4.M()>20 && ht > 200  && %s)"
@@ -112,18 +112,34 @@ if (__name__ == "__main__"):
 	source = mainConfig.source
 	log.logHighlighted("Calculating trigger efficiencies on %s triggered dataset"%source)
 	log.logHighlighted("Using trees from %s "%path)
-	treesDenominatorEE = readTreesV23(path,source,"%s"%(source,),"EE")
-	treesDenominatorMuMu = readTreesV23(path,source,"%s"%(source,),"MuMu")
-	treesDenominatorEMu = readTreesV23(path,source,"%s"%(source,),"EMu")
+
 	
+	if source == "PFHT":
 	
-	treesNominatorEE = readTreesV23(path,source,"%sHLTPFDiEle"%(source,),"EE")
-	treesNominatorMuMu = readTreesV23(path,source,"%sHLTPFDiMu"%(source,),"MuMu")
-	treesNominatorMuMuNoTrack = readTreesV23(path,source,"%sHLTPFDiMuNoTrackerMuon"%(source,),"MuMu")
-	treesNominatorEMu = readTreesV23(path,source,"%sHLTPFEleMu"%(source,),"EMu")
-	treesNominatorMuE = readTreesV23(path,source,"%sHLTPFMuEle"%(source,),"EMu")
-	treesNominatorMuEG = readTreesV23(path,source,"%sHLTPFMuEG"%(source,),"EMu")
-	
+
+		treesDenominatorEE = readTrees(path,source,"%s"%(source,),"EE")
+		treesDenominatorMuMu = readTrees(path,source,"%s"%(source,),"MuMu")
+		treesDenominatorEMu = readTrees(path,source,"%s"%(source,),"EMu")
+		
+		
+		treesNominatorEE = readTrees(path,source,"%sHLTPFDiEle"%(source,),"EE")
+		treesNominatorMuMu = readTrees(path,source,"%sHLTPFDiMu"%(source,),"MuMu")
+		treesNominatorMuMuNoTrack = readTrees(path,source,"%sHLTPFDiMuNoTrackerMuon"%(source,),"MuMu")
+		treesNominatorEMu = readTrees(path,source,"%sHLTPFEleMu"%(source,),"EMu")
+		treesNominatorMuE = readTrees(path,source,"%sHLTPFMuEle"%(source,),"EMu")
+		treesNominatorMuEG = readTrees(path,source,"%sHLTPFMuEG"%(source,),"EMu")
+	else:
+		treesDenominatorEE = readTrees(path,source,"%s"%(source,),"EE")
+		treesDenominatorMuMu = readTrees(path,source,"%s"%(source,),"MuMu")
+		treesDenominatorEMu = readTrees(path,source,"%s"%(source,),"EMu")
+		
+		
+		treesNominatorEE = readTrees(path,source,"%sHLTDiEle"%(source,),"EE")
+		treesNominatorMuMu = readTrees(path,source,"%sHLTDiMu"%(source,),"MuMu")
+		treesNominatorMuMuNoTrack = readTrees(path,source,"%sHLTDiMuNoTrackerMuon"%(source,),"MuMu")
+		treesNominatorEMu = readTrees(path,source,"%sHLTEleMu"%(source,),"EMu")
+		treesNominatorMuE = readTrees(path,source,"%sHLTMuEle"%(source,),"EMu")
+		treesNominatorMuEG = readTrees(path,source,"%sHLTMuEG"%(source,),"EMu")			
 	cuts = mainConfig.cuts
 	variables = mainConfig.variables
 	runs = mainConfig.runs
