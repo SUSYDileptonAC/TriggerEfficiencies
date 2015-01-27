@@ -25,7 +25,8 @@ from defs import getRegion, getPlot, getRunRange, Backgrounds
 
 from setTDRStyle import setTDRStyle
 from helpers import readTrees, createHistoFromTree, TheStack, totalNumberOfGeneratedEvents, Process
-
+from centralConfig import regionsToUse, runRanges, backgroundLists, plotLists, baselineTrigger
+from pathes import locations
 
 tableTemplate = r"""
 \begin{tabular}{l|c|c|c|c}
@@ -324,7 +325,6 @@ def centralValues(source,path,selection,runRange,isMC,backgrounds):
 	counts[runRange.label]["MuMu"] = getEfficiency(nominators["MuMu"], denominators["MuMu"],plot.cuts)
 	counts[runRange.label]["MuMuNoTrack"] = getEfficiency(nominators["MuMuNoTrack"], denominators["MuMuNoTrack"],plot.cuts)
 	counts[runRange.label]["EMu"] = getEfficiency(nominators["MuEG"], denominators["MuEG"],plot.cuts)
-	print counts[runRange.label]["EE"]
 	counts[runRange.label]["RT"] = (counts[runRange.label]["EE"]["Efficiency"]*counts[runRange.label]["MuMu"]["Efficiency"])**0.5 / counts[runRange.label]["EMu"]["Efficiency"]
 	counts[runRange.label]["RTErrSyst"] =  (err**2/(2*counts[runRange.label]["EE"]["Efficiency"]*counts[runRange.label]["MuMu"]["Efficiency"])**2+ err**2/(2*counts[runRange.label]["MuMu"]["Efficiency"]*counts[runRange.label]["EE"]["Efficiency"])**2 + err**2/(counts[runRange.label]["EMu"]["Efficiency"])**2)**0.5
 	counts[runRange.label]["RTErrStat"] =  (max(counts[runRange.label]["EE"]["UncertaintyUp"],counts[runRange.label]["EE"]["UncertaintyDown"])**2/(2*counts[runRange.label]["EE"]["Efficiency"]*counts[runRange.label]["MuMu"]["Efficiency"])**2+ max(counts[runRange.label]["MuMu"]["UncertaintyUp"],counts[runRange.label]["MuMu"]["UncertaintyDown"])**2/(2*counts[runRange.label]["MuMu"]["Efficiency"]*counts[runRange.label]["EE"]["Efficiency"])**2 + max(counts[runRange.label]["EMu"]["UncertaintyUp"],counts[runRange.label]["EMu"]["UncertaintyDown"])**2/(counts[runRange.label]["EMu"]["Efficiency"])**2)**0.5
@@ -453,10 +453,15 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds):
 		effEMu.Draw("samep")
 
 		latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (8 TeV)"%runRange.printval)
-		cmsExtra = "Private Work"
+		
 
-		latexCMS.DrawLatex(0.15,0.955,"CMS")
-		latexCMSExtra.DrawLatex(0.28,0.955,"%s"%(cmsExtra))
+		latexCMS.DrawLatex(0.19,0.89,"CMS")
+		if "Simulation" in cmsExtra:
+			yLabelPos = 0.82	
+		else:
+			yLabelPos = 0.85	
+
+		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))
 		legend.Draw("same")
 		if isMC:
 			hCanvas.Print("fig/Triggereff_%s_%s_%s_%s_%s_MC.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))
@@ -508,10 +513,15 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds):
 
 
 		latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (8 TeV)"%runRange.printval)
-		cmsExtra = "Private Work"
+		
 
-		latexCMS.DrawLatex(0.15,0.955,"CMS")
-		latexCMSExtra.DrawLatex(0.28,0.955,"%s"%(cmsExtra))
+		latexCMS.DrawLatex(0.19,0.89,"CMS")
+		if "Simulation" in cmsExtra:
+			yLabelPos = 0.82	
+		else:
+			yLabelPos = 0.85	
+
+		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))
 		legend.Draw("same")
 		if isMC:
 			hCanvas.Print("fig/Triggereff_SFvsOF_%s_%s_%s_%s_%s_MC.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))
@@ -546,10 +556,15 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds):
 		sfLine.Draw("SAME")				
 		
 		latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (8 TeV)"%runRange.printval)
-		cmsExtra = "Private Work"
+		
 
-		latexCMS.DrawLatex(0.15,0.955,"CMS")
-		latexCMSExtra.DrawLatex(0.28,0.955,"%s"%(cmsExtra))			
+		latexCMS.DrawLatex(0.19,0.89,"CMS")
+		if "Simulation" in cmsExtra:
+			yLabelPos = 0.82	
+		else:
+			yLabelPos = 0.85	
+
+		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))	
 
 		
 		legend.Clear()
@@ -564,7 +579,7 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds):
 			hCanvas.Print("fig/Triggereff_SFvsOF_Syst_%s_%s_%s_%s_%s.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))	
 			
 			
-def studyTriggerBias(path,source,plots,selection,runRange,backgrounds):			
+def studyTriggerBias(path,source,plots,selection,runRange,backgrounds,cmsExtra):			
 	for name in plots:
 		plot = getPlot(name)
 		plot.addRegion(selection)
@@ -693,12 +708,17 @@ def studyTriggerBias(path,source,plots,selection,runRange,backgrounds):
 
 
 		latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (8 TeV)"%runRange.printval)
-		cmsExtra = "Simulation Private Work"
+		
 
-		latexCMS.DrawLatex(0.15,0.955,"CMS")
-		latexCMSExtra.DrawLatex(0.28,0.955,"%s"%(cmsExtra))
+		latexCMS.DrawLatex(0.19,0.89,"CMS")
+		if "Simulation" in cmsExtra:
+			yLabelPos = 0.82	
+		else:
+			yLabelPos = 0.85	
+
+		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))
+		
 		legend.Draw("same")
-		print source
 		if source == "HT" or source == "AlphaT":
 			hCanvas.Print("fig/Triggereff_AlphaTSyst_%s_%s_%s_%s_%s.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))	
 		else:
@@ -706,7 +726,7 @@ def studyTriggerBias(path,source,plots,selection,runRange,backgrounds):
 				
 
 
-def singleLepton(path,selection,runRange,backgrounds):
+def singleLepton(path,selection,runRange,backgrounds,cmsExtra):
 	
 	
 	plot = getPlot("trailigPtPlotTriggerLeading30Single")
@@ -822,10 +842,15 @@ def singleLepton(path,selection,runRange,backgrounds):
 
 
 	latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (8 TeV)"%runRange.printval)
-	cmsExtra = "Private Work"
+	
 
-	latexCMS.DrawLatex(0.15,0.955,"CMS")
-	latexCMSExtra.DrawLatex(0.28,0.955,"%s"%(cmsExtra))			
+	latexCMS.DrawLatex(0.19,0.89,"CMS")
+	if "Simulation" in cmsExtra:
+		yLabelPos = 0.82	
+	else:
+		yLabelPos = 0.85	
+
+	latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))
 	#~ intlumi.DrawLatex(0.2,0.9,"#splitline{"+logEtaCut+", "+cut.label1+"}{"+variable.additionalCutsLabel+"}")	
 	legend.Draw("same")
 	
@@ -851,11 +876,11 @@ def main():
 						  help="Verbose mode.")
 	parser.add_argument("-m", "--mc", action="store_true", dest="mc", default=False,
 						  help="use MC, default is to use data.")
-	parser.add_argument("-s", "--selection", dest = "selection" , nargs=1, default=["HighHTExclusive"],
+	parser.add_argument("-s", "--selection", dest = "selection" , action="append", default=[],
 						  help="selection which to apply.")
 	parser.add_argument("-p", "--plot", dest="plots", action="append", default=[],
 						  help="select dependencies to study, default is all.")
-	parser.add_argument("-r", "--runRange", dest="runRange", nargs=1, default="Full2012",
+	parser.add_argument("-r", "--runRange", dest="runRange", action ="append", default=[],
 						  help="name of run range.")
 	parser.add_argument("-c", "--centralValues", action="store_true", dest="central", default=False,
 						  help="calculate effinciecy central values")
@@ -863,16 +888,16 @@ def main():
 						  help="backgrounds to plot.")
 	parser.add_argument("-d", "--dependencies", action="store_true", dest="dependencies", default= False,
 						  help="make dependency plots")
-	parser.add_argument("-w", "--preliminary", dest="preliminary", default=False,
-						  help="plot is preliminary.")	
-	parser.add_argument("-x", "--private", dest="private", default=False,
+	parser.add_argument("-x", "--private", action="store_true", dest="private", default=False,
 						  help="plot is private work.")	
 	parser.add_argument("-a", "--alphaT", action="store_true", dest="alphaT", default=False,
 						  help="use alphaT triggers as baseline.")	
 	parser.add_argument("-z", "--bias", action="store_true", dest="bias", default=False,
 						  help="produce trigger bias studies.")	
 	parser.add_argument("-t", "--trailing", action="store_true", dest="trailing", default=False,
-						  help="trailing lepton pt dependence using single lepton trigger.")	
+						  help="trailing lepton pt dependence using single lepton trigger.")						
+	parser.add_argument("-w", "--write", action="store_true", dest="write", default=False,
+						  help="write results to central repository")	
 					
 	args = parser.parse_args()
 
@@ -881,46 +906,74 @@ def main():
 
 
 	if len(args.backgrounds) == 0:
-		args.backgrounds = ["Rare","SingleTop","TTJets_SpinCorrelations","Diboson","DrellYanTauTau","DrellYan"]
+		args.backgrounds = backgroundLists.trigger
 	if len(args.plots) == 0:
-		args.plots = ["nJetsPlotTrigger","leadingPtPlotTriggerTrailing10","leadingPtPlotTrigger","trailigPtPlotTrigger","trailigPtPlotTriggerLeading30","mllPlotTrigger","htPlotTrigger","metPlotTrigger","nVtxPlotTrigger","tralingEtaPlotTrigger"]
-	
+		args.plots = plotLists.trigger
+	if len(args.selection) == 0:
+		args.selection.append(regionsToUse.triggerEfficiencies.central.name)	
+		args.selection.append(regionsToUse.triggerEfficiencies.forward.name)	
+		args.selection.append(regionsToUse.triggerEfficiencies.inclusive.name)	
+	if len(args.runRange) == 0:
+		args.runRange.append(runRanges.name)	
+
 	if args.bias:
 		args.mc = True
 				
-	path = pathes.triggerDataSetPath	
+	path = locations.triggerDataSetPath	
 	if args.mc:
-		path = pathes.triggerDataSetPathMC
+		path = locations.triggerDataSetPathMC
 	if args.trailing:
-		path = pathes.triggerDataSetPathSingleLepton
+		path = locations.triggerDataSetPathSingleLepton
 	if args.alphaT:
 		source = "alphaT"
 	else:
-		source = "PFHT"
+		source = baselineTrigger.name
 	log.logHighlighted("Calculating trigger efficiencies on %s triggered dataset"%source)
 	log.logHighlighted("Using trees from %s "%path)
 	
+	cmsExtra = ""
+	if args.private:
+		cmsExtra = "Private Work"
+		if args.mc:
+			cmsExtra = "#splitline{Private Work}{Simulation}"
+	elif args.mc:
+		cmsExtra = "Simulation"	
+	else:
+		cmsExtra = "Preliminary"	
+	
 
 	
-	runRange = getRunRange(args.runRange)
+	for runRangeName in args.runRange:
+		runRange = getRunRange(runRangeName)
 	
-	selection = getRegion(args.selection[0])
-	
-	if args.central:
-		centralVal = centralValues(source,path,selection,runRange,args.mc,args.backgrounds)
-		if args.mc:
-			outFilePkl = open("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label),"w")
-		else:
-			outFilePkl = open("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label),"w")
-		pickle.dump(centralVal, outFilePkl)
-		outFilePkl.close()
-		
-	if args.dependencies:
-		 dependencies(source,path,selection,args.plots,runRange,args.mc,args.backgrounds)	
-	
-	if args.bias:
-		studyTriggerBias(path,source,args.plots,selection,runRange,args.backgrounds)
-	if args.trailing:
-		singleLepton(path,selection,runRange,args.backgrounds)				
+		for selectionName in args.selection:
+			
+			selection = getRegion(selectionName)
+			
+
+			
+			if args.central:
+				centralVal = centralValues(source,path,selection,runRange,args.mc,args.backgrounds)
+				if args.mc:
+					outFilePkl = open("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label),"w")
+				else:
+					outFilePkl = open("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label),"w")
+				pickle.dump(centralVal, outFilePkl)
+				outFilePkl.close()
+				
+			if args.dependencies:
+				 dependencies(source,path,selection,args.plots,runRange,args.mc,args.backgrounds,cmsExtra)	
+			
+			if args.bias:
+				studyTriggerBias(path,source,args.plots,selection,runRange,args.backgrounds,cmsExtra)
+			if args.trailing:
+				singleLepton(path,selection,runRange,args.backgrounds,cmsExtra)		
+			if args.write:
+				import subprocess
+				if args.mc:
+					bashCommand = "cp shelves/triggerEff_%s_%s_%s_MC.pkl %s/shelves"%(selection.name,source,runRange.label,pathes.basePath)		
+				else:	
+					bashCommand = "cp shelves/triggerEff_%s_%s_%s.pkl %s/shelves"%(selection.name,source,runRange.label,pathes.basePath)
+				process = subprocess.Popen(bashCommand.split())								
 				
 main()
