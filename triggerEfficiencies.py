@@ -25,7 +25,7 @@ from defs import getRegion, getPlot, getRunRange, Backgrounds
 
 from setTDRStyle import setTDRStyle
 from helpers import readTrees, createHistoFromTree, TheStack, totalNumberOfGeneratedEvents, Process
-from centralConfig import regionsToUse, runRanges, backgroundLists, plotLists, baselineTrigger
+from centralConfig import regionsToUse, runRanges, backgroundLists, plotLists, baselineTrigger, systematics
 from pathes import locations
 
 tableTemplate = r"""
@@ -166,48 +166,47 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds):
 			
 			denominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorEE.iteritems():
-				denominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,cutStringEE,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				denominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,cutStringEE,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			denominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorMuMu.iteritems():
-				denominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,cutStringMuMu,plot.nBins,plot.firstBin,plot.lastBin).Clone())		
+				denominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,cutStringMuMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())		
 			denominatorHistoMuMuNoTrack = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorMuMu.iteritems():
-				denominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,cutStringMuMu,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				denominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,cutStringMuMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			denominatorHistoEMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorEMu.iteritems():
-				denominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,cutStringEMu,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				denominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,cutStringEMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			denominatorHistoMuE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorEMu.iteritems():
-				denominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,cutStringMuE,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				denominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,cutStringMuE,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			denominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorEMu.iteritems():
-				denominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				denominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 
 
 			nominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorEE.iteritems():
-				nominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,cutStringEE,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				nominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,cutStringEE,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			nominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorMuMu.iteritems():
-				nominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,cutStringMuMu,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				nominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,cutStringMuMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			nominatorHistoMuMuNoTrack = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorMuMuNoTrack.iteritems():
-				nominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,cutStringMuMu,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				nominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,cutStringMuMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			nominatorHistoMuE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorMuE.iteritems():
-				nominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,cutStringMuE,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				nominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,cutStringMuE,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			nominatorHistoEMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorEMu.iteritems():
-				nominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,cutStringEMu,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				nominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,cutStringEMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			nominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorMuEG.iteritems():
-				nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			
 		else:	
 			treesDenominatorEE = readTrees(path,"EE",source = source, modifier = "%s"%("Trigger"+source,))
 			treesDenominatorMuMu = readTrees(path,"MuMu",source = source, modifier = "%s"%("Trigger"+source,))
 			treesDenominatorEMu = readTrees(path,"EMu",source = source, modifier = "%s"%("Trigger"+source,))
-					
 			treesNominatorEE = readTrees(path,"EE",source = source,modifier="%sHLT%sDiEle"%("Trigger"+source,additionalString))
 			treesNominatorMuMu = readTrees(path,"MuMu",source = source,modifier="%sHLT%sDiMu"%("Trigger"+source,additionalString))
 			treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = source,modifier="%sHLT%sDiMuNoTrackerMuon"%("Trigger"+source,additionalString))
@@ -217,44 +216,44 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds):
 				
 			denominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorEE.iteritems():
-				denominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				denominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			denominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorMuMu.iteritems():
-				denominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin).Clone())		
+				denominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())		
 			denominatorHistoMuMuNoTrack = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorMuMu.iteritems():
-				denominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				denominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			denominatorHistoEMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorEMu.iteritems():
-				denominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				denominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			denominatorHistoMuE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorEMu.iteritems():
-				denominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				denominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			denominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorEMu.iteritems():
-				denominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				denominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 
 
 
 
 			nominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorEE.iteritems():
-				nominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				nominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			nominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorMuMu.iteritems():
-				nominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				nominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			nominatorHistoMuMuNoTrack = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorMuMuNoTrack.iteritems():
-				nominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				nominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			nominatorHistoMuE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorMuE.iteritems():
-				nominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				nominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			nominatorHistoEMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorEMu.iteritems():
-				nominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				nominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			nominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorMuEG.iteritems():
-				nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin).Clone())
+				nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 	else:
 		if source == "PFHT":
 			source = "HT"
@@ -308,7 +307,14 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds):
 def centralValues(source,path,selection,runRange,isMC,backgrounds):
 	
 	
-	err = 0.05
+	if "Central" in selection.name:
+		err = systematics.trigger.central.val
+	elif "Forward" in selection.name:
+		err = systematics.trigger.forward.val
+	else:
+		print "have no uncertainty for this selection, using 5%"
+		err = 0.05
+	
 	plot = getPlot("mllPlot")
 	plot.addRegion(selection)
 	plot.cleanCuts()
@@ -333,7 +339,7 @@ def centralValues(source,path,selection,runRange,isMC,backgrounds):
 
 
 
-def dependencies(source,path,selection,plots,runRange,isMC,backgrounds):
+def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra):
 
 	hCanvas = TCanvas("hCanvas", "Distribution", 800,800)
 	
@@ -392,12 +398,12 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds):
 		if os.path.isfile("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label)):
 			centralVals = pickle.load(open("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label),"rb"))
 		else:
-			centralVals = centralValues(source,path,selection,runRange,isMC)
+			centralVals = centralValues(source,path,selection,runRange,isMC,backgrounds)
 	else:
 		if os.path.isfile("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label)):
 			centralVals = pickle.load(open("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label),"rb"))
 		else:
-			centralVals = centralValues(source,path,selection,runRange,isMC)
+			centralVals = centralValues(source,path,selection,runRange,isMC,backgrounds)
 	
 				
 	
@@ -408,7 +414,7 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds):
 		plot.cuts = plot.cuts % runRange.runCut	
 
 		if  "Forward" in selection.name:
-			plot.nBins = int(variable.nBins/2)
+			plot.nBins = int(plot.nBins/2)
 		denominators, nominators = getHistograms(path,source,plot,runRange,isMC,backgrounds)
 		
 		
@@ -925,7 +931,7 @@ def main():
 	if args.trailing:
 		path = locations.triggerDataSetPathSingleLepton
 	if args.alphaT:
-		source = "alphaT"
+		source = "AlphaT"
 	else:
 		source = baselineTrigger.name
 	log.logHighlighted("Calculating trigger efficiencies on %s triggered dataset"%source)
