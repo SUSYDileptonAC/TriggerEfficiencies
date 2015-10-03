@@ -157,7 +157,6 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False):
 	
 	if not isMC:
 		additionalString = ""
-
 		
 		if "Single" in source:
 
@@ -227,15 +226,16 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False):
 					nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,cutStringMuEG2,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			
 		else:	
-			treesDenominatorEE = readTrees(path,"EE",source = source, modifier = "%s"%("Trigger"+source,))
-			treesDenominatorMuMu = readTrees(path,"MuMu",source = source, modifier = "%s"%("Trigger"+source,))
-			treesDenominatorEMu = readTrees(path,"EMu",source = source, modifier = "%s"%("Trigger"+source,))
-			treesNominatorEE = readTrees(path,"EE",source = source,modifier="%sHLT%sDiEle"%("Trigger"+source,additionalString))
-			treesNominatorMuMu = readTrees(path,"MuMu",source = source,modifier="%sHLT%sDiMu"%("Trigger"+source,additionalString))
-			treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = source,modifier="%sHLT%sDiMuNoTrackerMuon"%("Trigger"+source,additionalString))
-			treesNominatorEMu = readTrees(path,"EMu",source = source,modifier="%sHLT%sEleMu"%("Trigger"+source,additionalString))
-			treesNominatorMuE = readTrees(path,"EMu",source = source,modifier="%sHLT%sMuEle"%("Trigger"+source,additionalString))
-			treesNominatorMuEG = readTrees(path,"EMu",source = source,modifier="%sHLT%sMuEG"%("Trigger"+source,additionalString))
+			treesDenominatorEE = readTrees(path,"EE",source = source, modifier = "%s"%("TriggerEfficiency"+source,))
+			treesDenominatorMuMu = readTrees(path,"MuMu",source = source, modifier = "%s"%("TriggerEfficiency"+source,))
+			treesDenominatorEMu = readTrees(path,"EMu",source = source, modifier = "%s"%("TriggerEfficiency"+source,))
+			treesNominatorEE = readTrees(path,"EE",source = source,modifier="TriggerEfficiencyHLTDiEle%s"%(additionalString))
+			treesNominatorMuMu = readTrees(path,"MuMu",source = source,modifier="TriggerEfficiencyHLTDiMu%s"%(additionalString))
+			treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = source,modifier="TriggerEfficiencyHLTDiMuNoTrackerMuon%s"%(additionalString))
+			treesNominatorEMu = readTrees(path,"EMu",source = source,modifier="TriggerEfficiencyHLTEleMu%s"%(additionalString))
+			treesNominatorMuE = readTrees(path,"EMu",source = source,modifier="TriggerEfficiencyHLTMuEle%s"%(additionalString))
+			treesNominatorMuEG = readTrees(path,"EMu",source = source,modifier="TriggerEfficiencyHLTMuEG%s"%(additionalString))
+
 			denominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorEE.iteritems():
 				denominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
