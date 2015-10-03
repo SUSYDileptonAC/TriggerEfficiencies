@@ -157,8 +157,7 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False):
 	
 	if not isMC:
 		additionalString = ""
-		if source == "PFHT":
-			additionalString = "PF"
+
 		
 		if "Single" in source:
 
@@ -237,7 +236,6 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False):
 			treesNominatorEMu = readTrees(path,"EMu",source = source,modifier="%sHLT%sEleMu"%("Trigger"+source,additionalString))
 			treesNominatorMuE = readTrees(path,"EMu",source = source,modifier="%sHLT%sMuEle"%("Trigger"+source,additionalString))
 			treesNominatorMuEG = readTrees(path,"EMu",source = source,modifier="%sHLT%sMuEG"%("Trigger"+source,additionalString))
-				
 			denominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorEE.iteritems():
 				denominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
@@ -287,19 +285,19 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False):
 			for cut in plot.cuts.split("&&"):
 				if "ht >" in cut:	
 					plot.cuts = plot.cuts.replace(cut+ "&&","weight*(")
-		treesDenominatorEE = readTrees(path,"EE",source = "Summer12", modifier = "%s"%("TriggerEfficiency"+source,))
-		treesDenominatorMuMu = readTrees(path,"MuMu",source = "Summer12", modifier = "%s"%("TriggerEfficiency"+source,))
-		treesDenominatorEMu = readTrees(path,"EMu",source = "Summer12", modifier = "%s"%("TriggerEfficiency"+source,))
+		treesDenominatorEE = readTrees(path,"EE",source = "Summer12", modifier = "%s"%("MiniAODTriggerEfficiency"+source,))
+		treesDenominatorMuMu = readTrees(path,"MuMu",source = "Summer12", modifier = "%s"%("MiniAODTriggerEfficiency"+source,))
+		treesDenominatorEMu = readTrees(path,"EMu",source = "Summer12", modifier = "%s"%("MiniAODTriggerEfficiency"+source,))
 		
 		
-		treesNominatorEE = readTrees(path,"EE",source = "Summer12",modifier="%sHLTDiEle%s"%("TriggerEfficiency",source))
-		treesNominatorMuMu = readTrees(path,"MuMu",source = "Summer12",modifier="%sHLTDiMu%s"%("TriggerEfficiency",source))
-		treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = "Summer12",modifier="%sHLTDiMuNoTrackerMuon%s"%("TriggerEfficiency",source))
-		treesNominatorEMu = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTEleMu%s"%("TriggerEfficiency",source))
-		treesNominatorMuE = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTMuEle%s"%("TriggerEfficiency",source))
-		treesNominatorMuEG = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTMuEG%s"%("TriggerEfficiency",source))
+		treesNominatorEE = readTrees(path,"EE",source = "Summer12",modifier="%sHLTDiEle%s"%("MiniAODTriggerEfficiency",source))
+		treesNominatorMuMu = readTrees(path,"MuMu",source = "Summer12",modifier="%sHLTDiMu%s"%("MiniAODTriggerEfficiency",source))
+		treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = "Summer12",modifier="%sHLTDiMuNoTrackerMuon%s"%("MiniAODTriggerEfficiency",source))
+		treesNominatorEMu = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTEleMu%s"%("MiniAODTriggerEfficiency",source))
+		treesNominatorMuE = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTMuEle%s"%("MiniAODTriggerEfficiency",source))
+		treesNominatorMuEG = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTMuEG%s"%("MiniAODTriggerEfficiency",source))
 		
-		eventCounts = totalNumberOfGeneratedEvents(path,"TTJets")	
+		eventCounts = totalNumberOfGeneratedEvents(path,"TT")	
 		eventCounts.update(totalNumberOfGeneratedEvents(path,"AStar"))	
 		eventCounts.update(totalNumberOfGeneratedEvents(path,"ZJets"))	
 		processes = []
@@ -488,6 +486,9 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 			denominators["MuEG"].Add(denominatorsMuon["MuEG"].Clone())
 			nominators["MuEG"].Add(nominatorsMuon["MuEG"].Clone())
 
+
+		print nominators["EE"].GetEntries(),denominators["EE"].GetEntries()
+
 		effEE = TGraphAsymmErrors(nominators["EE"],denominators["EE"],"cp")
 		effEMu = TGraphAsymmErrors(nominators["EMu"],denominators["EMu"],"cp")
 		effMuE = TGraphAsymmErrors(nominators["MuE"],denominators["MuE"],"cp")
@@ -516,10 +517,10 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 
 		
 		legend.Clear()
-		legend.AddEntry(effEE,"Ele_23_Ele12_X ","p")
-		legend.AddEntry(effMuMu,"Mu17_Mu8 || Mu17_TkMu8","p")
-		legend.AddEntry(effMuE,"Mu23_Ele12_X","p")
-		legend.AddEntry(effEMu,"Ele23_X_Mu8","p")
+		legend.AddEntry(effEE,"ee","p")
+		legend.AddEntry(effMuMu,"#mu#mu","p")
+		legend.AddEntry(effMuE,"#mue","p")
+		legend.AddEntry(effEMu,"e#mu","p")
 
 		
 		effEE.Draw("samep")
@@ -581,8 +582,8 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 		
 
 		legend.Clear()
-		legend.AddEntry(effSF,"Ele_23_Ele12_X || Mu17_Mu8 || Mu17_TkMu8 ","p")
-		legend.AddEntry(effOF,"Mu23_Ele12_X || Ele23_X_Mu8" ,"p")
+		legend.AddEntry(effSF,"ee and #mu#mu","p")
+		legend.AddEntry(effOF,"e#mu + #mue" ,"p")
 
 		effSF.Draw("samep")
 		effOF.Draw("samep")
