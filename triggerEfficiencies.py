@@ -226,15 +226,15 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False):
 					nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,cutStringMuEG2,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			
 		else:	
-			treesDenominatorEE = readTrees(path,"EE",source = source, modifier = "%s"%("TriggerEfficiency"+source,))
-			treesDenominatorMuMu = readTrees(path,"MuMu",source = source, modifier = "%s"%("TriggerEfficiency"+source,))
-			treesDenominatorEMu = readTrees(path,"EMu",source = source, modifier = "%s"%("TriggerEfficiency"+source,))
-			treesNominatorEE = readTrees(path,"EE",source = source,modifier="TriggerEfficiencyHLTDiEle%s"%(additionalString))
-			treesNominatorMuMu = readTrees(path,"MuMu",source = source,modifier="TriggerEfficiencyHLTDiMu%s"%(additionalString))
-			treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = source,modifier="TriggerEfficiencyHLTDiMuNoTrackerMuon%s"%(additionalString))
-			treesNominatorEMu = readTrees(path,"EMu",source = source,modifier="TriggerEfficiencyHLTEleMu%s"%(additionalString))
-			treesNominatorMuE = readTrees(path,"EMu",source = source,modifier="TriggerEfficiencyHLTMuEle%s"%(additionalString))
-			treesNominatorMuEG = readTrees(path,"EMu",source = source,modifier="TriggerEfficiencyHLTMuEG%s"%(additionalString))
+			treesDenominatorEE = readTrees(path,"EE",source = source, modifier = "%s"%("Trigger"+source,))
+			treesDenominatorMuMu = readTrees(path,"MuMu",source = source, modifier = "%s"%("Trigger"+source,))
+			treesDenominatorEMu = readTrees(path,"EMu",source = source, modifier = "%s"%("Trigger"+source,))
+			treesNominatorEE = readTrees(path,"EE",source = source,modifier="Trigger%sHLTDiEle%s"%(source,additionalString))
+			treesNominatorMuMu = readTrees(path,"MuMu",source = source,modifier="Trigger%sHLTDiMu%s"%(source,additionalString))
+			#~ treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = source,modifier="Trigger%sHLTDiMuNoTrackerMuon%s"%(source,additionalString))
+			#~ treesNominatorEMu = readTrees(path,"EMu",source = source,modifier="Trigger%sHLTEleMu%s"%(source,additionalString))
+			#~ treesNominatorMuE = readTrees(path,"EMu",source = source,modifier="Trigger%sHLTMuEle%s"%(source,additionalString))
+			treesNominatorMuEG = readTrees(path,"EMu",source = source,modifier="Trigger%sHLTMuEG%s"%(source,additionalString))
 
 			denominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorEE.iteritems():
@@ -242,15 +242,15 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False):
 			denominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorMuMu.iteritems():
 				denominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())		
-			denominatorHistoMuMuNoTrack = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorMuMu.iteritems():
-				denominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			denominatorHistoEMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorEMu.iteritems():
-				denominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			denominatorHistoMuE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorEMu.iteritems():
-				denominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+			#~ denominatorHistoMuMuNoTrack = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
+			#~ for name, tree in treesDenominatorMuMu.iteritems():
+				#~ denominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+			#~ denominatorHistoEMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
+			#~ for name, tree in treesDenominatorEMu.iteritems():
+				#~ denominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+			#~ denominatorHistoMuE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
+			#~ for name, tree in treesDenominatorEMu.iteritems():
+				#~ denominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			denominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorEMu.iteritems():
 				denominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
@@ -264,15 +264,15 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False):
 			nominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorMuMu.iteritems():
 				nominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			nominatorHistoMuMuNoTrack = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesNominatorMuMuNoTrack.iteritems():
-				nominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			nominatorHistoMuE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesNominatorMuE.iteritems():
-				nominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			nominatorHistoEMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesNominatorEMu.iteritems():
-				nominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+			#~ nominatorHistoMuMuNoTrack = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
+			#~ for name, tree in treesNominatorMuMuNoTrack.iteritems():
+				#~ nominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+			#~ nominatorHistoMuE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
+			#~ for name, tree in treesNominatorMuE.iteritems():
+				#~ nominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+			#~ nominatorHistoEMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
+			#~ for name, tree in treesNominatorEMu.iteritems():
+				#~ nominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			nominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorMuEG.iteritems():
 				nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
@@ -292,14 +292,14 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False):
 		
 		treesNominatorEE = readTrees(path,"EE",source = "Summer12",modifier="%sHLTDiEle%s"%("MiniAODTriggerEfficiency",source))
 		treesNominatorMuMu = readTrees(path,"MuMu",source = "Summer12",modifier="%sHLTDiMu%s"%("MiniAODTriggerEfficiency",source))
-		treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = "Summer12",modifier="%sHLTDiMuNoTrackerMuon%s"%("MiniAODTriggerEfficiency",source))
-		treesNominatorEMu = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTEleMu%s"%("MiniAODTriggerEfficiency",source))
-		treesNominatorMuE = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTMuEle%s"%("MiniAODTriggerEfficiency",source))
+		#~ treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = "Summer12",modifier="%sHLTDiMuNoTrackerMuon%s"%("MiniAODTriggerEfficiency",source))
+		#~ treesNominatorEMu = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTEleMu%s"%("MiniAODTriggerEfficiency",source))
+		#~ treesNominatorMuE = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTMuEle%s"%("MiniAODTriggerEfficiency",source))
 		treesNominatorMuEG = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTMuEG%s"%("MiniAODTriggerEfficiency",source))
 		
 		eventCounts = totalNumberOfGeneratedEvents(path,"TT")	
-		eventCounts.update(totalNumberOfGeneratedEvents(path,"AStar"))	
-		eventCounts.update(totalNumberOfGeneratedEvents(path,"ZJets"))	
+		#~ eventCounts.update(totalNumberOfGeneratedEvents(path,"AStar"))	
+		#~ eventCounts.update(totalNumberOfGeneratedEvents(path,"ZJets"))	
 		processes = []
 		for background in backgrounds:
 			processes.append(Process(getattr(Backgrounds,background),eventCounts))
@@ -310,44 +310,45 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False):
 		denominatorStackMuMu = TheStack(processes,runRange.lumi,plot,treesDenominatorMuMu,"None",1.0,1.0,1.0)	
 		denominatorStackMuEG = TheStack(processes,runRange.lumi,plot,treesDenominatorEMu,"None",1.0,1.0,1.0)	
 		
-		plot.cuts = plot.cuts+"*(pt1 > pt2)"
-		denominatorStackEMu = TheStack(processes,runRange.lumi,plot,treesDenominatorEMu,"None",1.0,1.0,1.0)	
-
-		plot.cuts = tmpCuts+"*(pt1 < pt2)"
-		denominatorStackMuE = TheStack(processes,runRange.lumi,plot,treesDenominatorEMu,"None",1.0,1.0,1.0)	
+		#~ plot.cuts = plot.cuts+"*(pt1 > pt2)"
+		#~ denominatorStackEMu = TheStack(processes,runRange.lumi,plot,treesDenominatorEMu,"None",1.0,1.0,1.0)	
+#~ 
+		#~ plot.cuts = tmpCuts+"*(pt1 < pt2)"
+		#~ denominatorStackMuE = TheStack(processes,runRange.lumi,plot,treesDenominatorEMu,"None",1.0,1.0,1.0)	
 			
-		plot.cuts = tmpCuts	
+		#~ plot.cuts = tmpCuts	
 			
 		nominatorStackEE = TheStack(processes,runRange.lumi,plot,treesNominatorEE,"None",1.0,1.0,1.0)		
 		nominatorStackMuMu = TheStack(processes,runRange.lumi,plot,treesNominatorMuMu,"None",1.0,1.0,1.0)		
-		nominatorStackMuMuNoTrack = TheStack(processes,runRange.lumi,plot,treesNominatorMuMuNoTrack,"None",1.0,1.0,1.0)	
+		#~ nominatorStackMuMuNoTrack = TheStack(processes,runRange.lumi,plot,treesNominatorMuMuNoTrack,"None",1.0,1.0,1.0)	
 		nominatorStackMuEG = TheStack(processes,runRange.lumi,plot,treesNominatorMuEG,"None",1.0,1.0,1.0)
 			
-		plot.cuts = plot.cuts+"*(pt1 > pt2)"			
-		nominatorStackEMu = TheStack(processes,runRange.lumi,plot,treesNominatorEMu,"None",1.0,1.0,1.0)	
+		#~ plot.cuts = plot.cuts+"*(pt1 > pt2)"			
+		#~ nominatorStackEMu = TheStack(processes,runRange.lumi,plot,treesNominatorEMu,"None",1.0,1.0,1.0)	
 		
-		plot.cuts = tmpCuts+"*(pt1 < pt2)"	
-		nominatorStackMuE = TheStack(processes,runRange.lumi,plot,treesNominatorMuE,"None",1.0,1.0,1.0)		
+		#~ plot.cuts = tmpCuts+"*(pt1 < pt2)"	
+		#~ nominatorStackMuE = TheStack(processes,runRange.lumi,plot,treesNominatorMuE,"None",1.0,1.0,1.0)		
 
-		plot.cuts = tmpCuts	
+		#~ plot.cuts = tmpCuts	
 	
 
 		denominatorHistoEE = denominatorStackEE.theHistogram
 		denominatorHistoMuMu = denominatorStackMuMu.theHistogram
-		denominatorHistoMuMuNoTrack = denominatorStackMuMu.theHistogram
-		denominatorHistoEMu = denominatorStackEMu.theHistogram
-		denominatorHistoMuE = denominatorStackMuE.theHistogram
+		#~ denominatorHistoMuMuNoTrack = denominatorStackMuMu.theHistogram
+		#~ denominatorHistoEMu = denominatorStackEMu.theHistogram
+		#~ denominatorHistoMuE = denominatorStackMuE.theHistogram
 		denominatorHistoMuEG = denominatorStackMuEG.theHistogram
 		
 		nominatorHistoEE = nominatorStackEE.theHistogram
 		nominatorHistoMuMu = nominatorStackMuMu.theHistogram
-		nominatorHistoMuMuNoTrack = nominatorStackMuMuNoTrack.theHistogram
-		nominatorHistoEMu = nominatorStackEMu.theHistogram
-		nominatorHistoMuE = nominatorStackMuE.theHistogram
+		#~ nominatorHistoMuMuNoTrack = nominatorStackMuMuNoTrack.theHistogram
+		#~ nominatorHistoEMu = nominatorStackEMu.theHistogram
+		#~ nominatorHistoMuE = nominatorStackMuE.theHistogram
 		nominatorHistoMuEG = nominatorStackMuEG.theHistogram		
 	
 		plot.cuts = tmpCutsNoHT
-	return {"EE":denominatorHistoEE,"MuMu":denominatorHistoMuMu,"MuMuNoTrack":denominatorHistoMuMuNoTrack,"EMu":denominatorHistoEMu,"MuE":denominatorHistoMuE,"MuEG":denominatorHistoMuEG} , {"EE":nominatorHistoEE,"MuMu":nominatorHistoMuMu,"MuMuNoTrack":nominatorHistoMuMuNoTrack,"EMu":nominatorHistoEMu,"MuE":nominatorHistoMuE,"MuEG":nominatorHistoMuEG}
+	#~ return {"EE":denominatorHistoEE,"MuMu":denominatorHistoMuMu,"MuMuNoTrack":denominatorHistoMuMuNoTrack,"EMu":denominatorHistoEMu,"MuE":denominatorHistoMuE,"MuEG":denominatorHistoMuEG} , {"EE":nominatorHistoEE,"MuMu":nominatorHistoMuMu,"MuMuNoTrack":nominatorHistoMuMuNoTrack,"EMu":nominatorHistoEMu,"MuE":nominatorHistoMuE,"MuEG":nominatorHistoMuEG}
+	return {"EE":denominatorHistoEE,"MuMu":denominatorHistoMuMu,"MuEG":denominatorHistoMuEG} , {"EE":nominatorHistoEE,"MuMu":nominatorHistoMuMu ,"MuEG":nominatorHistoMuEG}
 
 def centralValues(source,path,selection,runRange,isMC,backgrounds):
 	
@@ -376,14 +377,13 @@ def centralValues(source,path,selection,runRange,isMC,backgrounds):
 		denominatorsElectron, nominatorsElectron = getHistograms(path,"SingleElectron",plot,runRange,False,backgrounds)
 		denominatorsMuon, nominatorsMuon = getHistograms(path,"SingleMuon",plot,runRange,False,backgrounds)		
 
-		denominators = {"EE":denominatorsElectron["EE"],"EMu":denominatorsElectron["EMu"],"MuEG":denominatorsElectron["MuEG"],"MuMu":denominatorsMuon["MuMu"],"MuMuNoTrack":denominatorsMuon["MuMuNoTrack"],"MuE":denominatorsMuon["MuE"]}
-		nominators = {"EE":nominatorsElectron["EE"],"EMu":nominatorsElectron["EMu"],"MuEG":nominatorsElectron["MuEG"],"MuMu":nominatorsMuon["MuMu"],"MuMuNoTrack":nominatorsMuon["MuMuNoTrack"],"MuE":nominatorsMuon["MuE"]}
+		denominators = {"EE":denominatorsElectron["EE"],"MuEG":denominatorsElectron["MuEG"],"MuMu":denominatorsMuon["MuMu"]}
+		nominators = {"EE":nominatorsElectron["EE"],"MuEG":nominatorsElectron["MuEG"],"MuMu":nominatorsMuon["MuMu"]}
 		denominators["MuEG"].Add(denominatorsMuon["MuEG"].Clone())
 		nominators["MuEG"].Add(nominatorsMuon["MuEG"].Clone())
 	
 	counts[runRange.label]["EE"] = getEfficiency(nominators["EE"], denominators["EE"],plot.cuts)
 	counts[runRange.label]["MuMu"] = getEfficiency(nominators["MuMu"], denominators["MuMu"],plot.cuts)
-	counts[runRange.label]["MuMuNoTrack"] = getEfficiency(nominators["MuMuNoTrack"], denominators["MuMuNoTrack"],plot.cuts)
 	counts[runRange.label]["EMu"] = getEfficiency(nominators["MuEG"], denominators["MuEG"],plot.cuts)
 	counts[runRange.label]["RT"] = (counts[runRange.label]["EE"]["Efficiency"]*counts[runRange.label]["MuMu"]["Efficiency"])**0.5 / counts[runRange.label]["EMu"]["Efficiency"]
 	counts[runRange.label]["RTErrSyst"] =  counts[runRange.label]["RT"]*(err**2/(2*counts[runRange.label]["MuMu"]["Efficiency"])**2+ err**2/(2*counts[runRange.label]["EE"]["Efficiency"])**2 + err**2/(counts[runRange.label]["EMu"]["Efficiency"])**2)**0.5
@@ -411,20 +411,20 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 	legendHist1 = TH1F()
 	legendHist2 = TH1F()
 	legendHist3 = TH1F()
-	legendHist4 = TH1F()
-	legendHist5 = TH1F()
+	#~ legendHist4 = TH1F()
+	#~ legendHist5 = TH1F()
 	
 	legendHist1.SetMarkerColor(ROOT.kBlack)
 	legendHist2.SetMarkerColor(ROOT.kRed)
-	legendHist3.SetMarkerColor(ROOT.kRed+2)
-	legendHist4.SetMarkerColor(ROOT.kBlue)
-	legendHist5.SetMarkerColor(ROOT.kBlue+2)
+	legendHist3.SetMarkerColor(ROOT.kBlue)
+	#~ legendHist4.SetMarkerColor(ROOT.kBlue)
+	#~ legendHist5.SetMarkerColor(ROOT.kBlue+2)
 	
-	legend.AddEntry(legendHist1,"Ele_17_X_Ele8_X","p")
-	legend.AddEntry(legendHist2,"Mu17_Mu8 or Mu17_TkMu8","p")
-	legend.AddEntry(legendHist3,"Mu17_Mu8","p")
-	legend.AddEntry(legendHist4,"Mu17_Ele8_X","p")
-	legend.AddEntry(legendHist5,"Ele17_X_Mu8","p")
+	legend.AddEntry(legendHist1,"ee","p")
+	legend.AddEntry(legendHist2,"#mu#mu","p")
+	legend.AddEntry(legendHist3,"e#mu","p")
+	#~ legend.AddEntry(legendHist4,"Mu17_Ele8_X","p")
+	#~ legend.AddEntry(legendHist5,"Ele17_X_Mu8","p")
 	
 	latex = ROOT.TLatex()
 	latex.SetTextFont(42)
@@ -481,37 +481,29 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 			denominatorsElectron, nominatorsElectron = getHistograms(path,"SingleElectron",plot,runRange,False,backgrounds)
 			denominatorsMuon, nominatorsMuon = getHistograms(path,"SingleMuon",plot,runRange,False,backgrounds)		
 
-			denominators = {"EE":denominatorsElectron["EE"],"EMu":denominatorsElectron["EMu"],"MuEG":denominatorsElectron["MuEG"],"MuMu":denominatorsMuon["MuMu"],"MuMuNoTrack":denominatorsMuon["MuMuNoTrack"],"MuE":denominatorsMuon["MuE"]}
-			nominators = {"EE":nominatorsElectron["EE"],"EMu":nominatorsElectron["EMu"],"MuEG":nominatorsElectron["MuEG"],"MuMu":nominatorsMuon["MuMu"],"MuMuNoTrack":nominatorsMuon["MuMuNoTrack"],"MuE":nominatorsMuon["MuE"]}
+			denominators = {"EE":denominatorsElectron["EE"],"MuEG":denominatorsElectron["MuEG"],"MuMu":denominatorsMuon["MuMu"]}
+			nominators = {"EE":nominatorsElectron["EE"],"MuEG":nominatorsElectron["MuEG"],"MuMu":nominatorsMuon["MuMu"]}
 			denominators["MuEG"].Add(denominatorsMuon["MuEG"].Clone())
 			nominators["MuEG"].Add(nominatorsMuon["MuEG"].Clone())
 
 
-		print nominators["EE"].GetEntries(),denominators["EE"].GetEntries()
-
 		effEE = TGraphAsymmErrors(nominators["EE"],denominators["EE"],"cp")
-		effEMu = TGraphAsymmErrors(nominators["EMu"],denominators["EMu"],"cp")
-		effMuE = TGraphAsymmErrors(nominators["MuE"],denominators["MuE"],"cp")
 		effMuMu = TGraphAsymmErrors(nominators["MuMu"],denominators["MuMu"],"cp")
-		effMuMuNoTrack = TGraphAsymmErrors(nominators["MuMuNoTrack"],denominators["MuMuNoTrack"],"cp")
 
+		denominatorHistoOF = denominators["MuEG"].Clone()
+		nominatorHistoOF = nominators["MuEG"].Clone()
+		effOF = TGraphAsymmErrors(nominatorHistoOF,denominatorHistoOF,"cp")
 		
 
 		effEE.SetMarkerColor(ROOT.kBlack)
 		effMuMu.SetMarkerColor(ROOT.kRed)
-		effMuMuNoTrack.SetMarkerColor(ROOT.kRed+2)
-		effMuE.SetMarkerColor(ROOT.kBlue)
-		effEMu.SetMarkerColor(ROOT.kBlue+2)
+		effOF.SetMarkerColor(ROOT.kBlue)
 		effEE.SetLineColor(ROOT.kBlack)
 		effMuMu.SetLineColor(ROOT.kRed)
-		effMuMuNoTrack.SetLineColor(ROOT.kRed+2)
-		effMuE.SetLineColor(ROOT.kBlue)
-		effEMu.SetLineColor(ROOT.kBlue+2)
+		effOF.SetLineColor(ROOT.kBlue)
 		effEE.SetMarkerStyle(20)
 		effMuMu.SetMarkerStyle(21)
-		effMuMuNoTrack.SetMarkerStyle(22)
-		effMuE.SetMarkerStyle(23)
-		effEMu.SetMarkerStyle(33)				
+		effOF.SetMarkerStyle(22)				
 		plotPad.DrawFrame(plot.firstBin,0.6,plot.lastBin,1.2,"; %s ; Efficiency" %(plot.xaxis))
 		
 
@@ -519,15 +511,15 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 		legend.Clear()
 		legend.AddEntry(effEE,"ee","p")
 		legend.AddEntry(effMuMu,"#mu#mu","p")
-		legend.AddEntry(effMuE,"#mue","p")
-		legend.AddEntry(effEMu,"e#mu","p")
+		legend.AddEntry(effOF,"e#mu","p")
+		#~ legend.AddEntry(effEMu,"e#mu","p")
 
 		
 		effEE.Draw("samep")
 		effMuMu.Draw("samep")
-		#~ effMuMuNoTrack.Draw("samep")
-		effMuE.Draw("samep")
-		effEMu.Draw("samep")
+		effOF.Draw("samep")
+		#~ effMuE.Draw("samep")
+		#~ effEMu.Draw("samep")
 
 		latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (13 TeV)"%runRange.printval)
 		
@@ -553,28 +545,22 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 		nominatorHistoSFNoTrack = nominators["EE"].Clone()
 		
 		nominatorHistoSF.Add(nominators["MuMu"].Clone())
-		nominatorHistoSFNoTrack.Add(nominators["MuMuNoTrack"].Clone())
 		
 		nominatorHistoOF = nominators["MuEG"].Clone()
 		
 		effSF = TGraphAsymmErrors(nominatorHistoSF,denominatorHistoSF,"cp")
-		effSFNoTrack = TGraphAsymmErrors(nominatorHistoSFNoTrack,denominatorHistoSF,"cp")
 		effOF = TGraphAsymmErrors(nominatorHistoOF,denominatorHistoOF,"cp")
 
 
 
 		effSF.SetMarkerColor(ROOT.kBlack)
-		effSFNoTrack.SetMarkerColor(ROOT.kRed)
 		effOF.SetMarkerColor(ROOT.kBlue)
 		effSF.SetLineColor(ROOT.kBlack)
-		effSFNoTrack.SetLineColor(ROOT.kRed)
 		effOF.SetLineColor(ROOT.kBlue)
 		effSF.SetMarkerStyle(20)
-		effSFNoTrack.SetMarkerStyle(21)
 		effOF.SetMarkerStyle(22)
 		
 		effSFNoFit = effSF.Clone()
-		effSFNoTrackNoFit = effSF.Clone()
 		effOFNoFit = effSF.Clone()
 		
 	
@@ -583,7 +569,7 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 
 		legend.Clear()
 		legend.AddEntry(effSF,"ee and #mu#mu","p")
-		legend.AddEntry(effOF,"e#mu + #mue" ,"p")
+		legend.AddEntry(effOF,"e#mu" ,"p")
 
 		effSF.Draw("samep")
 		effOF.Draw("samep")
