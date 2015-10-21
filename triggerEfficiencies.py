@@ -150,14 +150,15 @@ def efficiencyRatioGeometricMean(eff1,eff2,eff3,source):
 	return newEff
 
 
-def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False):
+def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False,nonIso=False):
 	
 
 
 	
 	if not isMC:
 		additionalString = ""
-		
+		if nonIso:
+			additionalString = "All"
 		if "Single" in source:
 
 
@@ -279,6 +280,11 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False):
 	else:
 		if source == "PFHT":
 			source = "HT"
+		
+		anotherString = ""
+		if nonIso:
+			anotherString = "All"
+			
 		tmpCutsNoHT = plot.cuts
 		
 		if source == "" and noHT:
@@ -290,12 +296,13 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False):
 		treesDenominatorEMu = readTrees(path,"EMu",source = "Summer12", modifier = "%s"%("MiniAODTriggerEfficiency"+source,))
 		
 		
-		treesNominatorEE = readTrees(path,"EE",source = "Summer12",modifier="%sHLTDiEle%s"%("MiniAODTriggerEfficiency",source))
-		treesNominatorMuMu = readTrees(path,"MuMu",source = "Summer12",modifier="%sHLTDiMu%s"%("MiniAODTriggerEfficiency",source))
+		treesNominatorEE = readTrees(path,"EE",source = "Summer12",modifier="%sHLTDiEle%s"%("MiniAODTriggerEfficiency",anotherString+source))
+		anotherString = ""
+		treesNominatorMuMu = readTrees(path,"MuMu",source = "Summer12",modifier="%sHLTDiMu%s"%("MiniAODTriggerEfficiency",anotherString+source))
 		#~ treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = "Summer12",modifier="%sHLTDiMuNoTrackerMuon%s"%("MiniAODTriggerEfficiency",source))
 		#~ treesNominatorEMu = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTEleMu%s"%("MiniAODTriggerEfficiency",source))
 		#~ treesNominatorMuE = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTMuEle%s"%("MiniAODTriggerEfficiency",source))
-		treesNominatorMuEG = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTMuEG%s"%("MiniAODTriggerEfficiency",source))
+		treesNominatorMuEG = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTMuEG%s"%("MiniAODTriggerEfficiency",anotherString+source))
 		
 		eventCounts = totalNumberOfGeneratedEvents(path,"TT")	
 		#~ eventCounts.update(totalNumberOfGeneratedEvents(path,"AStar"))	
@@ -350,7 +357,7 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False):
 	#~ return {"EE":denominatorHistoEE,"MuMu":denominatorHistoMuMu,"MuMuNoTrack":denominatorHistoMuMuNoTrack,"EMu":denominatorHistoEMu,"MuE":denominatorHistoMuE,"MuEG":denominatorHistoMuEG} , {"EE":nominatorHistoEE,"MuMu":nominatorHistoMuMu,"MuMuNoTrack":nominatorHistoMuMuNoTrack,"EMu":nominatorHistoEMu,"MuE":nominatorHistoMuE,"MuEG":nominatorHistoMuEG}
 	return {"EE":denominatorHistoEE,"MuMu":denominatorHistoMuMu,"MuEG":denominatorHistoMuEG} , {"EE":nominatorHistoEE,"MuMu":nominatorHistoMuMu ,"MuEG":nominatorHistoMuEG}
 
-def centralValues(source,path,selection,runRange,isMC,backgrounds):
+def centralValues(source,path,selection,runRange,isMC,backgrounds,nonIso):
 	
 	
 	if "Central" in selection.name:
@@ -372,7 +379,7 @@ def centralValues(source,path,selection,runRange,isMC,backgrounds):
 	counts = {runRange.label:{}}	
 								
 	if not source == "SingleLepton":
-		denominators, nominators = getHistograms(path,source,plot,runRange,isMC,backgrounds)
+		denominators, nominators = getHistograms(path,source,plot,runRange,isMC,backgrounds,nonIso=nonIso)
 	else:
 		denominatorsElectron, nominatorsElectron = getHistograms(path,"SingleElectron",plot,runRange,False,backgrounds)
 		denominatorsMuon, nominatorsMuon = getHistograms(path,"SingleMuon",plot,runRange,False,backgrounds)		
@@ -393,7 +400,7 @@ def centralValues(source,path,selection,runRange,isMC,backgrounds):
 
 
 
-def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra):
+def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,nonIso):
 
 	hCanvas = TCanvas("hCanvas", "Distribution", 800,800)
 	
@@ -449,10 +456,16 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 	intlumi.SetTextSize(0.03)
 	intlumi.SetNDC(True)		
 	if isMC:
-		if os.path.isfile("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label)):
-			centralVals = pickle.load(open("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label),"rb"))
-		else:
-			centralVals = centralValues(source,path,selection,runRange,isMC,backgrounds)
+		if nonIso:
+			if os.path.isfile("shelves/triggerEff_%s_%s_%s_NonIso_MC.pkl"%(selection.name,source,runRange.label)):
+				centralVals = pickle.load(open("shelves/triggerEff_%s_%s_%s_NonIso_MC.pkl"%(selection.name,source,runRange.label),"rb"))
+			else:
+				centralVals = centralValues(source,path,selection,runRange,isMC,backgrounds,nonIso=nonIso)
+		else:		
+			if os.path.isfile("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label)):
+				centralVals = pickle.load(open("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label),"rb"))
+			else:
+				centralVals = centralValues(source,path,selection,runRange,isMC,backgrounds,nonIso=nonIso)
 	else:
 		#~ if source == "SingleLepton":
 			#~ if os.path.isfile("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,"PFHT",runRange.label)):
@@ -463,7 +476,7 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 		if os.path.isfile("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label)):
 			centralVals = pickle.load(open("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label),"rb"))
 		else:
-			centralVals = centralValues(source,path,selection,runRange,isMC,backgrounds)
+			centralVals = centralValues(source,path,selection,runRange,isMC,backgrounds,nonIso=nonIso)
 		
 				
 	
@@ -472,11 +485,14 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 		plot.addRegion(selection)
 		#~ plot.cleanCuts()
 		plot.cuts = plot.cuts % runRange.runCut	
-
+		
+		if nonIso:
+			plot.additionalName = str(plot.additionalName)+"_NonIso"
+		
 		if  "Forward" in selection.name:
 			plot.nBins = int(plot.nBins/2)
 		if not source == "SingleLepton":
-			denominators, nominators = getHistograms(path,source,plot,runRange,isMC,backgrounds)
+			denominators, nominators = getHistograms(path,source,plot,runRange,isMC,backgrounds,nonIso=nonIso)
 		else:
 			denominatorsElectron, nominatorsElectron = getHistograms(path,"SingleElectron",plot,runRange,False,backgrounds)
 			denominatorsMuon, nominatorsMuon = getHistograms(path,"SingleMuon",plot,runRange,False,backgrounds)		
@@ -973,6 +989,8 @@ def main():
 						  help="plot is private work.")	
 	parser.add_argument("-a", "--alphaT", action="store_true", dest="alphaT", default=False,
 						  help="use alphaT triggers as baseline.")	
+	parser.add_argument("-i", "--iso", action="store_true", dest="iso", default=False,
+						  help="include non-iso triggers.")	
 	parser.add_argument("-z", "--bias", action="store_true", dest="bias", default=False,
 						  help="produce trigger bias studies.")	
 	parser.add_argument("-Z", "--biasHT", action="store_true", dest="biasHT", default=False,
@@ -1038,16 +1056,22 @@ def main():
 
 			
 			if args.central:
-				centralVal = centralValues(source,path,selection,runRange,args.mc,args.backgrounds)
-				if args.mc:
-					outFilePkl = open("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label),"w")
-				else:
-					outFilePkl = open("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label),"w")
+				centralVal = centralValues(source,path,selection,runRange,args.mc,args.backgrounds,args.iso)
+				if args.iso:
+					if args.mc:
+						outFilePkl = open("shelves/triggerEff_%s_%s_%s_NonIso_MC.pkl"%(selection.name,source,runRange.label),"w")
+					else:
+						outFilePkl = open("shelves/triggerEff_%s_%s_%s_NonIso.pkl"%(selection.name,source,runRange.label),"w")
+				else:		
+					if args.mc:
+						outFilePkl = open("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label),"w")
+					else:
+						outFilePkl = open("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label),"w")
 				pickle.dump(centralVal, outFilePkl)
 				outFilePkl.close()
 				
 			if args.dependencies:
-				 dependencies(source,path,selection,args.plots,runRange,args.mc,args.backgrounds,cmsExtra)	
+				 dependencies(source,path,selection,args.plots,runRange,args.mc,args.backgrounds,cmsExtra,args.iso)	
 			
 			if args.bias:
 				studyTriggerBias(path,source,args.plots,selection,runRange,args.backgrounds,cmsExtra,args.biasHT)
