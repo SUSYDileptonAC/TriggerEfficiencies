@@ -481,6 +481,8 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,
 				
 	
 	for name in plots:
+		if isMC:
+			name = name+"MC"
 		plot = getPlot(name)
 		plot.addRegion(selection)
 		#~ plot.cleanCuts()
