@@ -151,7 +151,6 @@ def efficiencyRatioGeometricMean(eff1,eff2,eff3,source):
 
 def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False,nonIso=False):
 	
-	
 	if not isMC:
 		additionalString = ""
 		if nonIso:
@@ -244,7 +243,9 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False,nonIso=F
 				else:
 					nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,cutStringMuEG2,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			
-		else:	
+		else:
+			print source
+			print "%s"%("Trigger"+source,)	
 			treesDenominatorEE = readTrees(path,"EE",source = source, modifier = "%s"%("Trigger"+source,))
 			treesDenominatorMuMu = readTrees(path,"MuMu",source = source, modifier = "%s"%("Trigger"+source,))
 			treesDenominatorEMu = readTrees(path,"EMu",source = source, modifier = "%s"%("Trigger"+source,))
@@ -710,11 +711,12 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,
 		sfLine.SetLineWidth(3)
 		sfLine.SetLineStyle(2)
 		sfLine.Draw("SAME")		
-				
-		sfLineData.SetLineColor(ROOT.kBlack)
-		sfLineData.SetLineWidth(3)
-		sfLineData.SetLineStyle(2)
-		sfLineData.Draw("SAME")				
+		
+		if isMC:		
+			sfLineData.SetLineColor(ROOT.kBlack)
+			sfLineData.SetLineWidth(3)
+			sfLineData.SetLineStyle(2)
+			sfLineData.Draw("SAME")				
 		
 		latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (13 TeV)"%runRange.printval)
 		

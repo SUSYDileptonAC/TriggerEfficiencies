@@ -25,12 +25,12 @@ def main():
 	from sys import argv
 	#~ allPkls = loadPickles("shelves/*.pkl")
 
-	dataPkls = loadPickles("shelves/triggerEff_HighHTExclusive_PFHT_Full2012.pkl")
-	dataBarrelPkls = loadPickles("shelves/triggerEff_HighHTExclusiveCentral_PFHT_Full2012.pkl")
-	dataEndcapPkls = loadPickles("shelves/triggerEff_HighHTExclusiveForward_PFHT_Full2012.pkl")
-	mcPkls = loadPickles("shelves/triggerEff_HighHTExclusive_PFHT_Full2012_MC.pkl")
-	mcBarrelPkls = loadPickles("shelves/triggerEff_HighHTExclusiveCentral_PFHT_Full2012_MC.pkl")
-	mcEndcapPkls = loadPickles("shelves/triggerEff_HighHTExclusiveForward_PFHT_Full2012_MC.pkl")
+	dataPkls = loadPickles("shelves/triggerEff_HighHTExclusive_PFHT_Run2015_25ns_NonIso.pkl")
+	dataBarrelPkls = loadPickles("shelves/triggerEff_HighHTExclusiveCentral_PFHT_Run2015_25ns_NonIso.pkl")
+	dataEndcapPkls = loadPickles("shelves/triggerEff_HighHTExclusiveForward_PFHT_Run2015_25ns_NonIso.pkl")
+	mcPkls = loadPickles("shelves/triggerEff_HighHTExclusive_PFHT_Run2015_25ns_NonIso_MC.pkl")
+	mcBarrelPkls = loadPickles("shelves/triggerEff_HighHTExclusiveCentral_PFHT_Run2015_25ns_NonIso_MC.pkl")
+	mcEndcapPkls = loadPickles("shelves/triggerEff_HighHTExclusiveForward_PFHT_Run2015_25ns_NonIso_MC.pkl")
 
 
 	#~ print dataPkls
@@ -65,7 +65,7 @@ def main():
 
 	tableMC =""
 	tableData =""
-	run = "Full2012"
+	run = "Run2015_25ns"
 	
 	tableData += lineTemplate%("ee",dataPkls[run]["EE"]["Nominator"],dataPkls[run]["EE"]["Denominator"],dataPkls[run]["EE"]["Efficiency"],max(dataPkls[run]["EE"]["UncertaintyUp"],dataPkls[run]["EE"]["UncertaintyDown"]))	
 	tableData += lineTemplate%("$\mu\mu$",dataPkls[run]["MuMu"]["Nominator"],dataPkls[run]["MuMu"]["Denominator"],dataPkls[run]["MuMu"]["Efficiency"],max(dataPkls[run]["MuMu"]["UncertaintyUp"],dataPkls[run]["MuMu"]["UncertaintyDown"]))	
@@ -115,7 +115,7 @@ def main():
 	lineTemplate = r"%s & %d & %d & %.3f$\pm$%.3f & %d & %d & %.3f$\pm$%.3f \\"+"\n"
 	tableMC =""
 	tableData =""
-	run = "Full2012"
+	run = "Run2015_25ns"
 
 	tableData += lineTemplate%("ee",dataBarrelPkls[run]["EE"]["Nominator"],dataBarrelPkls[run]["EE"]["Denominator"],dataBarrelPkls[run]["EE"]["Efficiency"],max(dataBarrelPkls[run]["EE"]["UncertaintyUp"],dataBarrelPkls[run]["EE"]["UncertaintyDown"]),dataEndcapPkls[run]["EE"]["Nominator"],dataEndcapPkls[run]["EE"]["Denominator"],dataEndcapPkls[run]["EE"]["Efficiency"],max(dataEndcapPkls[run]["EE"]["UncertaintyUp"],dataEndcapPkls[run]["EE"]["UncertaintyDown"]))	
 	tableData += lineTemplate%("$\mu\mu$",dataBarrelPkls[run]["MuMu"]["Nominator"],dataBarrelPkls[run]["MuMu"]["Denominator"],dataBarrelPkls[run]["MuMu"]["Efficiency"],max(dataBarrelPkls[run]["MuMu"]["UncertaintyUp"],dataBarrelPkls[run]["MuMu"]["UncertaintyDown"]),dataEndcapPkls[run]["MuMu"]["Nominator"],dataEndcapPkls[run]["MuMu"]["Denominator"],dataEndcapPkls[run]["MuMu"]["Efficiency"],max(dataEndcapPkls[run]["MuMu"]["UncertaintyUp"],dataEndcapPkls[run]["MuMu"]["UncertaintyDown"]))	
