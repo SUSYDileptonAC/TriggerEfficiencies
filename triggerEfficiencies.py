@@ -244,8 +244,6 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False,nonIso=F
 					nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,cutStringMuEG2,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			
 		else:
-			print source
-			print "%s"%("Trigger"+source,)	
 			treesDenominatorEE = readTrees(path,"EE",source = source, modifier = "%s"%("Trigger"+source,))
 			treesDenominatorMuMu = readTrees(path,"MuMu",source = source, modifier = "%s"%("Trigger"+source,))
 			treesDenominatorEMu = readTrees(path,"EMu",source = source, modifier = "%s"%("Trigger"+source,))
@@ -256,11 +254,16 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False,nonIso=F
 			#~ treesNominatorMuE = readTrees(path,"EMu",source = source,modifier="Trigger%sHLTMuEle%s"%(source,additionalString))
 			treesNominatorMuEG = readTrees(path,"EMu",source = source,modifier="Trigger%sHLTMuEG%s"%(source,additionalString))
 
+			#~ print "denominator"
 			denominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorEE.iteritems():
+				#~ print "EE events"
+				#~ tree.CopyTree(plot.cuts).Scan("runNr:lumiSec:eventNr>0 ? eventNr : eventNr+4294967296:met:jet1pt:jet2pt:jet3pt:nJets:nBJets","","colsize=12")
 				denominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			denominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorMuMu.iteritems():
+				#~ print "MuMu events"
+				#~ tree.CopyTree(plot.cuts).Scan("runNr:lumiSec:eventNr>0 ? eventNr : eventNr+4294967296:met:jet1pt:jet2pt:jet3pt:nJets:nBJets","","colsize=12")
 				denominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())		
 			#~ denominatorHistoMuMuNoTrack = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			#~ for name, tree in treesDenominatorMuMu.iteritems():
@@ -273,15 +276,22 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False,nonIso=F
 				#~ denominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			denominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesDenominatorEMu.iteritems():
+				#~ print "EMu events"
+				#~ tree.CopyTree(plot.cuts).Scan("runNr:lumiSec:eventNr>0 ? eventNr : eventNr+4294967296:met:jet1pt:jet2pt:jet3pt:nJets:nBJets","","colsize=12")
 				denominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 
 
 
+			#~ print "nominator"
 			nominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorEE.iteritems():
+				#~ print "EE events"
+				#~ tree.CopyTree(plot.cuts).Scan("runNr:lumiSec:eventNr>0 ? eventNr : eventNr+4294967296:met:jet1pt:jet2pt:jet3pt:nJets:nBJets","","colsize=12")
 				nominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			nominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorMuMu.iteritems():
+				#~ print "MuMu events"
+				#~ tree.CopyTree(plot.cuts).Scan("runNr:lumiSec:eventNr>0 ? eventNr : eventNr+4294967296:met:jet1pt:jet2pt:jet3pt:nJets:nBJets","","colsize=12")
 				nominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			#~ nominatorHistoMuMuNoTrack = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			#~ for name, tree in treesNominatorMuMuNoTrack.iteritems():
@@ -294,6 +304,8 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False,nonIso=F
 				#~ nominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			nominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 			for name, tree in treesNominatorMuEG.iteritems():
+				#~ print "EMu events"
+				#~ tree.CopyTree(plot.cuts).Scan("runNr:lumiSec:eventNr>0 ? eventNr : eventNr+4294967296:met:jet1pt:jet2pt:jet3pt:nJets:nBJets","","colsize=12")
 				nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 	else:
 		if source == "PFHT":
@@ -389,6 +401,7 @@ def centralValues(source,path,selection,runRange,isMC,backgrounds,nonIso):
 		print "have no uncertainty for this selection, using 5%"
 		err = 0.05
 	
+	#~ print selection
 	plot = getPlot("mllPlot")
 	plot.addRegion(selection)
 	plot.cleanCuts()
