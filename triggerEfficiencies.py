@@ -26,7 +26,7 @@ from defs import getRegion, getPlot, getRunRange, Backgrounds
 
 from setTDRStyle import setTDRStyle
 from helpers import readTrees, createHistoFromTree, TheStack, totalNumberOfGeneratedEvents, Process
-from centralConfig import regionsToUse, runRanges, backgroundLists, plotLists, baselineTrigger, systematics
+from centralConfig import regionsToUse, runRanges, backgroundLists, plotLists, systematics
 from locations import locations
 
 tableTemplate = r"""
@@ -179,11 +179,11 @@ def getHistograms(path,plot,runRange,isMC,backgrounds):
 		treesDenominatorEMu = readTrees(path,"EMu", modifier = "MiniAODTriggerEfficiencyHLTPFHT")
 		
 		
-		treesNominatorEE = readTrees(path,"EE",modifier="MiniAODTriggerEfficiencyHLTPFHTDiEleAll")
-		treesNominatorMuMu = readTrees(path,"MuMu",modifier="MiniAODTriggerEfficiencyHLTPFHTDiMuAll")
-		treesNominatorMuEG = readTrees(path,"EMu",modifier="MiniAODTriggerEfficiencyHLTPFHTMuEGAll")
+		treesNominatorEE = readTrees(path,"EE",modifier="MiniAODTriggerEfficiencyHLTPFHTDiEle")
+		treesNominatorMuMu = readTrees(path,"MuMu",modifier="MiniAODTriggerEfficiencyHLTPFHTDiMu")
+		treesNominatorMuEG = readTrees(path,"EMu",modifier="MiniAODTriggerEfficiencyHLTPFHTMuEG")
 		
-		eventCounts = totalNumberOfGeneratedEvents(path,"TT")	
+		eventCounts = totalNumberOfGeneratedEvents(path)	
 		processes = []
 		for background in backgrounds:
 			processes.append(Process(getattr(Backgrounds,background),eventCounts))
