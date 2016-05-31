@@ -25,12 +25,12 @@ def main():
 	from sys import argv
 	#~ allPkls = loadPickles("shelves/*.pkl")
 
-	dataPkls = loadPickles("shelves/triggerEff_HighHTExclusive_PFHT_Run2015_25ns_NonIso.pkl")
-	dataBarrelPkls = loadPickles("shelves/triggerEff_HighHTExclusiveCentral_PFHT_Run2015_25ns_NonIso.pkl")
-	dataEndcapPkls = loadPickles("shelves/triggerEff_HighHTExclusiveForward_PFHT_Run2015_25ns_NonIso.pkl")
-	mcPkls = loadPickles("shelves/triggerEff_HighHTExclusive_PFHT_Run2015_25ns_NonIso_MC.pkl")
-	mcBarrelPkls = loadPickles("shelves/triggerEff_HighHTExclusiveCentral_PFHT_Run2015_25ns_NonIso_MC.pkl")
-	mcEndcapPkls = loadPickles("shelves/triggerEff_HighHTExclusiveForward_PFHT_Run2015_25ns_NonIso_MC.pkl")
+	dataPkls = loadPickles("shelves/triggerEff_HighHTExclusive_Run2015_25ns.pkl")
+	dataBarrelPkls = loadPickles("shelves/triggerEff_HighHTExclusiveCentral_Run2015_25ns.pkl")
+	dataEndcapPkls = loadPickles("shelves/triggerEff_HighHTExclusiveForward_Run2015_25ns.pkl")
+	mcPkls = loadPickles("shelves/triggerEff_HighHTExclusive_Run2015_25ns_MC.pkl")
+	mcBarrelPkls = loadPickles("shelves/triggerEff_HighHTExclusiveCentral_Run2015_25ns_MC.pkl")
+	mcEndcapPkls = loadPickles("shelves/triggerEff_HighHTExclusiveForward_Run2015_25ns_MC.pkl")
 
 
 	#~ print dataPkls
