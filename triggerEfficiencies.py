@@ -20,6 +20,7 @@ import argparse
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 from ROOT import TCanvas, TEfficiency, TPad, TH1F, TH1I, THStack, TLegend, TMath, TGraphAsymmErrors, TF1
+ROOT.gROOT.SetBatch(True)
 
 
 from defs import getRegion, getPlot, getRunRange, Backgrounds
