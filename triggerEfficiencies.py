@@ -20,6 +20,7 @@ import argparse
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 from ROOT import TCanvas, TEfficiency, TPad, TH1F, TH1I, THStack, TLegend, TMath, TGraphAsymmErrors, TF1
+ROOT.gROOT.SetBatch(True)
 
 
 from defs import getRegion, getPlot, getRunRange, Backgrounds
@@ -244,15 +245,17 @@ def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False,nonIso=F
 					nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,cutStringMuEG2,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 			
 		else:
+			print path
+			print source
 			treesDenominatorEE = readTrees(path,"EE",source = source, modifier = "%s"%("Trigger"+source,))
 			treesDenominatorMuMu = readTrees(path,"MuMu",source = source, modifier = "%s"%("Trigger"+source,))
 			treesDenominatorEMu = readTrees(path,"EMu",source = source, modifier = "%s"%("Trigger"+source,))
-			treesNominatorEE = readTrees(path,"EE",source = source,modifier="Trigger%sHLTDiEle%s"%(source,additionalString))
-			treesNominatorMuMu = readTrees(path,"MuMu",source = source,modifier="Trigger%sHLTDiMu%s"%(source,additionalString))
+			treesNominatorEE = readTrees(path,"EE",source = source,modifier="Trigger%sHLTDiEleAll%s"%(source,additionalString))
+			treesNominatorMuMu = readTrees(path,"MuMu",source = source,modifier="Trigger%sHLTDiMuAll%s"%(source,additionalString))
 			#~ treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = source,modifier="Trigger%sHLTDiMuNoTrackerMuon%s"%(source,additionalString))
 			#~ treesNominatorEMu = readTrees(path,"EMu",source = source,modifier="Trigger%sHLTEleMu%s"%(source,additionalString))
 			#~ treesNominatorMuE = readTrees(path,"EMu",source = source,modifier="Trigger%sHLTMuEle%s"%(source,additionalString))
-			treesNominatorMuEG = readTrees(path,"EMu",source = source,modifier="Trigger%sHLTMuEG%s"%(source,additionalString))
+			treesNominatorMuEG = readTrees(path,"EMu",source = source,modifier="Trigger%sHLTMuEGAll%s"%(source,additionalString))
 
 			#~ print "denominator"
 			denominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
@@ -586,7 +589,7 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,
 		effEE.SetMarkerStyle(20)
 		effMuMu.SetMarkerStyle(21)
 		effOF.SetMarkerStyle(22)				
-		plotPad.DrawFrame(plot.firstBin,0.6,plot.lastBin,1.2,"; %s ; Efficiency" %(plot.xaxis))
+		plotPad.DrawFrame(plot.firstBin,0.,plot.lastBin,1.3,"; %s ; Efficiency" %(plot.xaxis))
 		
 
 		
