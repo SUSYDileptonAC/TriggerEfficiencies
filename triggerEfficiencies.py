@@ -30,14 +30,6 @@ from helpers import readTrees, createHistoFromTree, TheStack, totalNumberOfGener
 from centralConfig import regionsToUse, runRanges, backgroundLists, plotLists, systematics
 from locations import locations
 
-tableTemplate = r"""
-\begin{tabular}{l|c|c|c|c}
-Run Period & Trigger & $N_{nominator}$ & $N_{denominator}$ & efficiency\\
-\hline
-%s
-\end{tabular}
-"""
-
 def getEfficiency(nominatorHisto, denominatorHisto,cutString):
 	eff = TGraphAsymmErrors(nominatorHisto,denominatorHisto,"cp")
 	effValue = ROOT.Double(0.)
@@ -54,44 +46,6 @@ def getEfficiency(nominatorHisto, denominatorHisto,cutString):
 	#	print cut, n
 	n["cut"] = cutString
 	return n
-
-
-def efficiencyRatio(eff1,eff2):
-	newEff = TGraphAsymmErrors(eff1.GetN())
-	for i in range(0,eff1.GetN()):
-		pointX1 = ROOT.Double(0.)
-		pointX2 = ROOT.Double(0.)
-		pointY1 = ROOT.Double(0.)
-		pointY2 = ROOT.Double(0.)
-		
-		isSuccesful1 = eff1.GetPoint(i,pointX1,pointY1)
-		isSuccesful2 = eff2.GetPoint(i,pointX2,pointY2)
-		errY1Up = eff1.GetErrorYhigh(i)
-		errY1Low = eff1.GetErrorYlow(i)
-		errY2Up = eff2.GetErrorYhigh(i)
-		errY2Low = eff2.GetErrorYlow(i)
-		
-		errX = eff1.GetErrorX(i)
-		
-		
-		if pointY2!=0:
-			yValue = pointY1/pointY2
-			xValue = pointX1
-			xError = errX
-			yErrorUp = math.sqrt(((1/pointY2)*errY1Up)**2+((pointY1/pointY2**2)*errY2Up)**2)
-			yErrorDown = math.sqrt(((1/pointY2)*errY1Low)**2+((pointY1/pointY2**2)*errY2Low)**2)				
-		else:
-			yValue = 0
-			xValue = pointX1
-			xError = errX
-			yErrorUp =0
-			yErrorDown = 0
-			
-		#~ print i
-		newEff.SetPoint(i,xValue,yValue)
-		newEff.SetPointError(i,xError,xError,yErrorDown,yErrorUp)
-		
-	return newEff
 	
 def efficiencyRatioGeometricMean(eff1,eff2,eff3):
 	newEff = TGraphAsymmErrors(eff1.GetN())
@@ -145,34 +99,25 @@ def getHistograms(path,plot,runRange,isMC,backgrounds):
 		treesNominatorMuMu = readTrees(path,"MuMu",modifier="TriggerPFHTHLTDiMuAll")
 		treesNominatorMuEG = readTrees(path,"EMu",modifier="TriggerPFHTHLTMuEGAll")
 
-		#~ print "denominator"
 		denominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 		for name, tree in treesDenominatorEE.iteritems():
-			#~ print "EE events"
 			denominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 		denominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 		for name, tree in treesDenominatorMuMu.iteritems():
-			#~ print "MuMu events"
 			denominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())		
 		denominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 		for name, tree in treesDenominatorEMu.iteritems():
-			#~ print "EMu events"
 			denominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 
 
-
-		#~ print "nominator"
 		nominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 		for name, tree in treesNominatorEE.iteritems():
-			#~ print "EE events"
 			nominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 		nominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 		for name, tree in treesNominatorMuMu.iteritems():
-			#~ print "MuMu events"
 			nominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 		nominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
 		for name, tree in treesNominatorMuEG.iteritems():
-			#~ print "EMu events"
 			nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 	else:			
 		treesDenominatorEE = readTrees(path,"EE", modifier = "MiniAODTriggerEfficiencyHLTPFHT")
@@ -221,7 +166,6 @@ def centralValues(path,selection,runRange,isMC,backgrounds):
 		print "have no uncertainty for this selection, using 5%"
 		err = 0.05
 	
-	#~ print selection
 	plot = getPlot("mllPlot")
 	plot.addRegion(selection)
 	plot.cleanCuts()
@@ -359,8 +303,6 @@ def dependencies(path,selection,plots,runRange,isMC,backgrounds,cmsExtra):
 		effOF.SetMarkerStyle(22)				
 		plotPad.DrawFrame(plot.firstBin,0.6,plot.lastBin,1.2,"; %s ; Efficiency" %(plot.xaxis))
 		
-
-		
 		legend.Clear()
 		legend.AddEntry(effEE,"ee","p")
 		legend.AddEntry(effMuMu,"#mu#mu","p")
@@ -400,8 +342,6 @@ def dependencies(path,selection,plots,runRange,isMC,backgrounds,cmsExtra):
 		
 		effSF = TGraphAsymmErrors(nominatorHistoSF,denominatorHistoSF,"cp")
 		effOF = TGraphAsymmErrors(nominatorHistoOF,denominatorHistoOF,"cp")
-
-
 
 		effSF.SetMarkerColor(ROOT.kBlack)
 		effOF.SetMarkerColor(ROOT.kBlue)
@@ -479,8 +419,7 @@ def dependencies(path,selection,plots,runRange,isMC,backgrounds,cmsExtra):
 		effSFvsOF.Draw("samep")
 		if isMC:
 			effSFvsOFData.Draw("samep")
-		
-		
+			
 		sfLine.SetLineColor(ROOT.kBlue)
 		sfLine.SetLineWidth(3)
 		sfLine.SetLineStyle(2)
@@ -497,13 +436,11 @@ def dependencies(path,selection,plots,runRange,isMC,backgrounds,cmsExtra):
 
 		latexCMS.DrawLatex(0.19,0.88,"CMS")
 		if "Simulation" in cmsExtra:
-			cmsExtra = "Preliminary"
 			yLabelPos = 0.81	
 		else:
 			yLabelPos = 0.84	
 
 		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))	
-
 		
 		legend.Clear() 
 			
@@ -523,8 +460,7 @@ def dependencies(path,selection,plots,runRange,isMC,backgrounds,cmsExtra):
 			hCanvas.Print("fig/Triggereff_SFvsOF_Syst_%s_%s_%s_%s_MC.pdf"%(selection.name,runRange.label,plot.variablePlotName,plot.additionalName))		
 		else:
 			hCanvas.Print("fig/Triggereff_SFvsOF_Syst_%s_%s_%s_%s.pdf"%(selection.name,runRange.label,plot.variablePlotName,plot.additionalName))	
-			
-			
+				
 			
 				
 def main():
@@ -545,9 +481,7 @@ def main():
 	parser.add_argument("-b", "--backgrounds", dest="backgrounds", action="append", default=[],
 						  help="backgrounds to plot.")
 	parser.add_argument("-d", "--dependencies", action="store_true", dest="dependencies", default= False,
-						  help="make dependency plots")
-	parser.add_argument("-x", "--private", action="store_true", dest="private", default=False,
-						  help="plot is private work.")								
+						  help="make dependency plots")							
 	parser.add_argument("-w", "--write", action="store_true", dest="write", default=False,
 						  help="write results to central repository")	
 					
@@ -572,15 +506,9 @@ def main():
 	
 	log.logHighlighted("Using trees from %s "%path)
 	
-	cmsExtra = ""
-	if args.private:
-		cmsExtra = "Private Work"
-		if args.mc:
-			cmsExtra = "#splitline{Private Work}{Simulation}"
-	elif args.mc:
-		cmsExtra = "Simulation"	
-	else:
-		cmsExtra = "Preliminary"	
+	cmsExtra = "Private Work"
+	if args.mc:
+		cmsExtra = "#splitline{Private Work}{Simulation}"
 	
 
 	
