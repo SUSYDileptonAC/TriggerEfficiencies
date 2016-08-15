@@ -39,6 +39,7 @@ def main():
 
 	tableTemplate =r"""
 \begin{table}[hbp] \caption{Triggerefficiency-values for data and MC with OS, $p_T>20(20)\,\GeV$ and $H_T>200\,\GeV$ for the inclusive region.} 
+\label{tab:EffValues_Inclusive}
 \centering 
 \renewcommand{\arraystretch}{1.2} 
 \begin{tabular}{l|c|c|c}     
@@ -49,9 +50,6 @@ def main():
 \hline
 %s 
  
-\end{tabular}  
-\label{tab:EffValues_Inclusive}
-\end{table}
 
 \hline
 & \multicolumn{3}{c}{MC, $|\eta|<2.4$ } \\
@@ -59,6 +57,9 @@ def main():
 
 %s    
     \hline 
+    
+\end{tabular}  
+\end{table}    
 """
 	lineTemplate = r"%s & %d & %d & %.3f$\pm$%.3f \\"+"\n"
 
@@ -87,6 +88,7 @@ def main():
 
 	tableTemplate =r"""
 \begin{table}[hbp] \caption{Triggerefficiency-values for data and MC with OS, $p_T>20(20)\,\GeV$ and $H_T>200\,\GeV$ for central and forward region seperated.} 
+\label{tab:EffValues_Seperated}
 \centering 
 \renewcommand{\arraystretch}{1.2} 
 \begin{tabular}{l|c|c|c|c|c|c}     
@@ -99,10 +101,6 @@ def main():
 &  \multicolumn{3}{c|}{$|\eta|<1.4$ } & \multicolumn{3}{|c}{ at least 1 $|\eta| > 1.6$ }\\
 \hline
 %s 
- 
-\end{tabular}  
-\label{tab:EffValues_Seperated}
-\end{table}
 
 & \multicolumn{6}{c}{MC} \\
 \hline
@@ -110,6 +108,9 @@ def main():
 \hline 
 %s    
     \hline 
+    
+\end{tabular}  
+\end{table}
 	
 """
 	lineTemplate = r"%s & %d & %d & %.3f$\pm$%.3f & %d & %d & %.3f$\pm$%.3f \\"+"\n"
