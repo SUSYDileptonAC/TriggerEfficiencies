@@ -90,60 +90,65 @@ def efficiencyRatioGeometricMean(eff1,eff2,eff3):
 
 def getHistograms(path,plot,runRange,isMC,backgrounds):
 	
-	if not isMC:
-			
-		treesDenominatorEE = readTrees(path,"EE",modifier = "TriggerPFHT")
-		treesDenominatorMuMu = readTrees(path,"MuMu", modifier = "TriggerPFHT")
-		treesDenominatorEMu = readTrees(path,"EMu", modifier = "TriggerPFHT")
-		treesNominatorEE = readTrees(path,"EE",modifier="TriggerPFHTHLTDiEleAll")
-		treesNominatorMuMu = readTrees(path,"MuMu",modifier="TriggerPFHTHLTDiMuAll")
-		treesNominatorMuEG = readTrees(path,"EMu",modifier="TriggerPFHTHLTMuEGAll")
+	baseCut = plot.cuts	
+	cutsEE = baseCut+"*( HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v > 0 || HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v > 0)"
+	cutsEMu = baseCut+"*( HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v > 0 || HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v > 0 || HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v > 0)"
+	cutsMuMu = baseCut+"*( HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v > 0 || HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v > 0 || HLT_Mu27_TkMu8_v > 0)"
 
+	
+	if not isMC:			
+		treesEE = readTrees(path,"EE",modifier = "TriggerPFHT")
+		treesMuMu = readTrees(path,"MuMu", modifier = "TriggerPFHT")
+		treesEMu = readTrees(path,"EMu", modifier = "TriggerPFHT")
+		
 		denominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-		for name, tree in treesDenominatorEE.iteritems():
-			denominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+		for name, tree in treesEE.iteritems():
+			if name == "MergedData":
+				denominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 		denominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-		for name, tree in treesDenominatorMuMu.iteritems():
-			denominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())		
+		for name, tree in treesMuMu.iteritems():
+			if name == "MergedData":
+				denominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())		
 		denominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-		for name, tree in treesDenominatorEMu.iteritems():
-			denominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+		for name, tree in treesEMu.iteritems():
+			if name == "MergedData":
+				denominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 
 
 		nominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-		for name, tree in treesNominatorEE.iteritems():
-			nominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+		for name, tree in treesEE.iteritems():
+			if name == "MergedData":
+				nominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,cutsEE,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 		nominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-		for name, tree in treesNominatorMuMu.iteritems():
-			nominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+		for name, tree in treesMuMu.iteritems():
+			if name == "MergedData":
+				nominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,cutsMuMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 		nominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-		for name, tree in treesNominatorMuEG.iteritems():
-			nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-	else:			
-		treesDenominatorEE = readTrees(path,"EE", modifier = "MiniAODTriggerEfficiencyHLTPFHT")
-		treesDenominatorMuMu = readTrees(path,"MuMu", modifier = "MiniAODTriggerEfficiencyHLTPFHT")
-		treesDenominatorEMu = readTrees(path,"EMu", modifier = "MiniAODTriggerEfficiencyHLTPFHT")
-		
-		
-		treesNominatorEE = readTrees(path,"EE",modifier="MiniAODTriggerEfficiencyHLTPFHTDiEle")
-		treesNominatorMuMu = readTrees(path,"MuMu",modifier="MiniAODTriggerEfficiencyHLTPFHTDiMu")
-		treesNominatorMuEG = readTrees(path,"EMu",modifier="MiniAODTriggerEfficiencyHLTPFHTMuEG")
+		for name, tree in treesEMu.iteritems():
+			if name == "MergedData":
+				nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,cutsEMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+	else:	
+		treesEE = readTrees(path,"EE")
+		treesMuMu = readTrees(path,"MuMu")
+		treesEMu = readTrees(path,"EMu")
 		
 		eventCounts = totalNumberOfGeneratedEvents(path)	
 		processes = []
 		for background in backgrounds:
 			processes.append(Process(getattr(Backgrounds,background),eventCounts))
 		
-		tmpCuts = plot.cuts
+		denominatorStackEE = TheStack(processes,runRange.lumi,plot,treesEE,"None",1.0,1.0,1.0)		
+		denominatorStackMuMu = TheStack(processes,runRange.lumi,plot,treesMuMu,"None",1.0,1.0,1.0)	
+		denominatorStackMuEG = TheStack(processes,runRange.lumi,plot,treesEMu,"None",1.0,1.0,1.0)	
 		
-		denominatorStackEE = TheStack(processes,runRange.lumi,plot,treesDenominatorEE,"None",1.0,1.0,1.0)		
-		denominatorStackMuMu = TheStack(processes,runRange.lumi,plot,treesDenominatorMuMu,"None",1.0,1.0,1.0)	
-		denominatorStackMuEG = TheStack(processes,runRange.lumi,plot,treesDenominatorEMu,"None",1.0,1.0,1.0)	
+		plot.cuts = cutsEE	
+		nominatorStackEE = TheStack(processes,runRange.lumi,plot,treesEE,"None",1.0,1.0,1.0)	
+		plot.cuts = cutsMuMu	
+		nominatorStackMuMu = TheStack(processes,runRange.lumi,plot,treesMuMu,"None",1.0,1.0,1.0)
+		plot.cuts = cutsEMu		
+		nominatorStackMuEG = TheStack(processes,runRange.lumi,plot,treesEMu,"None",1.0,1.0,1.0)
 		
-			
-		nominatorStackEE = TheStack(processes,runRange.lumi,plot,treesNominatorEE,"None",1.0,1.0,1.0)		
-		nominatorStackMuMu = TheStack(processes,runRange.lumi,plot,treesNominatorMuMu,"None",1.0,1.0,1.0)		
-		nominatorStackMuEG = TheStack(processes,runRange.lumi,plot,treesNominatorMuEG,"None",1.0,1.0,1.0)
+		plot.cuts = baseCut
 			
 		denominatorHistoEE = denominatorStackEE.theHistogram
 		denominatorHistoMuMu = denominatorStackMuMu.theHistogram
@@ -501,8 +506,6 @@ def main():
 		args.runRange.append(runRanges.name)	
 
 	path = locations.triggerDataSetPath	
-	if args.mc:
-		path = locations.triggerDataSetPathMC
 	
 	log.logHighlighted("Using trees from %s "%path)
 	
