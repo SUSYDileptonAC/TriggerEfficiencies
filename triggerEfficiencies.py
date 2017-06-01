@@ -23,7 +23,7 @@ from ROOT import TCanvas, TEfficiency, TPad, TH1F, TH1I, THStack, TLegend, TMath
 ROOT.gROOT.SetBatch(True)
 
 
-from defs import getRegion, getPlot, getRunRange, Backgrounds
+from defs import getRegion, getPlot, getRunRange, Backgrounds,theCuts
 
 from setTDRStyle import setTDRStyle
 from helpers import readTrees, createHistoFromTree, TheStack, totalNumberOfGeneratedEvents, Process
@@ -87,7 +87,6 @@ def efficiencyRatio(eff1,eff2):
 			yErrorUp =0
 			yErrorDown = 0
 			
-		#~ print i
 		newEff.SetPoint(i,xValue,yValue)
 		newEff.SetPointError(i,xError,xError,yErrorDown,yErrorUp)
 		
@@ -114,8 +113,7 @@ def efficiencyRatioGeometricMean(eff1,eff2,eff3,source):
 		errY3Down = eff3.GetErrorYlow(i)
 		
 		errX = eff1.GetErrorX(i)
-		#~ print pointY1
-		#~ print pointY2
+
 
 		if source == "SingleLepton":
 			if pointY3!=0 and pointY2!=0 and pointY3!=0:
@@ -148,252 +146,110 @@ def efficiencyRatioGeometricMean(eff1,eff2,eff3,source):
 		newEff.SetPointError(i,xError,xError,yErrorDown,yErrorUp)
 		
 	return newEff
+	
+def efficiencyRatioSF(eff1,eff2,):
+	newEff = TGraphAsymmErrors(eff1.GetN())
+	for i in range(0,eff1.GetN()):
+		pointX1 = ROOT.Double(0.)
+		pointX2 = ROOT.Double(0.)
+		pointY1 = ROOT.Double(0.)
+		pointY2 = ROOT.Double(0.)
+		
+		isSuccesful1 = eff1.GetPoint(i,pointX1,pointY1)
+		isSuccesful2 = eff2.GetPoint(i,pointX2,pointY2)
+		errY1Up = eff1.GetErrorYhigh(i)
+		errY1Down = eff1.GetErrorYlow(i)
+		errY2Up = eff2.GetErrorYhigh(i)
+		errY2Down = eff2.GetErrorYlow(i)
+		
+		errX = eff1.GetErrorX(i)
+
+		if pointY1!=0 and pointY2!=0:
+			yValue = pointY1/pointY2
+			xValue = pointX1
+			xError = errX			
+			yErrorUp = math.sqrt( (  1. / pointY2  * errY1Up )**2 + (  pointY1 / pointY2**2  * errY2Down )**2 )				
+			yErrorDown = math.sqrt( (  1. / pointY2  * errY1Down )**2 + (  pointY1 / pointY2**2  * errY2Up )**2 )					
+		else:
+			yValue = 0
+			xValue = pointX1
+			xError = errX
+			yErrorUp =0
+			yErrorDown = 0
+			
+		newEff.SetPoint(i,xValue,yValue)
+		newEff.SetPointError(i,xError,xError,yErrorDown,yErrorUp)
+		
+	return newEff
 
 
-def getHistograms(path,source,plot,runRange,isMC,backgrounds,noHT=False,nonIso=False):
+def getHistograms(path,plot,runRange,isMC,backgrounds,source):
 	
 	if not isMC:
-		additionalString = ""
-		if nonIso:
-			additionalString = "All"
-		if "Single" in source:
-
-		
-			treesDenominatorEE = readTrees(path,"EE",source = source, modifier = "%s"%(source+"Trigger",))
-			treesDenominatorMuMu = readTrees(path,"MuMu",source = source, modifier = "%s"%(source+"Trigger",))
-			treesDenominatorEMu = readTrees(path,"EMu",source = source, modifier = "%s"%(source+"Trigger",))
+		treesEE = readTrees(path,"EE",modifier = "TriggerPFHT")
+		treesMuMu = readTrees(path,"MuMu", modifier = "TriggerPFHT")
+		treesEMu = readTrees(path,"EMu", modifier = "TriggerPFHT")
 			
-			if nonIso:
-				treesNominatorEE = readTrees(path,"EE",source = source,modifier="%sHLTDiEleAll"%(source+"Trigger"))
-				treesNominatorMuMu = readTrees(path,"MuMu",source = source,modifier="%sHLTDiMuAll"%(source+"Trigger"))
-				#~ treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = source,modifier="%sHLTDiMuNoTrackerMuon"%(source+"Trigger"))
-				treesNominatorEMu = readTrees(path,"EMu",source = source,modifier="%sHLTEleMuAll"%(source+"Trigger"))
-				treesNominatorMuE = readTrees(path,"EMu",source = source,modifier="%sHLTMuEleAll"%(source+"Trigger"))
-				treesNominatorMuEG = readTrees(path,"EMu",source = source,modifier="%sHLTMuEGAll"%(source+"Trigger"))
-			else:
-				treesNominatorEE = readTrees(path,"EE",source = source,modifier="%sHLTDiEle"%(source+"Trigger"))
-				treesNominatorMuMu = readTrees(path,"MuMu",source = source,modifier="%sHLTDiMu"%(source+"Trigger"))
-				#~ treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = source,modifier="%sHLTDiMuNoTrackerMuon"%(source+"Trigger"))
-				treesNominatorEMu = readTrees(path,"EMu",source = source,modifier="%sHLTEleMu"%(source+"Trigger"))
-				treesNominatorMuE = readTrees(path,"EMu",source = source,modifier="%sHLTMuEle"%(source+"Trigger"))
-				treesNominatorMuEG = readTrees(path,"EMu",source = source,modifier="%sHLTMuEG"%(source+"Trigger"))
-			
-			cutStringEE = plot.cuts.replace("weight*(","weight*(matchesSingleElectron2 == 1 && pt2 > 30 &&")				
-			cutStringMuMu = plot.cuts.replace("weight*","weight*(matchesSingleMuon2 && pt2 > 30 == 1)*")			
-			cutStringEMu = plot.cuts.replace("weight*","weight*(pt1 > 30 && matchesSingleElectron1 == 1)*")	
-			cutStringMuE = plot.cuts.replace("weight*","weight*(pt2 > 30 && matchesSingleMuon2 == 1 )*")	
-			cutStringMuEG1 = plot.cuts.replace("weight*","weight*(pt1 > pt2 && pt1 > 30 && matchesSingleElectron1 == 1 )*")	
-			cutStringMuEG2 = plot.cuts.replace("weight*","weight*(pt2 > pt1 && pt2 > 30 && matchesSingleMuon2 == 1 )*")	
-			
-			denominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorEE.iteritems():
-				denominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,cutStringEE,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			denominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorMuMu.iteritems():
-				denominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,cutStringMuMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())		
-			#~ denominatorHistoMuMuNoTrack = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			#~ for name, tree in treesDenominatorMuMu.iteritems():
-				#~ denominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,cutStringMuMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			denominatorHistoEMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorEMu.iteritems():
-				denominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,cutStringEMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			denominatorHistoMuE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorEMu.iteritems():
-				denominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,cutStringMuE,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			denominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorEMu.iteritems():
-				if source == "SingleElectron":
-					denominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,cutStringMuEG1,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-				else:
-					denominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,cutStringMuEG2,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-
-			if nonIso:
-				cutStringEE = plot.cuts.replace("weight*(","weight*(matchesSingleElectron2 == 1 && pt2 > 30 && (matchesDoubleElectronTrailing1 || matchesDoubleElectronTrailingNonIso1) &&")				
-				cutStringMuMu = plot.cuts.replace("weight*","weight*(matchesSingleMuon2 == 1 && pt2 > 30 && (matchesDoubleMuonTrailingBoth1 || matchesDoubleMuonTrailingNonIso1))*")			
-				cutStringEMu = plot.cuts.replace("weight*","weight*(pt1 > 30 && matchesSingleElectron1 == 1 && (matchesEMuTrailing2 || matchesMuEGMuonNonIso2) )*")	
-				cutStringMuE = plot.cuts.replace("weight*","weight*(pt2 > 30 && matchesSingleMuon2 == 1  && (matchesMuETrailing1 ||  matchesMuEGElectronNonIso1) )*")	
-				cutStringMuEG1 = plot.cuts.replace("weight*","weight*(pt1 > pt2 && pt1 > 30 && matchesSingleElectron1 == 1 && (matchesEMuTrailing2 || matchesMuEGMuonNonIso2))*")	
-				cutStringMuEG2 = plot.cuts.replace("weight*","weight*(pt2 > pt1 && pt2 > 30 && matchesSingleMuon2 == 1 && (matchesMuETrailing1 || matchesMuEGElectronNonIso1) )*")	
-			else:
-				cutStringEE = plot.cuts.replace("weight*(","weight*(matchesSingleElectron2 == 1 && pt2 > 30 && matchesDoubleElectronTrailing1 &&")				
-				cutStringMuMu = plot.cuts.replace("weight*","weight*(matchesSingleMuon2 == 1 && pt2 > 30 && matchesDoubleMuonTrailingBoth1)*")			
-				cutStringEMu = plot.cuts.replace("weight*","weight*(pt1 > 30 && matchesSingleElectron1 == 1 && matchesEMuTrailing2)*")	
-				cutStringMuE = plot.cuts.replace("weight*","weight*(pt2 > 30 && matchesSingleMuon2 == 1  && matchesMuETrailing1)*")	
-				cutStringMuEG1 = plot.cuts.replace("weight*","weight*(pt1 > pt2 && pt1 > 30 && matchesSingleElectron1 == 1 && matchesEMuTrailing2)*")	
-				cutStringMuEG2 = plot.cuts.replace("weight*","weight*(pt2 > pt1 && pt2 > 30 && matchesSingleMuon2 == 1 && matchesMuETrailing1)*")	
-
-			nominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorEE.iteritems():
-				nominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,cutStringEE,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			nominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorMuMu.iteritems():
-				nominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,cutStringMuMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			#~ nominatorHistoMuMuNoTrack = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			#~ for name, tree in treesNominatorMuMuNoTrack.iteritems():
-				#~ nominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,cutStringMuMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			nominatorHistoMuE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorEMu.iteritems():
-				nominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,cutStringMuE,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			nominatorHistoEMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorEMu.iteritems():
-				nominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,cutStringEMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			nominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorEMu.iteritems():
-				if source == "SingleElectron":
-					nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,cutStringMuEG1,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-				else:
-					nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,cutStringMuEG2,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			
-		else:
-			print path
-			print source
-			treesDenominatorEE = readTrees(path,"EE",source = source, modifier = "%s"%("Trigger"+source,))
-			treesDenominatorMuMu = readTrees(path,"MuMu",source = source, modifier = "%s"%("Trigger"+source,))
-			treesDenominatorEMu = readTrees(path,"EMu",source = source, modifier = "%s"%("Trigger"+source,))
-			treesNominatorEE = readTrees(path,"EE",source = source,modifier="Trigger%sHLTDiEleAll%s"%(source,additionalString))
-			treesNominatorMuMu = readTrees(path,"MuMu",source = source,modifier="Trigger%sHLTDiMuAll%s"%(source,additionalString))
-			#~ treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = source,modifier="Trigger%sHLTDiMuNoTrackerMuon%s"%(source,additionalString))
-			#~ treesNominatorEMu = readTrees(path,"EMu",source = source,modifier="Trigger%sHLTEleMu%s"%(source,additionalString))
-			#~ treesNominatorMuE = readTrees(path,"EMu",source = source,modifier="Trigger%sHLTMuEle%s"%(source,additionalString))
-			treesNominatorMuEG = readTrees(path,"EMu",source = source,modifier="Trigger%sHLTMuEGAll%s"%(source,additionalString))
-
-			#~ print "denominator"
-			denominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorEE.iteritems():
-				#~ print "EE events"
-				#~ tree.CopyTree(plot.cuts).Scan("runNr:lumiSec:eventNr>0 ? eventNr : eventNr+4294967296:met:jet1pt:jet2pt:jet3pt:nJets:nBJets","","colsize=12")
+		denominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
+		for name, tree in treesEE.iteritems():
+			if name == "MergedData":
 				denominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			denominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorMuMu.iteritems():
-				#~ print "MuMu events"
-				#~ tree.CopyTree(plot.cuts).Scan("runNr:lumiSec:eventNr>0 ? eventNr : eventNr+4294967296:met:jet1pt:jet2pt:jet3pt:nJets:nBJets","","colsize=12")
+		denominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
+		for name, tree in treesMuMu.iteritems():
+			if name == "MergedData":
 				denominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())		
-			#~ denominatorHistoMuMuNoTrack = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			#~ for name, tree in treesDenominatorMuMu.iteritems():
-				#~ denominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			#~ denominatorHistoEMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			#~ for name, tree in treesDenominatorEMu.iteritems():
-				#~ denominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			#~ denominatorHistoMuE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			#~ for name, tree in treesDenominatorEMu.iteritems():
-				#~ denominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			denominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesDenominatorEMu.iteritems():
-				#~ print "EMu events"
-				#~ tree.CopyTree(plot.cuts).Scan("runNr:lumiSec:eventNr>0 ? eventNr : eventNr+4294967296:met:jet1pt:jet2pt:jet3pt:nJets:nBJets","","colsize=12")
+		denominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
+		for name, tree in treesEMu.iteritems():
+			if name == "MergedData":
 				denominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+				
+		cutsEE = plot.cuts.replace("chargeProduct < 0", "chargeProduct < 0 && %s"%theCuts.triggerCuts.EE.cut)
+		cutsOF = plot.cuts.replace("chargeProduct < 0", "chargeProduct < 0 && %s"%theCuts.triggerCuts.EM.cut)
+		cutsMuMu = plot.cuts.replace("chargeProduct < 0", "chargeProduct < 0 && %s"%theCuts.triggerCuts.MM.cut)
 
 
-
-			#~ print "nominator"
-			nominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesNominatorEE.iteritems():
-				#~ print "EE events"
-				#~ tree.CopyTree(plot.cuts).Scan("runNr:lumiSec:eventNr>0 ? eventNr : eventNr+4294967296:met:jet1pt:jet2pt:jet3pt:nJets:nBJets","","colsize=12")
-				nominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			nominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesNominatorMuMu.iteritems():
-				#~ print "MuMu events"
-				#~ tree.CopyTree(plot.cuts).Scan("runNr:lumiSec:eventNr>0 ? eventNr : eventNr+4294967296:met:jet1pt:jet2pt:jet3pt:nJets:nBJets","","colsize=12")
-				nominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			#~ nominatorHistoMuMuNoTrack = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			#~ for name, tree in treesNominatorMuMuNoTrack.iteritems():
-				#~ nominatorHistoMuMuNoTrack.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			#~ nominatorHistoMuE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			#~ for name, tree in treesNominatorMuE.iteritems():
-				#~ nominatorHistoMuE.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			#~ nominatorHistoEMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			#~ for name, tree in treesNominatorEMu.iteritems():
-				#~ nominatorHistoEMu.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
-			nominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
-			for name, tree in treesNominatorMuEG.iteritems():
-				#~ print "EMu events"
-				#~ tree.CopyTree(plot.cuts).Scan("runNr:lumiSec:eventNr>0 ? eventNr : eventNr+4294967296:met:jet1pt:jet2pt:jet3pt:nJets:nBJets","","colsize=12")
-				nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,plot.cuts,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+		nominatorHistoEE = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
+		for name, tree in treesEE.iteritems():
+			if name == "MergedData":
+				nominatorHistoEE.Add(createHistoFromTree(tree,plot.variable,cutsEE,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+		nominatorHistoMuMu = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
+		for name, tree in treesMuMu.iteritems():
+			if name == "MergedData":
+				nominatorHistoMuMu.Add(createHistoFromTree(tree,plot.variable,cutsMuMu,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
+		nominatorHistoMuEG = TH1F("","",plot.nBins,plot.firstBin,plot.lastBin)
+		for name, tree in treesEMu.iteritems():
+			if name == "MergedData":
+				nominatorHistoMuEG.Add(createHistoFromTree(tree,plot.variable,cutsOF,plot.nBins,plot.firstBin,plot.lastBin,binning=plot.binning).Clone())
 	else:
-		if source == "PFHT":
-			source = "HT"
+		treesEE = readTrees(path,"EE")
+		treesMuMu = readTrees(path,"MuMu")
+		treesEMu = readTrees(path,"EMu")
 		
-		anotherString = ""
-		if nonIso:
-			anotherString = "All"
-			
-		tmpCutsNoHT = plot.cuts
-		
-		if source == "" and noHT:
-			for cut in plot.cuts.split("&&"):
-				if "ht >" in cut:	
-					plot.cuts = plot.cuts.replace(cut+ "&&","weight*(")
-		treesDenominatorEE = readTrees(path,"EE",source = "Summer12", modifier = "%s"%("MiniAODTriggerEfficiency"+source,))
-		treesDenominatorMuMu = readTrees(path,"MuMu",source = "Summer12", modifier = "%s"%("MiniAODTriggerEfficiency"+source,))
-		treesDenominatorEMu = readTrees(path,"EMu",source = "Summer12", modifier = "%s"%("MiniAODTriggerEfficiency"+source,))
-		
-		
-		treesNominatorEE = readTrees(path,"EE",source = "Summer12",modifier="%sHLTDiEle%s"%("MiniAODTriggerEfficiency",source+anotherString))
-		anotherString = ""
-		treesNominatorMuMu = readTrees(path,"MuMu",source = "Summer12",modifier="%sHLTDiMu%s"%("MiniAODTriggerEfficiency",source+anotherString))
-		#~ treesNominatorMuMuNoTrack = readTrees(path,"MuMu",source = "Summer12",modifier="%sHLTDiMuNoTrackerMuon%s"%("MiniAODTriggerEfficiency",source))
-		#~ treesNominatorEMu = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTEleMu%s"%("MiniAODTriggerEfficiency",source))
-		#~ treesNominatorMuE = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTMuEle%s"%("MiniAODTriggerEfficiency",source))
-		treesNominatorMuEG = readTrees(path,"EMu",source = "Summer12",modifier="%sHLTMuEG%s"%("MiniAODTriggerEfficiency",source+anotherString))
-		
-		eventCounts = totalNumberOfGeneratedEvents(path,"TT")	
-		#~ eventCounts.update(totalNumberOfGeneratedEvents(path,"AStar"))	
-		#~ eventCounts.update(totalNumberOfGeneratedEvents(path,"ZJets"))	
+		eventCounts = totalNumberOfGeneratedEvents(path)	
 		processes = []
 		for background in backgrounds:
 			processes.append(Process(getattr(Backgrounds,background),eventCounts))
 		
-		tmpCuts = plot.cuts
+		denominatorStackEE = TheStack(processes,runRange.lumi,plot,treesEE,"None",1.0,1.0,1.0)		
+		denominatorStackMuMu = TheStack(processes,runRange.lumi,plot,treesMuMu,"None",1.0,1.0,1.0)	
+		denominatorStackMuEG = TheStack(processes,runRange.lumi,plot,treesEMu,"None",1.0,1.0,1.0)	
 		
-		denominatorStackEE = TheStack(processes,runRange.lumi,plot,treesDenominatorEE,"None",1.0,1.0,1.0)		
-		denominatorStackMuMu = TheStack(processes,runRange.lumi,plot,treesDenominatorMuMu,"None",1.0,1.0,1.0)	
-		denominatorStackMuEG = TheStack(processes,runRange.lumi,plot,treesDenominatorEMu,"None",1.0,1.0,1.0)	
-		
-		#~ plot.cuts = plot.cuts+"*(pt1 > pt2)"
-		#~ denominatorStackEMu = TheStack(processes,runRange.lumi,plot,treesDenominatorEMu,"None",1.0,1.0,1.0)	
-#~ 
-		#~ plot.cuts = tmpCuts+"*(pt1 < pt2)"
-		#~ denominatorStackMuE = TheStack(processes,runRange.lumi,plot,treesDenominatorEMu,"None",1.0,1.0,1.0)	
+		nominatorStackEE = TheStack(processes,runRange.lumi,plot,treesEE,"None",1.0,1.0,1.0,useTriggerEmulation=True)	
+		nominatorStackMuMu = TheStack(processes,runRange.lumi,plot,treesMuMu,"None",1.0,1.0,1.0,useTriggerEmulation=True)
+		nominatorStackMuEG = TheStack(processes,runRange.lumi,plot,treesEMu,"None",1.0,1.0,1.0,useTriggerEmulation=True)
 			
-		#~ plot.cuts = tmpCuts	
-			
-		nominatorStackEE = TheStack(processes,runRange.lumi,plot,treesNominatorEE,"None",1.0,1.0,1.0)		
-		nominatorStackMuMu = TheStack(processes,runRange.lumi,plot,treesNominatorMuMu,"None",1.0,1.0,1.0)		
-		#~ nominatorStackMuMuNoTrack = TheStack(processes,runRange.lumi,plot,treesNominatorMuMuNoTrack,"None",1.0,1.0,1.0)	
-		nominatorStackMuEG = TheStack(processes,runRange.lumi,plot,treesNominatorMuEG,"None",1.0,1.0,1.0)
-			
-		#~ plot.cuts = plot.cuts+"*(pt1 > pt2)"			
-		#~ nominatorStackEMu = TheStack(processes,runRange.lumi,plot,treesNominatorEMu,"None",1.0,1.0,1.0)	
-		
-		#~ plot.cuts = tmpCuts+"*(pt1 < pt2)"	
-		#~ nominatorStackMuE = TheStack(processes,runRange.lumi,plot,treesNominatorMuE,"None",1.0,1.0,1.0)		
-
-		#~ plot.cuts = tmpCuts	
-	
-
 		denominatorHistoEE = denominatorStackEE.theHistogram
 		denominatorHistoMuMu = denominatorStackMuMu.theHistogram
-		#~ denominatorHistoMuMuNoTrack = denominatorStackMuMu.theHistogram
-		#~ denominatorHistoEMu = denominatorStackEMu.theHistogram
-		#~ denominatorHistoMuE = denominatorStackMuE.theHistogram
 		denominatorHistoMuEG = denominatorStackMuEG.theHistogram
 		
 		nominatorHistoEE = nominatorStackEE.theHistogram
 		nominatorHistoMuMu = nominatorStackMuMu.theHistogram
-		#~ nominatorHistoMuMuNoTrack = nominatorStackMuMuNoTrack.theHistogram
-		#~ nominatorHistoEMu = nominatorStackEMu.theHistogram
-		#~ nominatorHistoMuE = nominatorStackMuE.theHistogram
-		nominatorHistoMuEG = nominatorStackMuEG.theHistogram		
-	
-		plot.cuts = tmpCutsNoHT
-	#~ return {"EE":denominatorHistoEE,"MuMu":denominatorHistoMuMu,"MuMuNoTrack":denominatorHistoMuMuNoTrack,"EMu":denominatorHistoEMu,"MuE":denominatorHistoMuE,"MuEG":denominatorHistoMuEG} , {"EE":nominatorHistoEE,"MuMu":nominatorHistoMuMu,"MuMuNoTrack":nominatorHistoMuMuNoTrack,"EMu":nominatorHistoEMu,"MuE":nominatorHistoMuE,"MuEG":nominatorHistoMuEG}
-	if "Single" in source:
-		return {"EE":denominatorHistoEE,"MuMu":denominatorHistoMuMu,"MuE":denominatorHistoMuE,"EMu":denominatorHistoEMu,"MuEG":denominatorHistoMuEG} , {"EE":nominatorHistoEE,"MuMu":nominatorHistoMuMu ,"MuE":nominatorHistoMuE,"EMu":nominatorHistoEMu,"MuEG":nominatorHistoMuEG}
-	else:	
-		return {"EE":denominatorHistoEE,"MuMu":denominatorHistoMuMu,"MuEG":denominatorHistoMuEG} , {"EE":nominatorHistoEE,"MuMu":nominatorHistoMuMu ,"MuEG":nominatorHistoMuEG}
+		nominatorHistoMuEG = nominatorStackMuEG.theHistogram
+		
+		
+	return {"EE":denominatorHistoEE,"MuMu":denominatorHistoMuMu,"MuEG":denominatorHistoMuEG} , {"EE":nominatorHistoEE,"MuMu":nominatorHistoMuMu ,"MuEG":nominatorHistoMuEG}
 
-def centralValues(source,path,selection,runRange,isMC,backgrounds,nonIso):
+def centralValues(source,path,selection,runRange,isMC,backgrounds):
 	
 	
 	if "Central" in selection.name:
@@ -401,8 +257,8 @@ def centralValues(source,path,selection,runRange,isMC,backgrounds,nonIso):
 	elif "Forward" in selection.name:
 		err = systematics.trigger.forward.val
 	else:
-		print "have no uncertainty for this selection, using 5%"
-		err = 0.05
+		#~ print "have no uncertainty for this selection, using %.2f"%systematics.trigger.inclusive.val
+		err = systematics.trigger.inclusive.val
 	
 	#~ print selection
 	plot = getPlot("mllPlot")
@@ -412,19 +268,16 @@ def centralValues(source,path,selection,runRange,isMC,backgrounds,nonIso):
 	plot.firstBin = 20
 	plot.lastBin = 10000
 	plot.nBins = 1
+	plot.cuts = plot.cuts.replace("mll","p4.M()")
+	plot.cuts = plot.cuts.replace("pt > 25","p4.Pt() > 25")	
+	plot.cuts = plot.cuts.replace("triggerSummary > 0 &&","")	
+	plot.variable = plot.variable.replace("mll","p4.M()")
+	if 	plot.variable == "pt":
+		plot.variable = plot.variable.replace("pt","p4.Pt()")
 	
 	counts = {runRange.label:{}}	
-								
-	if not source == "SingleLepton":
-		denominators, nominators = getHistograms(path,source,plot,runRange,isMC,backgrounds,nonIso=nonIso)
-	else:
-		denominatorsElectron, nominatorsElectron = getHistograms(path,"SingleElectron",plot,runRange,False,backgrounds,nonIso=nonIso)
-		denominatorsMuon, nominatorsMuon = getHistograms(path,"SingleMuon",plot,runRange,False,backgrounds,nonIso=nonIso)		
 
-		denominators = {"EE":denominatorsElectron["EE"],"MuEG":denominatorsElectron["MuEG"],"MuMu":denominatorsMuon["MuMu"]}
-		nominators = {"EE":nominatorsElectron["EE"],"MuEG":nominatorsElectron["MuEG"],"MuMu":nominatorsMuon["MuMu"]}
-		denominators["MuEG"].Add(denominatorsMuon["MuEG"].Clone())
-		nominators["MuEG"].Add(nominatorsMuon["MuEG"].Clone())
+	denominators, nominators = getHistograms(path,plot,runRange,isMC,backgrounds,source)
 	
 	counts[runRange.label]["EE"] = getEfficiency(nominators["EE"], denominators["EE"],plot.cuts)
 	counts[runRange.label]["MuMu"] = getEfficiency(nominators["MuMu"], denominators["MuMu"],plot.cuts)
@@ -437,7 +290,7 @@ def centralValues(source,path,selection,runRange,isMC,backgrounds,nonIso):
 
 
 
-def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,nonIso):
+def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra):
 
 	hCanvas = TCanvas("hCanvas", "Distribution", 800,800)
 	
@@ -448,27 +301,21 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,
 	plotPad.cd()
 	
 
-	legend = TLegend(0.55, 0.16, 0.9, 0.35)
+	legend = TLegend(0.55, 0.16, 0.9, 0.4)
 	legend.SetFillStyle(0)
 	legend.SetBorderSize(0)
 	
 	legendHist1 = TH1F()
 	legendHist2 = TH1F()
 	legendHist3 = TH1F()
-	#~ legendHist4 = TH1F()
-	#~ legendHist5 = TH1F()
 	
 	legendHist1.SetMarkerColor(ROOT.kBlack)
 	legendHist2.SetMarkerColor(ROOT.kRed)
 	legendHist3.SetMarkerColor(ROOT.kBlue)
-	#~ legendHist4.SetMarkerColor(ROOT.kBlue)
-	#~ legendHist5.SetMarkerColor(ROOT.kBlue+2)
 	
 	legend.AddEntry(legendHist1,"ee","p")
 	legend.AddEntry(legendHist2,"#mu#mu","p")
 	legend.AddEntry(legendHist3,"e#mu","p")
-	#~ legend.AddEntry(legendHist4,"Mu17_Ele8_X","p")
-	#~ legend.AddEntry(legendHist5,"Ele17_X_Mu8","p")
 	
 	latex = ROOT.TLatex()
 	latex.SetTextFont(42)
@@ -493,43 +340,19 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,
 	intlumi.SetTextSize(0.03)
 	intlumi.SetNDC(True)		
 	if isMC:
-		if nonIso:
-			if os.path.isfile("shelves/triggerEff_%s_%s_%s_NonIso_MC.pkl"%(selection.name,source,runRange.label)):
-				centralVals = pickle.load(open("shelves/triggerEff_%s_%s_%s_NonIso_MC.pkl"%(selection.name,source,runRange.label),"rb"))
-			else:
-				centralVals = centralValues(source,path,selection,runRange,isMC,backgrounds,nonIso=nonIso)
-		else:		
-			if os.path.isfile("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label)):
-				centralVals = pickle.load(open("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label),"rb"))
-			else:
-				centralVals = centralValues(source,path,selection,runRange,isMC,backgrounds,nonIso=nonIso)
-		if nonIso:				
-			if os.path.isfile("shelves/triggerEff_%s_%s_%s_NonIso.pkl"%(selection.name,source,runRange.label)):
-				centralValsData = pickle.load(open("shelves/triggerEff_%s_%s_%s_NonIso.pkl"%(selection.name,source,runRange.label),"rb"))
-			else:
-				centralValsData = centralValues(source,path,selection,runRange,False,backgrounds,nonIso=nonIso)
-		else:		
-			if os.path.isfile("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label)):
-				centralValsData = pickle.load(open("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label),"rb"))
-			else:
-				centralValsData = centralValues(source,path,selection,runRange,False,backgrounds,nonIso=nonIso)
-	else:
-		#~ if source == "SingleLepton":
-			#~ if os.path.isfile("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,"PFHT",runRange.label)):
-				#~ centralVals = pickle.load(open("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,"PFHT",runRange.label),"rb"))
-			#~ else:
-				#~ centralVals = centralValues(source,path,selection,runRange,isMC,backgrounds)
-		#~ else:
-		if nonIso:
-			if os.path.isfile("shelves/triggerEff_%s_%s_%s_NonIso.pkl"%(selection.name,source,runRange.label)):
-				centralVals = pickle.load(open("shelves/triggerEff_%s_%s_%s_NonIso.pkl"%(selection.name,source,runRange.label),"rb"))
-			else:
-				centralVals = centralValues(source,path,selection,runRange,isMC,backgrounds,nonIso=nonIso)
+		if os.path.isfile("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label)):
+			centralVals = pickle.load(open("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label),"rb"))
 		else:
-			if os.path.isfile("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label)):
-				centralVals = pickle.load(open("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label),"rb"))
-			else:
-				centralVals = centralValues(source,path,selection,runRange,isMC,backgrounds,nonIso=nonIso)
+			centralVals = centralValues(source,path,selection,runRange,isMC,backgrounds)
+		if os.path.isfile("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label)):
+			centralValsData = pickle.load(open("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label),"rb"))
+		else:
+			centralValsData = centralValues(source,path,selection,runRange,False,backgrounds)
+	else:
+		if os.path.isfile("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label)):
+			centralVals = pickle.load(open("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label),"rb"))
+		else:
+			centralVals = centralValues(source,path,selection,runRange,isMC,backgrounds)
 		
 				
 	
@@ -538,32 +361,33 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,
 			plotData = getPlot(name)
 			plotData.addRegion(selection)
 			#~ plot.cleanCuts()
-			plotData.cuts = plotData.cuts % runRange.runCut				
+			plotData.cuts = plotData.cuts % runRange.runCut
+			plotData.cuts = plotData.cuts.replace("mll","p4.M()")
+			plotData.cuts = plotData.cuts.replace("pt > 25","p4.Pt() > 25")
+			plotData.cuts = plotData.cuts.replace("triggerSummary > 0 &&","")
+			plotData.variable = plotData.variable.replace("mll","p4.M()")
+			if 	plotData.variable == "pt":	
+				plotData.variable = plotData.variable.replace("pt","p4.Pt()")	
+	
 			name = name+"MC"
 		plot = getPlot(name)
 		plot.addRegion(selection)
 		#~ plot.cleanCuts()
-		plot.cuts = plot.cuts % runRange.runCut	
+		plot.cuts = plot.cuts % runRange.runCut
+		plot.cuts = plot.cuts.replace("mll","p4.M()")
+		plot.cuts = plot.cuts.replace("pt > 25","p4.Pt() > 25")
+		plot.cuts = plot.cuts.replace("triggerSummary > 1 &&","")
+		plot.variable = plot.variable.replace("mll","p4.M()")
+		if 	plot.variable == "pt":	
+			plot.variable = plot.variable.replace("pt","p4.Pt()")	
 		
-		if nonIso:
-			plot.additionalName = str(plot.additionalName)+"_NonIso"
 		
 		if  "Forward" in selection.name:
 			plot.nBins = int(plot.nBins/2)
-		if not source == "SingleLepton":
-			denominators, nominators = getHistograms(path,source,plot,runRange,isMC,backgrounds,nonIso=nonIso)
-			if isMC: 
-				denominatorsData, nominatorsData = getHistograms(locations.triggerDataSetPath,source,plotData,runRange,False,backgrounds,nonIso=nonIso)
+		denominators, nominators = getHistograms(path,plot,runRange,isMC,backgrounds,source)
+		if isMC: 
+			denominatorsData, nominatorsData = getHistograms(locations.triggerDataSetPath,plotData,runRange,False,backgrounds,source)
 				
-		else:
-			denominatorsElectron, nominatorsElectron = getHistograms(path,"SingleElectron",plot,runRange,False,backgrounds,nonIso=nonIso)
-			denominatorsMuon, nominatorsMuon = getHistograms(path,"SingleMuon",plot,runRange,False,backgrounds,nonIso=nonIso)		
-
-			denominators = {"EE":denominatorsElectron["EE"],"MuEG":denominatorsElectron["MuEG"],"MuMu":denominatorsMuon["MuMu"]}
-			nominators = {"EE":nominatorsElectron["EE"],"MuEG":nominatorsElectron["MuEG"],"MuMu":nominatorsMuon["MuMu"]}
-			denominators["MuEG"].Add(denominatorsMuon["MuEG"].Clone())
-			nominators["MuEG"].Add(nominatorsMuon["MuEG"].Clone())
-
 
 		effEE = TGraphAsymmErrors(nominators["EE"],denominators["EE"],"cp")
 		effMuMu = TGraphAsymmErrors(nominators["MuMu"],denominators["MuMu"],"cp")
@@ -589,7 +413,7 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,
 		effEE.SetMarkerStyle(20)
 		effMuMu.SetMarkerStyle(21)
 		effOF.SetMarkerStyle(22)				
-		plotPad.DrawFrame(plot.firstBin,0.,plot.lastBin,1.3,"; %s ; Efficiency" %(plot.xaxis))
+		plotPad.DrawFrame(plot.firstBin,0.5,plot.lastBin,1.2,"; %s ; Efficiency" %(plot.xaxis))
 		
 
 		
@@ -597,23 +421,21 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,
 		legend.AddEntry(effEE,"ee","p")
 		legend.AddEntry(effMuMu,"#mu#mu","p")
 		legend.AddEntry(effOF,"e#mu","p")
-		#~ legend.AddEntry(effEMu,"e#mu","p")
 
 		
 		effEE.Draw("samep")
 		effMuMu.Draw("samep")
 		effOF.Draw("samep")
-		#~ effMuE.Draw("samep")
-		#~ effEMu.Draw("samep")
-
+		
 		latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (13 TeV)"%runRange.printval)
 		
 
 		latexCMS.DrawLatex(0.19,0.88,"CMS")
-		if "Simulation" in cmsExtra:
-			yLabelPos = 0.81	
-		else:
-			yLabelPos = 0.84	
+		#~ if "Simulation" in cmsExtra:
+			#~ yLabelPos = 0.81	
+		#~ else:
+			#~ yLabelPos = 0.84	
+		yLabelPos = 0.84	
 
 		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))
 		legend.Draw("same")
@@ -649,7 +471,7 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,
 		effOFNoFit = effSF.Clone()
 		
 	
-		plotPad.DrawFrame(plot.firstBin,0,plot.lastBin,1.2,"; %s ; Efficiency" %(plot.xaxis))
+		plotPad.DrawFrame(plot.firstBin,0.5,plot.lastBin,1.2,"; %s ; Efficiency" %(plot.xaxis))
 		
 
 		legend.Clear()
@@ -664,10 +486,11 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,
 		
 
 		latexCMS.DrawLatex(0.19,0.88,"CMS")
-		if "Simulation" in cmsExtra:
-			yLabelPos = 0.81	
-		else:
-			yLabelPos = 0.84	
+		#~ if "Simulation" in cmsExtra:
+			#~ yLabelPos = 0.81	
+		#~ else:
+			#~ yLabelPos = 0.84	
+		yLabelPos = 0.84	
 
 		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))
 		legend.Draw("same")
@@ -689,18 +512,14 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,
 			effSFvsOF.SetLineColor(ROOT.kBlue)
 
 		x= array("f",[plot.firstBin, plot.lastBin]) 
-		if source == "SingleLepton":	
-			y= array("f", [float(centralVals[runRange.label]["RT"])**2, float(centralVals[runRange.label]["RT"])**2])
-			sfLine= ROOT.TF1("sfLine",str(centralVals[runRange.label]["RT"]**2),plot.firstBin, plot.lastBin)
- 
-		else:
-			if isMC:
-				yData= array("f", [float(centralValsData[runRange.label]["RT"]), float(centralValsData[runRange.label]["RT"])]) 
-				sfLineData= ROOT.TF1("sfLine",str(centralValsData[runRange.label]["RT"]),plot.firstBin, plot.lastBin)
-			y= array("f", [float(centralVals[runRange.label]["RT"]), float(centralVals[runRange.label]["RT"])]) 
-			sfLine= ROOT.TF1("sfLine",str(centralVals[runRange.label]["RT"]),plot.firstBin, plot.lastBin)
+		if isMC:
+			yData= array("f", [float(centralValsData[runRange.label]["RT"]), float(centralValsData[runRange.label]["RT"])]) 
+			sfLineData= ROOT.TF1("sfLine",str(centralValsData[runRange.label]["RT"]),plot.firstBin, plot.lastBin)
+		y= array("f", [float(centralVals[runRange.label]["RT"]), float(centralVals[runRange.label]["RT"])]) 
+		sfLine= ROOT.TF1("sfLine",str(centralVals[runRange.label]["RT"]),plot.firstBin, plot.lastBin)
 		if isMC:
 			eyData= array("f", [float(centralValsData[runRange.label]["RTErrSyst"]), float(centralValsData[runRange.label]["RTErrSyst"])])					
+			eyData= array("f", [float(centralVals[runRange.label]["RTErrSyst"]), float(centralVals[runRange.label]["RTErrSyst"])])					
 			exData= array("f", [0.,0.])
 			
 			ge= ROOT.TGraphErrors(2, x, yData, exData, eyData)
@@ -717,6 +536,7 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,
 			ge.SetFillStyle(1001)
 			ge.SetLineColor(ROOT.kWhite)
 			ge.Draw("SAME 3")
+		
 		
 		effSFvsOF.Draw("samep")
 		if isMC:
@@ -738,31 +558,28 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,
 		
 
 		latexCMS.DrawLatex(0.19,0.88,"CMS")
-		if "Simulation" in cmsExtra:
-			cmsExtra = "Preliminary"
-			yLabelPos = 0.81	
-		else:
-			yLabelPos = 0.84	
+		#~ if "Simulation" in cmsExtra:
+			#~ cmsExtra = "Preliminary"
+			#~ yLabelPos = 0.81	
+		#~ else:
+			#~ yLabelPos = 0.84	
+		yLabelPos = 0.84	
 
 		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))	
-
+		
 		
 		legend.Clear()
-		if source == "SingleLepton":
-			legend.AddEntry(effSFvsOF,"R_{T}","p")
-			legend.AddEntry(sfLine,"Mean R_{T}: %.3f"%(centralVals[runRange.label]["RT"])**2,"l") 
+					
+		if isMC:
+			legend.AddEntry(effSFvsOF,"R_{T} MC","p")
+			legend.AddEntry(effSFvsOFData,"R_{T} Data","p")
 		else:
-			
-			if isMC:
-				legend.AddEntry(effSFvsOF,"R_{T} MC","p")
-				legend.AddEntry(effSFvsOFData,"R_{T} Data","p")
-			else:
-				legend.AddEntry(effSFvsOF,"R_{T}","p")
-			if isMC:		
-				legend.AddEntry(sfLine,"Mean R_{T} MC: %.3f"%(centralVals[runRange.label]["RT"]),"l") 
-				legend.AddEntry(sfLineData,"Mean R_{T} Data: %.3f"%(centralValsData[runRange.label]["RT"]),"l") 
-			else:
-				legend.AddEntry(sfLine,"Mean R_{T}: %.3f"%(centralVals[runRange.label]["RT"]),"l") 
+			legend.AddEntry(effSFvsOF,"R_{T}","p")
+		if isMC:		
+			legend.AddEntry(sfLine,"Mean R_{T} MC: %.3f"%(centralVals[runRange.label]["RT"]),"l") 
+			legend.AddEntry(sfLineData,"Mean R_{T} Data: %.3f"%(centralValsData[runRange.label]["RT"]),"l") 
+		else:
+			legend.AddEntry(sfLine,"Mean R_{T}: %.3f"%(centralVals[runRange.label]["RT"]),"l") 
 				
 		legend.AddEntry(ge,"syst. uncert. Data","f") 
 		legend.Draw("same")
@@ -772,321 +589,43 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra,
 		else:
 			hCanvas.Print("fig/Triggereff_SFvsOF_Syst_%s_%s_%s_%s_%s.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))	
 			
-			
-def studyTriggerBias(path,source,plots,selection,runRange,backgrounds,cmsExtra,biasHT):			
-	for name in plots:
-		plot = getPlot(name)
-		plot.addRegion(selection)
-		plot.cuts = plot.cuts % runRange.runCut	
-
-		if plot.variable is not "ht":
-			plot.cuts = plot.cuts.replace("ht > 200","ht > 400")
-
-		denominators, nominators = getHistograms(path,source,plot,runRange,True,backgrounds)
-		denominatorsNoTrig, nominatorsNoTrig = getHistograms(path,"",plot,runRange,True,backgrounds,noHT=biasHT)
-
+		
+		plotPad.DrawFrame(plot.firstBin,.5,plot.lastBin,1.5,"; %s ; eff_{#mu#mu}/eff_{ee}" %(plot.xaxis))
 
 		
-		hCanvas = TCanvas("hCanvas", "Distribution", 800,800)
+		effMMvsEE = efficiencyRatioSF(effMuMu,effEE)
 		
-		plotPad = ROOT.TPad("plotPad","plotPad",0,0,1,1)
-		style = setTDRStyle()
-		style.SetTitleYOffset(1.2)
-		style.SetPadLeftMargin(0.15)		
-		plotPad.UseCurrentStyle()
-
-		plotPad.Draw()	
-		plotPad.cd()	
-		
-		legend = TLegend(0.45, 0.2, 0.95, 0.5)
-		legend.SetFillStyle(0)
-		legend.SetBorderSize(0)
-		
-		legendHist1 = TH1F()
-		legendHist2 = TH1F()
-		legendHist3 = TH1F()
-		legendHist4 = TH1F()
-		legendHist5 = TH1F()
-		
-		legendHist1.SetMarkerColor(ROOT.kBlack)
-		legendHist2.SetMarkerColor(ROOT.kRed)
-		legendHist3.SetMarkerColor(ROOT.kRed+2)
-		legendHist4.SetMarkerColor(ROOT.kBlue)
-		legendHist5.SetMarkerColor(ROOT.kBlue+2)
-		
-		legend.AddEntry(legendHist1,"Ele_17_X_Ele8_X","p")
-		legend.AddEntry(legendHist2,"Mu17_Mu8 || Mu17_TkMu8","p")
-		legend.AddEntry(legendHist3,"Mu17_Mu8","p")
-		legend.AddEntry(legendHist4,"Mu17_Ele8_X","p")
-		legend.AddEntry(legendHist5,"Ele17_X_Mu8","p")
-		
-		latex = ROOT.TLatex()
-		latex.SetTextFont(42)
-		latex.SetTextAlign(31)
-		latex.SetTextSize(0.04)
-		latex.SetNDC(True)
-		latexCMS = ROOT.TLatex()
-		latexCMS.SetTextFont(61)
-		latexCMS.SetTextSize(0.06)
-		latexCMS.SetNDC(True)
-		latexCMSExtra = ROOT.TLatex()
-		latexCMSExtra.SetTextFont(52)
-		latexCMSExtra.SetTextSize(0.045)
-		latexCMSExtra.SetNDC(True)		
-
-		intlumi = ROOT.TLatex()
-		intlumi.SetTextAlign(12)
-		intlumi.SetTextSize(0.03)
-		intlumi.SetNDC(True)					
+		line = ROOT.TLine(plot.firstBin, 1.,  plot.lastBin, 1.)
+		line.SetLineWidth(2)
+		line.SetLineStyle(2)
+		line.Draw("")
 		
 		
-		denominatorHistoSF = denominators["EE"].Clone()
-		denominatorHistoSF.Add(denominators["MuMu"].Clone())
-		denominatorHistoOF = denominators["MuEG"].Clone()
 		
-		nominatorHistoSF = nominators["EE"].Clone()
-		nominatorHistoSF.Add(nominators["MuMu"].Clone())
+		effMMvsEE.Draw("samep")
 		
-		nominatorHistoOF = nominators["MuEG"].Clone()
-		
-		denominatorHistoSFNoTrig = denominatorsNoTrig["EE"].Clone()
-		denominatorHistoSFNoTrig.Add(denominatorsNoTrig["MuMu"].Clone())
-		denominatorHistoOFNoTrig = denominatorsNoTrig["MuEG"].Clone()
-		
-		nominatorHistoSFNoTrig = nominatorsNoTrig["EE"].Clone()
-		nominatorHistoSFNoTrig.Add(nominatorsNoTrig["MuMu"].Clone())
-		
-		nominatorHistoOFNoTrig = nominatorsNoTrig["MuEG"].Clone()
 
-
-		effSF = TGraphAsymmErrors(nominatorHistoSF,denominatorHistoSF,"cl=0.683 b(1,1) mode")
-		effOF = TGraphAsymmErrors(nominatorHistoOF,denominatorHistoOF,"cl=0.683 b(1,1) mode")
-		
-		effSFNoTrig = TGraphAsymmErrors(nominatorHistoSFNoTrig,denominatorHistoSFNoTrig,"cl=0.683 b(1,1) mode")
-		effOFNoTrig = TGraphAsymmErrors(nominatorHistoOFNoTrig,denominatorHistoOFNoTrig,"cl=0.683 b(1,1) mode")
-
-
-
-
-		effRatioSF = efficiencyRatio(effSF,effSFNoTrig)
-		effRatioOF = efficiencyRatio(effOF,effOFNoTrig)
-		
-		effRatioSF.SetMarkerStyle(21)
-		effRatioOF.SetMarkerStyle(22)
-		effRatioSF.SetMarkerSize(2)
-		effRatioOF.SetMarkerSize(2)
-		effRatioOF.SetMarkerColor(ROOT.kRed)
-		effRatioOF.SetLineColor(ROOT.kRed)
-		
-		hCanvas.DrawFrame(plot.firstBin,0.9,plot.lastBin,1.1,"; %s ; meas. efficiency / true efficiency" %(plot.xaxis))
-
-
-		x= array("f",[plot.firstBin, plot.lastBin]) 
-		y= array("f", [1.0, 1.0]) # 1.237
-		ex= array("f", [0.,0.])
-		ey= array("f", [0.01, 0.01])
-		ge= ROOT.TGraphErrors(2, x, y, ex, ey)
-		ge.SetFillColor(ROOT.kOrange-9)
-		ge.SetFillStyle(1001)
-		ge.SetLineColor(ROOT.kWhite)
-
-		sfLine= ROOT.TF1("sfLine","1.0",plot.firstBin, plot.lastBin)
-		sfLine.SetLineColor(ROOT.kBlack)
-		sfLine.SetLineWidth(3)
-		sfLine.SetLineStyle(2)
-		sfLine.Draw("SAME")					
-
-		effRatioOF.Draw("samep")
-		effRatioSF.Draw("samep")
-
-
-
-		legend.Clear()
-		legend.AddEntry(effRatioSF,"Same flavour","p")
-		legend.AddEntry(effRatioOF,"Opposite flavour","p")
-		legend.AddEntry(sfLine,"1.0","l")
-
-
-
-
-		latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (8 TeV)"%runRange.printval)
+		latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (13 TeV)"%runRange.printval)
 		
 
 		latexCMS.DrawLatex(0.19,0.88,"CMS")
-		if "Simulation" in cmsExtra:
-			yLabelPos = 0.81	
-		else:
-			yLabelPos = 0.84	
 
-		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))
-		
-		legend.Draw("same")
-		if biasHT:
-			hCanvas.Print("fig/Triggereff_AlphaTSyst_HT_%s_%s_%s_%s_%s.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))	
-		else:
-			hCanvas.Print("fig/Triggereff_AlphaTSyst_%s_%s_%s_%s_%s.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))								
-				
+		yLabelPos = 0.84	
 
-
-def singleLepton(path,plots,selection,runRange,backgrounds,cmsExtra,nonIso=False):
-	
-	for plotName in plots:
-		plot = getPlot(plotName)
-		plot.addRegion(selection)
-		plot.cleanCuts()
-		plot.cuts = plot.cuts % runRange.runCut	
-		plot.cuts = plot.cuts.replace("&& pt1 > 20 && pt2 > 20","")
-
-		denominatorsElectron, nominatorsElectron = getHistograms(path,"SingleElectron",plot,runRange,False,backgrounds,nonIso=nonIso)
-		denominatorsMuon, nominatorsMuon = getHistograms(path,"SingleMuon",plot,runRange,False,backgrounds,nonIso=nonIso)
-
-
-		hCanvas = TCanvas("hCanvas", "Distribution", 800,800)
-		
-		plotPad = ROOT.TPad("plotPad","plotPad",0,0,1,1)
-		setTDRStyle()
-		plotPad.UseCurrentStyle()
-		plotPad.Draw()	
-		plotPad.cd()
-		
-		legend = TLegend(0.3, 0.15, 0.95, 0.5)
-		legend.SetFillStyle(0)
-		legend.SetBorderSize(0)
-
-		
-		latex = ROOT.TLatex()
-		latex.SetTextFont(42)
-		latex.SetTextAlign(31)
-		latex.SetTextSize(0.04)
-		latex.SetNDC(True)
-		latexCMS = ROOT.TLatex()
-		latexCMS.SetTextFont(61)
-		#latexCMS.SetTextAlign(31)
-		latexCMS.SetTextSize(0.06)
-		latexCMS.SetNDC(True)
-		latexCMSExtra = ROOT.TLatex()
-		latexCMSExtra.SetTextFont(52)
-		#latexCMSExtra.SetTextAlign(31)
-		latexCMSExtra.SetTextSize(0.045)
-		latexCMSExtra.SetNDC(True)		
-		
-
-
-		intlumi = ROOT.TLatex()
-		intlumi.SetTextAlign(12)
-		intlumi.SetTextSize(0.03)
-		intlumi.SetNDC(True)				
-
-
-
-		effEE = TGraphAsymmErrors(nominatorsElectron["EE"],denominatorsElectron["EE"],"cp")
-		effEMu = TGraphAsymmErrors(nominatorsElectron["EMu"],denominatorsElectron["EMu"],"cp")
-		effMuE = TGraphAsymmErrors(nominatorsMuon["MuE"],denominatorsMuon["MuE"],"cp")
-		effMuMu = TGraphAsymmErrors(nominatorsMuon["MuMu"],denominatorsMuon["MuMu"],"cp")
-		#~ effMuMuNoTrack = TGraphAsymmErrors(nominatorsMuon["MuMuNoTrack"],denominatorsMuon["MuMuNoTrack"],"cp")
-
-		effEE.SetMarkerColor(ROOT.kBlack)
-		effMuMu.SetMarkerColor(ROOT.kRed)
-		#~ effMuMuNoTrack.SetMarkerColor(ROOT.kRed+2)
-		effMuE.SetMarkerColor(ROOT.kBlue)
-		effEMu.SetMarkerColor(ROOT.kBlue+2)
-		effEE.SetLineColor(ROOT.kBlack)
-		effMuMu.SetLineColor(ROOT.kRed)
-		#~ effMuMuNoTrack.SetLineColor(ROOT.kRed+2)
-		effMuE.SetLineColor(ROOT.kBlue)
-		effEMu.SetLineColor(ROOT.kBlue+2)
-		effEE.SetMarkerStyle(20)
-		effMuMu.SetMarkerStyle(21)
-		#~ effMuMuNoTrack.SetMarkerStyle(22)
-		effMuE.SetMarkerStyle(23)
-		effEMu.SetMarkerStyle(33)				
-		plotPad.DrawFrame(plot.firstBin,0.,plot.lastBin,1.2,"; %s ; Efficiency" %(plot.xaxis))
-		
-			
-		
-		
-		#~ fitEE = TF1("fitEE","[0]",0,100)
-		#~ fitMuMu = TF1("fitMuMu","[0]",0,100)
-		#~ fitMuMuNoTrack = TF1("fitMuMuNoTrack","[0]",0,100)
-		#~ fitEMu = TF1("fitEMu","[0]",0,100)
-		#~ fitMuE = TF1("fitMuE","[0]",0,100)
-		fitEE = TF1("fitEE","0.5*[2]*(1. + TMath::Erf((x-[0])/(TMath::Sqrt(2)*[1])))",0,100)
-		fitEE.SetParameter(2,0.95)
-		fitEE.SetParameter(0,20)
-		#~ fitEE.SetParLimits(0,0,20)
-		fitEE.SetParameter(1,2)
-		fitMuMu = TF1("fitMuMu","0.5*[2]*(1. + TMath::Erf((x-[0])/(TMath::Sqrt(2)*[1])))",0,100)
-		fitMuMu.SetParameter(2,0.95)
-		fitMuMu.SetParameter(0,20)
-		#~ fitEE.SetParLimits(0,100)
-		fitMuMu.SetParameter(1,1)
-		fitEMu = TF1("fitEMu","0.5*[2]*(1. + TMath::Erf((x-[0])/(TMath::Sqrt(2)*[1])))",0,100)
-		fitEMu.SetParameter(2,0.95)
-		fitEMu.SetParameter(0,20)
-		#~ fitEE.SetParLimits(0,100)
-		fitEMu.SetParameter(1,1)
-		fitMuE = TF1("fitMuE","0.5*[2]*(1. + TMath::Erf((x-[0])/(TMath::Sqrt(2)*[1])))",0,100)
-		fitMuE.SetParameter(2,0.95)
-		fitMuE.SetParameter(0,20)
-		#~ fitEE.SetParLimits(0,100)
-		fitMuE.SetParameter(1,1)
-
-		fitEE.SetLineColor(ROOT.kBlack)
-		fitMuMu.SetLineColor(ROOT.kRed)
-		#~ fitMuMuNoTrack.SetLineColor(ROOT.kRed+2)
-		fitEMu.SetLineColor(ROOT.kBlue+2)
-		fitMuE.SetLineColor(ROOT.kBlue)
-		effEE.Fit("fitEE","BRQE","",0,100)
-		effMuMu.Fit("fitMuMu","BRQE","",0,100)
-		#~ effMuMuNoTrack.Fit("fitMuMuNoTrack","BRQE","",40,100)
-		effEMu.Fit("fitEMu","BRQE","",0,100)
-		effMuE.Fit("fitMuE","BRQE","",0,100)
+		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))	
 		
 		legend.Clear()
-
-		legend.SetHeader("Efficiencies of trailing lepton leg")
-		legend.AddEntry(effEE,"Dielectron %.3f #pm %.3f"%(fitEE.GetParameter(2),fitEE.GetParError(2)),"p")
-		legend.AddEntry(effMuMu,"Dimuon incl. tracker muon %.3f #pm %.3f"%(fitMuMu.GetParameter(2),fitMuMu.GetParError(2)),"p")
-		#~ legend.AddEntry(effMuMuNoTrack,"Dimuon %.3f #pm %.3f"%(fitMuMuNoTrack.GetParameter(0),fitMuMuNoTrack.GetParError(0)),"p")
-		legend.AddEntry(effMuE,"OF muon leading %.3f #pm %.3f"%(fitMuE.GetParameter(2),fitMuE.GetParError(2)),"p")
-		legend.AddEntry(effEMu,"OF electron leading %.3f #pm %.3f"%(fitEMu.GetParameter(2),fitEMu.GetParError(2)),"p")
-
+					
+		legend.AddEntry(effSFvsOF,"eff_{#mu#mu}/eff_{ee} MC","p")
 		
-		effEE.Draw("samep")
-		effMuMu.Draw("samep")
-		#~ effMuMuNoTrack.Draw("samep")
-		effMuE.Draw("samep")
-		effEMu.Draw("samep")
-
-
-		latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (8 TeV)"%runRange.printval)
-		
-
-		latexCMS.DrawLatex(0.19,0.88,"CMS")
-		if "Simulation" in cmsExtra:
-			yLabelPos = 0.81	
-		else:
-			yLabelPos = 0.84	
-
-		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))
-		#~ intlumi.DrawLatex(0.2,0.9,"#splitline{"+logEtaCut+", "+cut.label1+"}{"+variable.additionalCutsLabel+"}")	
 		legend.Draw("same")
-		
-		
-		line1 = ROOT.TLine(20,0.7,20,1.1)
-		line1.SetLineColor(ROOT.kBlue+3)
-
-		line1.SetLineWidth(2)
-		line1.SetLineStyle(2)
-
-		line1.Draw("same")				
-		if nonIso:			
-			hCanvas.Print("fig/Triggereff_SingleLepton_%s_%s_%s_%s_NonIso.pdf"%(selection.name,runRange.label,plot.variablePlotName,plot.additionalName))	
-		else:	
-			hCanvas.Print("fig/Triggereff_SingleLepton_%s_%s_%s_%s.pdf"%(selection.name,runRange.label,plot.variablePlotName,plot.additionalName))	
-
+		ROOT.gPad.RedrawAxis()
+		if isMC:
+			hCanvas.Print("fig/Triggereff_MMvsEE_Syst_%s_%s_%s_%s_%s_MC.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))		
+		else:
+			hCanvas.Print("fig/Triggereff_MMvsEE_Syst_%s_%s_%s_%s_%s.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))	
 			
-				
+			
 def main():
 
 
@@ -1111,17 +650,7 @@ def main():
 	parser.add_argument("-d", "--dependencies", action="store_true", dest="dependencies", default= False,
 						  help="make dependency plots")
 	parser.add_argument("-x", "--private", action="store_true", dest="private", default=False,
-						  help="plot is private work.")	
-	parser.add_argument("-a", "--alphaT", action="store_true", dest="alphaT", default=False,
-						  help="use alphaT triggers as baseline.")	
-	parser.add_argument("-i", "--iso", action="store_true", dest="iso", default=False,
-						  help="include non-iso triggers.")	
-	parser.add_argument("-z", "--bias", action="store_true", dest="bias", default=False,
-						  help="produce trigger bias studies.")	
-	parser.add_argument("-Z", "--biasHT", action="store_true", dest="biasHT", default=False,
-						  help="produce trigger bias studies including HT dependencies.")	
-	parser.add_argument("-t", "--trailing", action="store_true", dest="trailing", default=False,
-						  help="trailing lepton pt dependence using single lepton trigger.")						
+						  help="plot is private work.")								
 	parser.add_argument("-w", "--write", action="store_true", dest="write", default=False,
 						  help="write results to central repository")	
 					
@@ -1135,29 +664,23 @@ def main():
 		args.backgrounds = backgroundLists.trigger
 	if len(args.plots) == 0:
 		args.plots = plotLists.trigger
-		if args.trailing:
-			args.plots = ["trailingPtPlotTriggerLeading30SingleOnZ"]
 	if len(args.selection) == 0:
-		args.selection.append(regionsToUse.triggerEfficiencies.central.name)	
-		args.selection.append(regionsToUse.triggerEfficiencies.forward.name)	
+		#~ args.selection.append(regionsToUse.triggerEfficiencies.central.name)	
+		#~ args.selection.append(regionsToUse.triggerEfficiencies.forward.name)	
 		args.selection.append(regionsToUse.triggerEfficiencies.inclusive.name)	
 	if len(args.runRange) == 0:
 		args.runRange.append(runRanges.name)	
 
-	if args.bias:
-		args.mc = True
+	#~ if args.bias:
+		#~ args.mc = True
 				
 	path = locations.triggerDataSetPath	
 	if args.mc:
-		path = locations.triggerDataSetPathMC
-	if args.trailing or args.new:
-		path = locations.triggerDataSetPathSingleLepton
-	if args.alphaT:
-		source = "AlphaT"
-	elif args.new:
-		source = "SingleLepton"
-	else:
-		source = baselineTrigger.name
+		path = locations.dataSetPath
+
+	source = baselineTrigger.name
+
+		
 	log.logHighlighted("Calculating trigger efficiencies on %s triggered dataset"%source)
 	log.logHighlighted("Using trees from %s "%path)
 	
@@ -1183,39 +706,23 @@ def main():
 
 			
 			if args.central:
-				centralVal = centralValues(source,path,selection,runRange,args.mc,args.backgrounds,nonIso=args.iso)
-				if args.iso:
-					if args.mc:
-						outFilePkl = open("shelves/triggerEff_%s_%s_%s_NonIso_MC.pkl"%(selection.name,source,runRange.label),"w")
-					else:
-						outFilePkl = open("shelves/triggerEff_%s_%s_%s_NonIso.pkl"%(selection.name,source,runRange.label),"w")
-				else:		
-					if args.mc:
-						outFilePkl = open("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label),"w")
-					else:
-						outFilePkl = open("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label),"w")
+				centralVal = centralValues(source,path,selection,runRange,args.mc,args.backgrounds)	
+				if args.mc:
+					outFilePkl = open("shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label),"w")
+				else:
+					outFilePkl = open("shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label),"w")
 				pickle.dump(centralVal, outFilePkl)
 				outFilePkl.close()
 				
 			if args.dependencies:
-				 dependencies(source,path,selection,args.plots,runRange,args.mc,args.backgrounds,cmsExtra,args.iso)	
-			
-			if args.bias:
-				studyTriggerBias(path,source,args.plots,selection,runRange,args.backgrounds,cmsExtra,args.biasHT)
-			if args.trailing:
-				singleLepton(path,args.plots,selection,runRange,args.backgrounds,cmsExtra,nonIso=args.iso)		
+				 dependencies(source,path,selection,args.plots,runRange,args.mc,args.backgrounds,cmsExtra)	
+				
 			if args.write:
 				import subprocess
-				if args.iso:
-					if args.mc:
-						bashCommand = "cp shelves/triggerEff_%s_%s_%s_NonIso_MC.pkl %s/shelves/triggerEff_%s_%s_%s_MC.pkl"%(selection.name,source,runRange.label,pathes.basePath,selection.name,source,runRange.label)		
-					else:	
-						bashCommand = "cp shelves/triggerEff_%s_%s_%s_NonIso.pkl %s/shelves/triggerEff_%s_%s_%s.pkl"%(selection.name,source,runRange.label,pathes.basePath,selection.name,source,runRange.label)
-				else:
-					if args.mc:
-						bashCommand = "cp shelves/triggerEff_%s_%s_%s_MC.pkl %s/shelves"%(selection.name,source,runRange.label,pathes.basePath)		
-					else:	
-						bashCommand = "cp shelves/triggerEff_%s_%s_%s.pkl %s/shelves"%(selection.name,source,runRange.label,pathes.basePath)
+				if args.mc:
+					bashCommand = "cp shelves/triggerEff_%s_%s_%s_MC.pkl %s/shelves"%(selection.name,source,runRange.label,pathes.basePath)		
+				else:	
+					bashCommand = "cp shelves/triggerEff_%s_%s_%s.pkl %s/shelves"%(selection.name,source,runRange.label,pathes.basePath)
 				process = subprocess.Popen(bashCommand.split())								
 					
 main()
