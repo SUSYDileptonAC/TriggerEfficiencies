@@ -19,7 +19,7 @@ import argparse
 
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
-from ROOT import TCanvas, TEfficiency, TPad, TH1F, TH1I, THStack, TLegend, TMath, TGraphAsymmErrors, TF1
+from ROOT import TCanvas, TEfficiency, TPad, TH1F, TH1I, THStack, TLegend, TMath, TGraphAsymmErrors, TF1, kWhite
 ROOT.gROOT.SetBatch(True)
 
 
@@ -163,7 +163,7 @@ def efficiencyRatioSF(eff1,eff2,):
 		errY2Down = eff2.GetErrorYlow(i)
 		
 		errX = eff1.GetErrorX(i)
-
+		
 		if pointY1!=0 and pointY2!=0:
 			yValue = pointY1/pointY2
 			xValue = pointX1
@@ -176,14 +176,14 @@ def efficiencyRatioSF(eff1,eff2,):
 			xError = errX
 			yErrorUp =0
 			yErrorDown = 0
-			
+					
 		newEff.SetPoint(i,xValue,yValue)
 		newEff.SetPointError(i,xError,xError,yErrorDown,yErrorUp)
 		
 	return newEff
 
 
-def getHistograms(path,plot,runRange,isMC,backgrounds,source):
+def getHistograms(path,plot,runRange,isMC,backgrounds,source,HTTriggers=False):
 	
 	if not isMC:
 		treesEE = readTrees(path,"EE",modifier = "TriggerPFHT")
@@ -229,14 +229,18 @@ def getHistograms(path,plot,runRange,isMC,backgrounds,source):
 		processes = []
 		for background in backgrounds:
 			processes.append(Process(getattr(Backgrounds,background),eventCounts))
-		
-		denominatorStackEE = TheStack(processes,runRange.lumi,plot,treesEE,"None",1.0,1.0,1.0)		
-		denominatorStackMuMu = TheStack(processes,runRange.lumi,plot,treesMuMu,"None",1.0,1.0,1.0)	
-		denominatorStackMuEG = TheStack(processes,runRange.lumi,plot,treesEMu,"None",1.0,1.0,1.0)	
+			
+		if HTTriggers:
+			tempCut = plot.cuts	
+			plot.cuts = plot.cuts.replace("chargeProduct < 0", "chargeProduct < 0 && %s"%theCuts.triggerCuts.HT.cut)
 		
 		nominatorStackEE = TheStack(processes,runRange.lumi,plot,treesEE,"None",1.0,1.0,1.0,useTriggerEmulation=True)	
 		nominatorStackMuMu = TheStack(processes,runRange.lumi,plot,treesMuMu,"None",1.0,1.0,1.0,useTriggerEmulation=True)
 		nominatorStackMuEG = TheStack(processes,runRange.lumi,plot,treesEMu,"None",1.0,1.0,1.0,useTriggerEmulation=True)
+		
+		denominatorStackEE = TheStack(processes,runRange.lumi,plot,treesEE,"None",1.0,1.0,1.0)		
+		denominatorStackMuMu = TheStack(processes,runRange.lumi,plot,treesMuMu,"None",1.0,1.0,1.0)	
+		denominatorStackMuEG = TheStack(processes,runRange.lumi,plot,treesEMu,"None",1.0,1.0,1.0)	
 			
 		denominatorHistoEE = denominatorStackEE.theHistogram
 		denominatorHistoMuMu = denominatorStackMuMu.theHistogram
@@ -246,6 +250,9 @@ def getHistograms(path,plot,runRange,isMC,backgrounds,source):
 		nominatorHistoMuMu = nominatorStackMuMu.theHistogram
 		nominatorHistoMuEG = nominatorStackMuEG.theHistogram
 		
+		
+		if HTTriggers:
+			plot.cuts = tempCut		
 		
 	return {"EE":denominatorHistoEE,"MuMu":denominatorHistoMuMu,"MuEG":denominatorHistoMuEG} , {"EE":nominatorHistoEE,"MuMu":nominatorHistoMuMu ,"MuEG":nominatorHistoMuEG}
 
@@ -257,7 +264,6 @@ def centralValues(source,path,selection,runRange,isMC,backgrounds):
 	elif "Forward" in selection.name:
 		err = systematics.trigger.forward.val
 	else:
-		#~ print "have no uncertainty for this selection, using %.2f"%systematics.trigger.inclusive.val
 		err = systematics.trigger.inclusive.val
 	
 	#~ print selection
@@ -301,7 +307,7 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 	plotPad.cd()
 	
 
-	legend = TLegend(0.55, 0.16, 0.9, 0.4)
+	legend = TLegend(0.575, 0.16, 0.9, 0.4)
 	legend.SetFillStyle(0)
 	legend.SetBorderSize(0)
 	
@@ -332,6 +338,10 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 	#latexCMSExtra.SetTextAlign(31)
 	latexCMSExtra.SetTextSize(0.045)
 	latexCMSExtra.SetNDC(True)		
+	latexSelection = ROOT.TLatex()
+	#~ latexSelection.SetTextFont(42)
+	latexSelection.SetTextSize(0.03)
+	latexSelection.SetNDC(True)		
 	
 
 
@@ -376,32 +386,54 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 		plot.cuts = plot.cuts % runRange.runCut
 		plot.cuts = plot.cuts.replace("mll","p4.M()")
 		plot.cuts = plot.cuts.replace("pt > 25","p4.Pt() > 25")
-		plot.cuts = plot.cuts.replace("triggerSummary > 1 &&","")
+		plot.cuts = plot.cuts.replace("triggerSummary > 0 &&","")
 		plot.variable = plot.variable.replace("mll","p4.M()")
 		if 	plot.variable == "pt":	
 			plot.variable = plot.variable.replace("pt","p4.Pt()")	
 		
 		
-		if  "Forward" in selection.name:
-			plot.nBins = int(plot.nBins/2)
+		#~ if  "Forward" in selection.name:
+			#~ plot.nBins = int(plot.nBins/2)
 		denominators, nominators = getHistograms(path,plot,runRange,isMC,backgrounds,source)
-		if isMC: 
-			denominatorsData, nominatorsData = getHistograms(locations.triggerDataSetPath,plotData,runRange,False,backgrounds,source)
-				
-
+		
 		effEE = TGraphAsymmErrors(nominators["EE"],denominators["EE"],"cp")
 		effMuMu = TGraphAsymmErrors(nominators["MuMu"],denominators["MuMu"],"cp")
 
 		denominatorHistoOF = denominators["MuEG"].Clone()
 		nominatorHistoOF = nominators["MuEG"].Clone()
 		effOF = TGraphAsymmErrors(nominatorHistoOF,denominatorHistoOF,"cp")
+		
 		if isMC:
+			denominatorsData, nominatorsData = getHistograms(locations.triggerDataSetPath,plotData,runRange,False,backgrounds,source)	
+		
 			effEEData = TGraphAsymmErrors(nominatorsData["EE"],denominatorsData["EE"],"cp")
 			effMuMuData = TGraphAsymmErrors(nominatorsData["MuMu"],denominatorsData["MuMu"],"cp")
 
 			denominatorHistoOFData = denominatorsData["MuEG"].Clone()
 			nominatorHistoOFData = nominatorsData["MuEG"].Clone()
 			effOFData = TGraphAsymmErrors(nominatorHistoOFData,denominatorHistoOFData,"cp")
+			
+			denominatorsMCHTTriggers, nominatorsMCHTTriggers = getHistograms(path,plot,runRange,isMC,backgrounds,source,HTTriggers=True)
+			
+			effEEHTTriggersMC = TGraphAsymmErrors(nominatorsMCHTTriggers["EE"],denominatorsMCHTTriggers["EE"],"cp")
+			effMuMuHTTriggersMC = TGraphAsymmErrors(nominatorsMCHTTriggers["MuMu"],denominatorsMCHTTriggers["MuMu"],"cp")
+			effOFHTTriggersMC = TGraphAsymmErrors(nominatorsMCHTTriggers["MuEG"],denominatorsMCHTTriggers["MuEG"],"cp")
+			
+			effEERatioHTTriggersMC = efficiencyRatio(effEEHTTriggersMC,effEE)
+			effMuMuRatioHTTriggersMC = efficiencyRatio(effMuMuHTTriggersMC,effMuMu)
+			effOFRatioHTTriggersMC = efficiencyRatio(effOFHTTriggersMC,effOF)
+			
+			effEERatioHTTriggersMC.SetMarkerColor(ROOT.kBlack)
+			effMuMuRatioHTTriggersMC.SetMarkerColor(ROOT.kRed)
+			effOFRatioHTTriggersMC.SetMarkerColor(ROOT.kBlue)
+			
+			effEERatioHTTriggersMC.SetLineColor(ROOT.kBlack)
+			effMuMuRatioHTTriggersMC.SetLineColor(ROOT.kRed)
+			effOFRatioHTTriggersMC.SetLineColor(ROOT.kBlue)
+			
+			effEERatioHTTriggersMC.SetMarkerStyle(20)
+			effMuMuRatioHTTriggersMC.SetMarkerStyle(21)
+			effOFRatioHTTriggersMC.SetMarkerStyle(22)	
 		
 
 		effEE.SetMarkerColor(ROOT.kBlack)
@@ -412,12 +444,22 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 		effOF.SetLineColor(ROOT.kBlue)
 		effEE.SetMarkerStyle(20)
 		effMuMu.SetMarkerStyle(21)
-		effOF.SetMarkerStyle(22)				
+		effOF.SetMarkerStyle(22)	
+					
 		plotPad.DrawFrame(plot.firstBin,0.5,plot.lastBin,1.2,"; %s ; Efficiency" %(plot.xaxis))
+		
+		selectionLabel = selection.latex
+		
+		if plot.variable == "nJets":
+			selectionLabel = selectionLabel.replace("#notin (n_{jets}#geq 2 & p_{T}^{miss} > 100 GeV)", "p_{T}^{miss} < 100 GeV")
+		if plot.variable == "met":
+			selectionLabel = selectionLabel.replace("#notin (n_{jets}#geq 2 & p_{T}^{miss} > 100 GeV)", "n_{jets}=1")
 		
 
 		
 		legend.Clear()
+				
+		
 		legend.AddEntry(effEE,"ee","p")
 		legend.AddEntry(effMuMu,"#mu#mu","p")
 		legend.AddEntry(effOF,"e#mu","p")
@@ -431,18 +473,57 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 		
 
 		latexCMS.DrawLatex(0.19,0.88,"CMS")
-		#~ if "Simulation" in cmsExtra:
-			#~ yLabelPos = 0.81	
-		#~ else:
-			#~ yLabelPos = 0.84	
-		yLabelPos = 0.84	
+		if "Simulation" in cmsExtra:
+			yLabelPos = 0.81	
+		else:
+			yLabelPos = 0.84	
+		#~ yLabelPos = 0.84	
 
 		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))
+		latexSelection.DrawLatex(0.20,0.25,selectionLabel)
+		
 		legend.Draw("same")
 		if isMC:
 			hCanvas.Print("fig/Triggereff_%s_%s_%s_%s_%s_MC.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))
 		else:	
 			hCanvas.Print("fig/Triggereff_%s_%s_%s_%s_%s.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))
+		
+		if isMC:
+			
+			plotPad.DrawFrame(plot.firstBin,0.99,plot.lastBin,1.01,"; %s ; meas. efficiency / true efficiency" %(plot.xaxis))
+			legend.Clear()
+					
+			
+			legend.AddEntry(effEERatioHTTriggersMC,"ee","p")
+			legend.AddEntry(effMuMuRatioHTTriggersMC,"#mu#mu","p")
+			legend.AddEntry(effOFRatioHTTriggersMC,"e#mu","p")
+			
+			line = ROOT.TLine(plot.firstBin, 1.,  plot.lastBin, 1.)
+			line.SetLineWidth(2)
+			line.SetLineStyle(2)
+			line.Draw("")		
+	
+			
+			effEERatioHTTriggersMC.Draw("samep")
+			effMuMuRatioHTTriggersMC.Draw("samep")
+			effOFRatioHTTriggersMC.Draw("samep")
+			
+			latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (13 TeV)"%runRange.printval)
+			
+	
+			latexCMS.DrawLatex(0.19,0.88,"CMS")
+			if "Simulation" in cmsExtra:
+				yLabelPos = 0.81	
+			else:
+				yLabelPos = 0.84	
+			#~ yLabelPos = 0.84	
+	
+			latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))
+			latexSelection.DrawLatex(0.20,0.25,selectionLabel)
+			
+			legend.Draw("same")
+			hCanvas.Print("fig/Triggereff_EffRatio_%s_%s_%s_%s_%s_MC.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))
+			
 		
 		denominatorHistoSF = denominators["EE"].Clone()
 		denominatorHistoOF = denominators["MuEG"].Clone()
@@ -475,6 +556,7 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 		
 
 		legend.Clear()
+					
 		legend.AddEntry(effSF,"ee and #mu#mu","p")
 		legend.AddEntry(effOF,"e#mu" ,"p")
 
@@ -486,13 +568,14 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 		
 
 		latexCMS.DrawLatex(0.19,0.88,"CMS")
-		#~ if "Simulation" in cmsExtra:
-			#~ yLabelPos = 0.81	
-		#~ else:
-			#~ yLabelPos = 0.84	
-		yLabelPos = 0.84	
+		if "Simulation" in cmsExtra:
+			yLabelPos = 0.81	
+		else:
+			yLabelPos = 0.84	
+		#~ yLabelPos = 0.84	
 
 		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))
+		latexSelection.DrawLatex(0.20,0.25,selectionLabel)
 		legend.Draw("same")
 		if isMC:
 			hCanvas.Print("fig/Triggereff_SFvsOF_%s_%s_%s_%s_%s_MC.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))
@@ -558,18 +641,20 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 		
 
 		latexCMS.DrawLatex(0.19,0.88,"CMS")
-		#~ if "Simulation" in cmsExtra:
+		if "Simulation" in cmsExtra:
 			#~ cmsExtra = "Preliminary"
-			#~ yLabelPos = 0.81	
-		#~ else:
+			cmsExtraLabel = cmsExtra.replace("#splitline{Private Work}{Simulation}","Private Work")
 			#~ yLabelPos = 0.84	
+		else:
+			#~ yLabelPos = 0.84
+			cmsExtraLabel = cmsExtra	
 		yLabelPos = 0.84	
 
-		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))	
+		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtraLabel))	
 		
 		
 		legend.Clear()
-					
+								
 		if isMC:
 			legend.AddEntry(effSFvsOF,"R_{T} MC","p")
 			legend.AddEntry(effSFvsOFData,"R_{T} Data","p")
@@ -582,48 +667,14 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 			legend.AddEntry(sfLine,"Mean R_{T}: %.3f"%(centralVals[runRange.label]["RT"]),"l") 
 				
 		legend.AddEntry(ge,"syst. uncert. Data","f") 
-		legend.Draw("same")
+		legend.Draw("same")		
+		latexSelection.DrawLatex(0.20,0.25,selectionLabel)
 		ROOT.gPad.RedrawAxis()
 		if isMC:
 			hCanvas.Print("fig/Triggereff_SFvsOF_Syst_%s_%s_%s_%s_%s_MC.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))		
 		else:
 			hCanvas.Print("fig/Triggereff_SFvsOF_Syst_%s_%s_%s_%s_%s.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))	
 			
-		
-		plotPad.DrawFrame(plot.firstBin,.5,plot.lastBin,1.5,"; %s ; eff_{#mu#mu}/eff_{ee}" %(plot.xaxis))
-
-		
-		effMMvsEE = efficiencyRatioSF(effMuMu,effEE)
-		
-		line = ROOT.TLine(plot.firstBin, 1.,  plot.lastBin, 1.)
-		line.SetLineWidth(2)
-		line.SetLineStyle(2)
-		line.Draw("")
-		
-		
-		
-		effMMvsEE.Draw("samep")
-		
-
-		latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (13 TeV)"%runRange.printval)
-		
-
-		latexCMS.DrawLatex(0.19,0.88,"CMS")
-
-		yLabelPos = 0.84	
-
-		latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))	
-		
-		legend.Clear()
-					
-		legend.AddEntry(effSFvsOF,"eff_{#mu#mu}/eff_{ee} MC","p")
-		
-		legend.Draw("same")
-		ROOT.gPad.RedrawAxis()
-		if isMC:
-			hCanvas.Print("fig/Triggereff_MMvsEE_Syst_%s_%s_%s_%s_%s_MC.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))		
-		else:
-			hCanvas.Print("fig/Triggereff_MMvsEE_Syst_%s_%s_%s_%s_%s.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))	
 			
 			
 def main():
@@ -665,14 +716,11 @@ def main():
 	if len(args.plots) == 0:
 		args.plots = plotLists.trigger
 	if len(args.selection) == 0:
-		#~ args.selection.append(regionsToUse.triggerEfficiencies.central.name)	
-		#~ args.selection.append(regionsToUse.triggerEfficiencies.forward.name)	
+		args.selection.append(regionsToUse.triggerEfficiencies.central.name)	
+		args.selection.append(regionsToUse.triggerEfficiencies.forward.name)	
 		args.selection.append(regionsToUse.triggerEfficiencies.inclusive.name)	
 	if len(args.runRange) == 0:
 		args.runRange.append(runRanges.name)	
-
-	#~ if args.bias:
-		#~ args.mc = True
 				
 	path = locations.triggerDataSetPath	
 	if args.mc:
