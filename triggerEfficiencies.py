@@ -183,7 +183,7 @@ def efficiencyRatioSF(eff1,eff2,):
 	return newEff
 
 
-def getHistograms(path,plot,runRange,isMC,backgrounds,source,HTTriggers=False):
+def getHistograms(path,plot,runRange,isMC,backgrounds,source):
 	
 	if not isMC:
 		treesEE = readTrees(path,"EE",modifier = "TriggerPFHT")
@@ -229,10 +229,6 @@ def getHistograms(path,plot,runRange,isMC,backgrounds,source,HTTriggers=False):
 		processes = []
 		for background in backgrounds:
 			processes.append(Process(getattr(Backgrounds,background),eventCounts))
-			
-		if HTTriggers:
-			tempCut = plot.cuts	
-			plot.cuts = plot.cuts.replace("chargeProduct < 0", "chargeProduct < 0 && %s"%theCuts.triggerCuts.HT.cut)
 		
 		nominatorStackEE = TheStack(processes,runRange.lumi,plot,treesEE,"None",1.0,1.0,1.0,useTriggerEmulation=True)	
 		nominatorStackMuMu = TheStack(processes,runRange.lumi,plot,treesMuMu,"None",1.0,1.0,1.0,useTriggerEmulation=True)
@@ -249,10 +245,7 @@ def getHistograms(path,plot,runRange,isMC,backgrounds,source,HTTriggers=False):
 		nominatorHistoEE = nominatorStackEE.theHistogram
 		nominatorHistoMuMu = nominatorStackMuMu.theHistogram
 		nominatorHistoMuEG = nominatorStackMuEG.theHistogram
-		
-		
-		if HTTriggers:
-			plot.cuts = tempCut		
+			
 		
 	return {"EE":denominatorHistoEE,"MuMu":denominatorHistoMuMu,"MuEG":denominatorHistoMuEG} , {"EE":nominatorHistoEE,"MuMu":nominatorHistoMuMu ,"MuEG":nominatorHistoMuEG}
 
@@ -413,27 +406,6 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 			nominatorHistoOFData = nominatorsData["MuEG"].Clone()
 			effOFData = TGraphAsymmErrors(nominatorHistoOFData,denominatorHistoOFData,"cp")
 			
-			denominatorsMCHTTriggers, nominatorsMCHTTriggers = getHistograms(path,plot,runRange,isMC,backgrounds,source,HTTriggers=True)
-			
-			effEEHTTriggersMC = TGraphAsymmErrors(nominatorsMCHTTriggers["EE"],denominatorsMCHTTriggers["EE"],"cp")
-			effMuMuHTTriggersMC = TGraphAsymmErrors(nominatorsMCHTTriggers["MuMu"],denominatorsMCHTTriggers["MuMu"],"cp")
-			effOFHTTriggersMC = TGraphAsymmErrors(nominatorsMCHTTriggers["MuEG"],denominatorsMCHTTriggers["MuEG"],"cp")
-			
-			effEERatioHTTriggersMC = efficiencyRatio(effEEHTTriggersMC,effEE)
-			effMuMuRatioHTTriggersMC = efficiencyRatio(effMuMuHTTriggersMC,effMuMu)
-			effOFRatioHTTriggersMC = efficiencyRatio(effOFHTTriggersMC,effOF)
-			
-			effEERatioHTTriggersMC.SetMarkerColor(ROOT.kBlack)
-			effMuMuRatioHTTriggersMC.SetMarkerColor(ROOT.kRed)
-			effOFRatioHTTriggersMC.SetMarkerColor(ROOT.kBlue)
-			
-			effEERatioHTTriggersMC.SetLineColor(ROOT.kBlack)
-			effMuMuRatioHTTriggersMC.SetLineColor(ROOT.kRed)
-			effOFRatioHTTriggersMC.SetLineColor(ROOT.kBlue)
-			
-			effEERatioHTTriggersMC.SetMarkerStyle(20)
-			effMuMuRatioHTTriggersMC.SetMarkerStyle(21)
-			effOFRatioHTTriggersMC.SetMarkerStyle(22)	
 		
 
 		effEE.SetMarkerColor(ROOT.kBlack)
@@ -488,41 +460,6 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 		else:	
 			hCanvas.Print("fig/Triggereff_%s_%s_%s_%s_%s.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))
 		
-		if isMC:
-			
-			plotPad.DrawFrame(plot.firstBin,0.99,plot.lastBin,1.01,"; %s ; meas. efficiency / true efficiency" %(plot.xaxis))
-			legend.Clear()
-					
-			
-			legend.AddEntry(effEERatioHTTriggersMC,"ee","p")
-			legend.AddEntry(effMuMuRatioHTTriggersMC,"#mu#mu","p")
-			legend.AddEntry(effOFRatioHTTriggersMC,"e#mu","p")
-			
-			line = ROOT.TLine(plot.firstBin, 1.,  plot.lastBin, 1.)
-			line.SetLineWidth(2)
-			line.SetLineStyle(2)
-			line.Draw("")		
-	
-			
-			effEERatioHTTriggersMC.Draw("samep")
-			effMuMuRatioHTTriggersMC.Draw("samep")
-			effOFRatioHTTriggersMC.Draw("samep")
-			
-			latex.DrawLatex(0.95, 0.96, "%s fb^{-1} (13 TeV)"%runRange.printval)
-			
-	
-			latexCMS.DrawLatex(0.19,0.88,"CMS")
-			if "Simulation" in cmsExtra:
-				yLabelPos = 0.81	
-			else:
-				yLabelPos = 0.84	
-			#~ yLabelPos = 0.84	
-	
-			latexCMSExtra.DrawLatex(0.19,yLabelPos,"%s"%(cmsExtra))
-			latexSelection.DrawLatex(0.20,0.25,selectionLabel)
-			
-			legend.Draw("same")
-			hCanvas.Print("fig/Triggereff_EffRatio_%s_%s_%s_%s_%s_MC.pdf"%(source,selection.name,runRange.label,plot.variablePlotName,plot.additionalName))
 			
 		
 		denominatorHistoSF = denominators["EE"].Clone()
@@ -591,9 +528,10 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 		effSFvsOF = efficiencyRatioGeometricMean(effEE,effMuMu,effOF,source)
 		if isMC:
 			effSFvsOFData = efficiencyRatioGeometricMean(effEEData,effMuMuData,effOFData,source)
-			effSFvsOF.SetMarkerColor(ROOT.kBlue)
-			effSFvsOF.SetLineColor(ROOT.kBlue)
-
+			effSFvsOF.SetLineColor(ROOT.kGreen-2)
+			effSFvsOF.SetMarkerColor(ROOT.kGreen-2)
+			effSFvsOF.SetMarkerStyle(21)
+			
 		x= array("f",[plot.firstBin, plot.lastBin]) 
 		if isMC:
 			yData= array("f", [float(centralValsData[runRange.label]["RT"]), float(centralValsData[runRange.label]["RT"])]) 
@@ -626,7 +564,7 @@ def dependencies(source,path,selection,plots,runRange,isMC,backgrounds,cmsExtra)
 			effSFvsOFData.Draw("samep")
 		
 		
-		sfLine.SetLineColor(ROOT.kBlue)
+		sfLine.SetLineColor(ROOT.kGreen-2)
 		sfLine.SetLineWidth(3)
 		sfLine.SetLineStyle(2)
 		sfLine.Draw("SAME")		
